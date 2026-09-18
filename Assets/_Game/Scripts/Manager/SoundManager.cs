@@ -32,6 +32,7 @@ public class SoundManager : Singleton<SoundManager>
 
     public void Awake()
     {
+        RegisterSingleton(this);
         DontDestroyOnLoad(gameObject);
 
         soundSource = gameObject.AddComponent<AudioSource>();

@@ -1,66 +1,77 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelManager : Singleton<LevelManager>
 {
-    //[SerializeField] Level[] levels;
-    //public Level currentLevel;
-    int level = 0;
+    [SerializeField] private Level[] levels;
+    [SerializeField] private Level sceneLevel;
+    [SerializeField] private CameraController cameraController;
+    [SerializeField] private int level = 0;
+    private Level currentLevel;
 
-    public void Start()
+    private void Awake()
+    {
+        RegisterSingleton(this);
+    }
+
+    private void Start()
     {
         OnLoadLevel(level);
         OnInit();
     }
 
-    //khoi tao trang thai bat dau game
     public void OnInit()
     {
-        //player.OnInit();
+        GameManager.Ins.OnPlay();
+        if (currentLevel != null)
+        {
+            currentLevel.OnInit(cameraController);
+        }
     }
 
-    //goi khi bat dau gameplay
     public void OnPlay()
     {
-
+        GameManager.Ins.OnPlay();
     }
 
-    //reset trang thai khi ket thuc game
     public void OnDespawn()
     {
-        //player.OnDespawn();
-        //for (int i = 0; i < bots.Count; i++)
-        //{
-        //    bots[i].OnDespawn();
-        //}
+        if (currentLevel != null && currentLevel != sceneLevel)
+        {
+            currentLevel.OnDespawn();
+        }
 
-        //bots.Clear();
-        //SimplePool.CollectAll();
+        currentLevel = null;
     }
 
-    //tao prefab level moi
-    public void OnLoadLevel(int level)
+    public void OnLoadLevel(int levelIndex)
     {
-        //if (currentLevel != null)
-        //{
-        //    Destroy(currentLevel.gameObject);
-        //}
-
-        //currentLevel = Instantiate(levels[level]);
+        if (HasLevelPrefab(levelIndex))
+        {
+            currentLevel = Instantiate(levels[levelIndex], transform);
+        }
+        else
+        {
+            currentLevel = sceneLevel;
+        }
     }
-
 
     public void OnWin()
     {
-
+        GameManager.Ins.OnFinish();
     }
 
     public void OnLose()
     {
-
+        GameManager.Ins.OnLose();
     }
-    
+
+    public void OnReplay()
+    {
+        OnDespawn();
+        OnLoadLevel(level);
+        OnInit();
+    }
+
     public void OnNextLevel()
     {
         OnDespawn();
@@ -68,4 +79,8 @@ public class LevelManager : Singleton<LevelManager>
         OnInit();
     }
 
+    private bool HasLevelPrefab(int index)
+    {
+        return levels != null && index >= 0 && index < levels.Length && levels[index] != null;
+    }
 }

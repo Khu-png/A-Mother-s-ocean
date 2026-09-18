@@ -21,6 +21,7 @@ public class GridMap : MonoBehaviour
 
     [Header("Visual")]
     [SerializeField] private Sprite targetSprite;
+    [SerializeField] private MapPrefabSet prefabs = new MapPrefabSet();
 
     [Header("References")]
     [SerializeField] private Player playerPrefab;
@@ -71,8 +72,15 @@ public class GridMap : MonoBehaviour
         RefreshFinish();
     }
 
+    public void SetCameraController(CameraController controller)
+    {
+        cameraController = controller;
+        FitCamera();
+    }
+
     private void NormalizeSettings()
     {
+        prefabs = prefabs ?? new MapPrefabSet();
         cellSize = Mathf.Max(0.1f, cellSize);
         lineWidth = Mathf.Max(0.01f, lineWidth);
         height = Mathf.Max(1, mapRows.Length);
@@ -99,59 +107,37 @@ public class GridMap : MonoBehaviour
 
     private void BuildTile(Transform root, Vector2Int cell, char code)
     {
-        MapTile tile = new GameObject($"Tile {cell.x} {cell.y}").AddComponent<MapTile>();
-        tile.transform.SetParent(root);
-        tile.Setup(cell, CellToWorld(cell), cellSize, GridVisual.SquareSprite(), Color.white);
+        BlockTile block;
+        OneWayPath path;
+        RotateButton button;
+        MapTile tile = prefabs.CreateTile(root, cell, code, CellToWorld(cell), cellSize, GridVisual.SquareSprite(), out block, out path, out button);
         tiles.Add(cell, tile);
-        BuildTileRule(tile, cell, code);
+        if (block != null) blocks.Add(cell, block);
+        if (path != null) oneWayPaths.Add(cell, path);
+        if (button != null) rotateButtons.Add(cell, button);
 
         if (MapCode.IsStart(code)) BuildStart(cell);
         else if (MapCode.IsFinish(code)) BuildFinish(cell);
         else if (MapCode.IsTarget(code)) BuildTarget(cell);
     }
 
-    private void BuildTileRule(MapTile tile, Vector2Int cell, char code)
-    {
-        if (MapCode.IsBlock(code))
-        {
-            BlockTile block = tile.gameObject.AddComponent<BlockTile>();
-            block.Setup(tile, Color.white);
-            blocks.Add(cell, block);
-        }
-        else if (MapCode.IsOneWay(code))
-        {
-            OneWayPath path = tile.gameObject.AddComponent<OneWayPath>();
-            path.Setup(tile, MapCode.PathKind(code), MapCode.PathState(code), Color.white);
-            oneWayPaths.Add(cell, path);
-        }
-        else if (MapCode.IsRotator(code))
-        {
-            RotateButton button = tile.gameObject.AddComponent<RotateButton>();
-            button.Setup(tile, Color.white);
-            rotateButtons.Add(cell, button);
-        }
-    }
-
     private void BuildStart(Vector2Int cell)
     {
         startCell = cell;
-        StartPoint point = new GameObject("Start Point").AddComponent<StartPoint>();
-        point.transform.SetParent(transform);
+        StartPoint point = prefabs.CreateStart(transform);
         point.Setup(cell, CellToWorld(cell), cellSize, GridVisual.SquareSprite(), Color.white);
     }
 
     private void BuildFinish(Vector2Int cell)
     {
         finishCell = cell;
-        finishPoint = new GameObject("Finish Point").AddComponent<FinishPoint>();
-        finishPoint.transform.SetParent(transform);
+        finishPoint = prefabs.CreateFinish(transform);
         finishPoint.Setup(cell, CellToWorld(cell), cellSize, GridVisual.SquareSprite(), Color.white, Color.white);
     }
 
     private void BuildTarget(Vector2Int cell)
     {
-        TargetPoint target = new GameObject($"Target {cell.x} {cell.y}").AddComponent<TargetPoint>();
-        target.transform.SetParent(transform);
+        TargetPoint target = prefabs.CreateTarget(transform, cell);
         target.Setup(cell, CellToWorld(cell), cellSize, TargetSprite(), targetSprite != null ? Color.white : Color.yellow);
         targets.Add(cell, target);
     }
@@ -237,7 +223,7 @@ public class GridMap : MonoBehaviour
     {
         if (finishPoint == null) return;
         finishPoint.SetOpen(AreAllTargetsCollected());
-        if (finishPoint.IsOpen && playerCell == finishCell) Debug.Log("Level Complete");
+        if (finishPoint.IsOpen && playerCell == finishCell) LevelManager.Ins.OnWin();
     }
 
     private bool AreAllTargetsCollected()

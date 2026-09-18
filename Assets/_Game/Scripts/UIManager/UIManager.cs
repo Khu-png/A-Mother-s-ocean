@@ -36,6 +36,12 @@ public class UIManager : Singleton<UIManager>
     //canvas chua dung cac canvas con, nen la mot canvas - root de chua cac canvas nay
     public Transform CanvasParentTF;
 
+    private void Awake()
+    {
+        RegisterSingleton(this);
+        if (CanvasParentTF == null) CanvasParentTF = transform;
+    }
+
     #region Canvas
 
     //open UI
@@ -43,6 +49,7 @@ public class UIManager : Singleton<UIManager>
     public T OpenUI<T>() where T : UICanvas
     {
         UICanvas canvas = GetUI<T>();
+        if (canvas == null) return null;
 
         canvas.Setup();
         canvas.Open();
@@ -92,7 +99,9 @@ public class UIManager : Singleton<UIManager>
         //Debug.LogError(typeof(T));
         if (!IsLoaded<T>())
         {
-            UICanvas canvas = Instantiate(GetUIPrefab<T>(), CanvasParentTF);
+            T prefab = GetUIPrefab<T>();
+            if (prefab == null) return null;
+            UICanvas canvas = Instantiate(prefab, CanvasParentTF);
             uiCanvas[typeof(T)] = canvas;
         }
 
@@ -116,6 +125,7 @@ public class UIManager : Singleton<UIManager>
     //lay prefab tu Resources/UI 
     private T GetUIPrefab<T>() where T : UICanvas
     {
+        if (uiResources == null) return null;
         if (!uiCanvasPrefab.ContainsKey(typeof(T)))
         {
             //if (uiResources == null)
@@ -133,6 +143,7 @@ public class UIManager : Singleton<UIManager>
             }
         }
 
+        if (!uiCanvasPrefab.ContainsKey(typeof(T))) return null;
         return uiCanvasPrefab[typeof(T)] as T;
     }
 
@@ -159,10 +170,12 @@ public class UIManager : Singleton<UIManager>
 
     private void LateUpdate()
     {
+#if ENABLE_LEGACY_INPUT_MANAGER
         if (Input.GetKey(KeyCode.Escape) && BackTopUI != null)
         {
             BackActionEvents[BackTopUI]?.Invoke();
         }
+#endif
     }
 
     public void PushBackAction(UICanvas canvas, UnityAction action)
