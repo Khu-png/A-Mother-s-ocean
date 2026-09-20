@@ -16,6 +16,6 @@ public class Pause : UICanvas
     public void OnMainMenuButton()
     {
         Time.timeScale = 1f;
-        GameManager.ChangeState(GameState.MainMenu);
+        GameManager.Ins.OnInit();
     }
 }

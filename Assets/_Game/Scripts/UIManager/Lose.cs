@@ -9,6 +9,6 @@ public class Lose : UICanvas
 
     public void OnMainMenuButton()
     {
-        GameManager.ChangeState(GameState.MainMenu);
+        GameManager.Ins.OnInit();
     }
 }

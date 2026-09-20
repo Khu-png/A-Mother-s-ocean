@@ -15,12 +15,15 @@ public class LevelManager : Singleton<LevelManager>
 
     private void Start()
     {
-        OnLoadLevel(level);
-        OnInit();
     }
 
     public void OnInit()
     {
+        if (currentLevel == null)
+        {
+            OnLoadLevel(level);
+        }
+
         GameManager.Ins.OnPlay();
         if (currentLevel != null)
         {
