@@ -1,7 +1,25 @@
 using UnityEngine;
+using TMPro;
 
 public class Mainmenu : UICanvas
 {
+    public const string CoinsKey = "Coins";
+    [SerializeField] private TMP_Text currentLevelText;
+    [SerializeField] private TMP_Text coinAmountText;
+
+    private void OnEnable()
+    {
+        if (currentLevelText != null)
+            currentLevelText.text = "<size=55%>LEVEL</size>\n" + LevelManager.SavedLevelNumber;
+        RefreshCoins();
+    }
+
+    public void RefreshCoins()
+    {
+        if (coinAmountText != null)
+            coinAmountText.text = Mathf.Max(0, PlayerPrefs.GetInt(CoinsKey, 0)).ToString();
+    }
+
     public void OnPlayButton()
     {
         LevelManager.Ins.OnReplay();

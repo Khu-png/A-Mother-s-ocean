@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class LevelManager : Singleton<LevelManager>
 {
+    public const string CurrentLevelKey = "CurrentLevel";
+    public static int SavedLevelNumber => Mathf.Max(1, PlayerPrefs.GetInt(CurrentLevelKey, 1));
     [SerializeField] private Level[] levels;
     [SerializeField] private Level sceneLevel;
     [SerializeField] private CameraController cameraController;
@@ -11,6 +13,7 @@ public class LevelManager : Singleton<LevelManager>
     private void Awake()
     {
         RegisterSingleton(this);
+        level = SavedLevelNumber - 1;
     }
 
     private void Start()
@@ -78,7 +81,10 @@ public class LevelManager : Singleton<LevelManager>
     public void OnNextLevel()
     {
         OnDespawn();
-        OnLoadLevel(++level);
+        level++;
+        PlayerPrefs.SetInt(CurrentLevelKey, level + 1);
+        PlayerPrefs.Save();
+        OnLoadLevel(level);
         OnInit();
     }
 

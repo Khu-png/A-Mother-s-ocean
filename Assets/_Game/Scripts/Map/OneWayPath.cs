@@ -114,9 +114,10 @@ public class OneWayPath : MonoBehaviour
     private OneWayPathRotation RotationForState()
     {
         if (state == OneWayPathState.Horizontal) return OneWayPathRotation.Rotation90;
-        if (state == OneWayPathState.LeftUp) return OneWayPathRotation.Rotation90;
+        // Positive Z rotation is counterclockwise: left/down becomes right/down at 90 degrees.
+        if (state == OneWayPathState.RightDown) return OneWayPathRotation.Rotation90;
         if (state == OneWayPathState.UpRight) return OneWayPathRotation.Rotation180;
-        if (state == OneWayPathState.RightDown) return OneWayPathRotation.Rotation270;
+        if (state == OneWayPathState.LeftUp) return OneWayPathRotation.Rotation270;
         return OneWayPathRotation.Rotation0;
     }
 
@@ -130,17 +131,17 @@ public class OneWayPath : MonoBehaviour
 
     private void ToggleCornerState()
     {
-        if (state == OneWayPathState.LeftDown) state = OneWayPathState.LeftUp;
-        else if (state == OneWayPathState.LeftUp) state = OneWayPathState.UpRight;
-        else if (state == OneWayPathState.UpRight) state = OneWayPathState.RightDown;
+        if (state == OneWayPathState.LeftDown) state = OneWayPathState.RightDown;
+        else if (state == OneWayPathState.RightDown) state = OneWayPathState.UpRight;
+        else if (state == OneWayPathState.UpRight) state = OneWayPathState.LeftUp;
         else state = OneWayPathState.LeftDown;
     }
 
     private void ToggleCornerBack()
     {
-        if (state == OneWayPathState.LeftDown) state = OneWayPathState.RightDown;
-        else if (state == OneWayPathState.RightDown) state = OneWayPathState.UpRight;
-        else if (state == OneWayPathState.UpRight) state = OneWayPathState.LeftUp;
+        if (state == OneWayPathState.LeftDown) state = OneWayPathState.LeftUp;
+        else if (state == OneWayPathState.LeftUp) state = OneWayPathState.UpRight;
+        else if (state == OneWayPathState.UpRight) state = OneWayPathState.RightDown;
         else state = OneWayPathState.LeftDown;
     }
 
