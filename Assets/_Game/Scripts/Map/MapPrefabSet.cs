@@ -4,14 +4,40 @@ using UnityEngine;
 [Serializable]
 public class MapPrefabSet
 {
+    [Header("Tile Prefabs")]
+    [Tooltip("Prefab cho Empty Tile (EmptyTile.prefab)")]
     [SerializeField] private MapTile emptyTilePrefab;
+
+    [Tooltip("Prefab cho Block Tile (BlockTile.prefab)")]
     [SerializeField] private BlockTile blockTilePrefab;
+
+    [Tooltip("Prefab cho OneWay Straight (OneWayStraight.prefab)")]
     [SerializeField] private OneWayPath oneWayStraightPrefab;
+
+    [Tooltip("Prefab cho OneWay Corner (OneWayCorner.prefab)")]
     [SerializeField] private OneWayPath oneWayCornerPrefab;
+
+    [Tooltip("Prefab cho Rotate Tile (RotateTile.prefab)")]
     [SerializeField] private RotateButton rotateButtonPrefab;
+
+    [Header("Point Prefabs")]
+    [Tooltip("Prefab cho Start Point (StartPoint.prefab)")]
     [SerializeField] private StartPoint startPointPrefab;
+
+    [Tooltip("Prefab cho Target Point (TargetPoint.prefab)")]
     [SerializeField] private TargetPoint targetPointPrefab;
+
+    [Tooltip("Prefab cho Finish Point (FinishPoint.prefab)")]
     [SerializeField] private FinishPoint finishPointPrefab;
+
+    public MapTile EmptyTilePrefab => emptyTilePrefab;
+    public BlockTile BlockTilePrefab => blockTilePrefab;
+    public OneWayPath OneWayStraightPrefab => oneWayStraightPrefab;
+    public OneWayPath OneWayCornerPrefab => oneWayCornerPrefab;
+    public RotateButton RotateButtonPrefab => rotateButtonPrefab;
+    public StartPoint StartPointPrefab => startPointPrefab;
+    public TargetPoint TargetPointPrefab => targetPointPrefab;
+    public FinishPoint FinishPointPrefab => finishPointPrefab;
 
     public MapTile CreateTile(Transform root, Vector2Int cell, char code, Vector3 position, float cellSize,
         Sprite emptySprite, out BlockTile block, out OneWayPath path, out RotateButton button)

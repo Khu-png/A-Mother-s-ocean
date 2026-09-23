@@ -11,7 +11,6 @@ public class StartPoint : MonoBehaviour
     {
         cell = setupCell;
         transform.position = worldPosition;
-        transform.localScale = Vector3.one * (cellSize * 0.88f);
 
         spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = MapTileAssetLibrary.SpriteOrFallback("tile_start", sprite);

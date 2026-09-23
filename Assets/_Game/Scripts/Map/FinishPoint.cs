@@ -20,7 +20,6 @@ public class FinishPoint : MonoBehaviour
         closedSprite = MapTileAssetLibrary.Sprite("tile_finish_closed");
         openSprite = MapTileAssetLibrary.Sprite("tile_finish_open");
         transform.position = worldPosition;
-        transform.localScale = Vector3.one * (cellSize * 0.88f);
 
         spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = closedSprite != null ? closedSprite : sprite;
@@ -31,12 +30,9 @@ public class FinishPoint : MonoBehaviour
     public void SetOpen(bool isOpen)
     {
         IsOpen = isOpen;
-        if (spriteRenderer != null)
-        {
-            if (isOpen && openSprite != null) spriteRenderer.sprite = openSprite;
-            else if (!isOpen && closedSprite != null) spriteRenderer.sprite = closedSprite;
-            spriteRenderer.color = SpriteAssetLoaded() ? Color.white : IsOpen ? openColor : closedColor;
-        }
+        if (isOpen && openSprite != null) spriteRenderer.sprite = openSprite;
+        else if (!isOpen && closedSprite != null) spriteRenderer.sprite = closedSprite;
+        spriteRenderer.color = SpriteAssetLoaded() ? Color.white : IsOpen ? openColor : closedColor;
     }
 
     private bool SpriteAssetLoaded()

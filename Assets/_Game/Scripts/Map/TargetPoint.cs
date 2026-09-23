@@ -31,7 +31,7 @@ public class TargetPoint : MonoBehaviour
         spriteRenderer.sprite = sprite;
         spriteRenderer.color = color;
         spriteRenderer.sortingOrder = 3;
-        baseScale = Vector3.one * FitSpriteScale(cellSize, 0.72f);
+        baseScale = transform.localScale;
         transform.localScale = baseScale;
         ResetTarget();
     }
@@ -50,11 +50,4 @@ public class TargetPoint : MonoBehaviour
         transform.localScale = baseScale;
     }
 
-    private float FitSpriteScale(float cellSize, float fill)
-    {
-        if (spriteRenderer == null || spriteRenderer.sprite == null) return cellSize * fill;
-        Vector2 size = spriteRenderer.sprite.bounds.size;
-        float longestSide = Mathf.Max(size.x, size.y);
-        return longestSide > 0f ? cellSize * fill / longestSide : cellSize * fill;
-    }
 }

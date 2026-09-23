@@ -2,18 +2,18 @@ using UnityEngine;
 
 public class Pause : UICanvas
 {
-    public void OnResumeButton()
+    public void OnClickResume()
     {
         GameManager.Ins.OnResume();
     }
 
-    public void OnReplayButton()
+    public void OnClickReplay()
     {
         Time.timeScale = 1f;
         LevelManager.Ins.OnReplay();
     }
 
-    public void OnMainMenuButton()
+    public void OnClickMainMenu()
     {
         Time.timeScale = 1f;
         GameManager.Ins.OnInit();

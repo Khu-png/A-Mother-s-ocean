@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class Win : UICanvas
 {
-    public void OnNextButton()
+    public void OnClickNext()
     {
         LevelManager.Ins.OnNextLevel();
     }
 
-    public void OnReplayButton()
+    public void OnClickReplay()
     {
         LevelManager.Ins.OnReplay();
     }

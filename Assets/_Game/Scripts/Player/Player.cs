@@ -65,7 +65,7 @@ public class Player : MonoBehaviour
         moveTarget = worldPosition;
         moveTimer = 0f;
         IsMoving = true;
-        if (spriteRenderer != null) spriteRenderer.flipX = worldPosition.x < moveStart.x;
+        spriteRenderer.flipX = worldPosition.x < moveStart.x;
     }
 
     private void EnsureRenderer()
@@ -86,7 +86,6 @@ public class Player : MonoBehaviour
 
     private float FitSpriteScale(float cellSize, float fill)
     {
-        if (spriteRenderer == null || spriteRenderer.sprite == null) return cellSize * fill;
         Vector2 size = spriteRenderer.sprite.bounds.size;
         float longestSide = Mathf.Max(size.x, size.y);
         return longestSide > 0f ? cellSize * fill / longestSide : cellSize * fill;

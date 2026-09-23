@@ -20,23 +20,14 @@ public static class LevelPrefabBuilder
         MapPrefabBuilder.CreateMissingPrefabs();
 
         GameObject view = new GameObject("Level 01");
-        Level level = view.AddComponent<Level>();
         GridMap gridMap = view.AddComponent<GridMap>();
 
-        SetupLevel(level, gridMap);
         SetupGridMap(gridMap);
 
         PrefabUtility.SaveAsPrefabAsset(view, LevelPath);
         Object.DestroyImmediate(view);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-    }
-
-    private static void SetupLevel(Level level, GridMap gridMap)
-    {
-        SerializedObject data = new SerializedObject(level);
-        data.FindProperty("gridMap").objectReferenceValue = gridMap;
-        data.ApplyModifiedPropertiesWithoutUndo();
     }
 
     private static void SetupGridMap(GridMap gridMap)
@@ -63,11 +54,11 @@ public static class LevelPrefabBuilder
 
     private static void SetupPrefabSet(SerializedProperty prefabs)
     {
-        prefabs.FindPropertyRelative("emptyTilePrefab").objectReferenceValue = Load<MapTile>("Assets/_Game/Prefab/Map/Tiles/TileEmpty.prefab");
+        prefabs.FindPropertyRelative("emptyTilePrefab").objectReferenceValue = Load<MapTile>("Assets/_Game/Prefab/Map/Tiles/EmptyTile.prefab");
         prefabs.FindPropertyRelative("blockTilePrefab").objectReferenceValue = Load<BlockTile>("Assets/_Game/Prefab/Map/Tiles/BlockTile.prefab");
         prefabs.FindPropertyRelative("oneWayStraightPrefab").objectReferenceValue = Load<OneWayPath>("Assets/_Game/Prefab/Map/Tiles/OneWayStraight.prefab");
         prefabs.FindPropertyRelative("oneWayCornerPrefab").objectReferenceValue = Load<OneWayPath>("Assets/_Game/Prefab/Map/Tiles/OneWayCorner.prefab");
-        prefabs.FindPropertyRelative("rotateButtonPrefab").objectReferenceValue = Load<RotateButton>("Assets/_Game/Prefab/Map/Tiles/RotateButton.prefab");
+        prefabs.FindPropertyRelative("rotateButtonPrefab").objectReferenceValue = Load<RotateButton>("Assets/_Game/Prefab/Map/Tiles/RotateTile.prefab");
         prefabs.FindPropertyRelative("startPointPrefab").objectReferenceValue = Load<StartPoint>("Assets/_Game/Prefab/Map/Points/StartPoint.prefab");
         prefabs.FindPropertyRelative("targetPointPrefab").objectReferenceValue = Load<TargetPoint>("Assets/_Game/Prefab/Map/Points/TargetPoint.prefab");
         prefabs.FindPropertyRelative("finishPointPrefab").objectReferenceValue = Load<FinishPoint>("Assets/_Game/Prefab/Map/Points/FinishPoint.prefab");

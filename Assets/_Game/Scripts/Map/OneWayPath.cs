@@ -99,7 +99,7 @@ public class OneWayPath : MonoBehaviour
     private void ApplyVisual()
     {
         visualRotation = RotationForState();
-        Sprite sprite = MapTileAssetLibrary.Sprite(SpriteName());
+        Sprite sprite = tile.HasPrefabSprite ? tile.Sprite : MapTileAssetLibrary.Sprite(SpriteName());
         tile.SetSprite(sprite);
         tile.SetVisualRotation(RotationDegrees(visualRotation));
         tile.SetColor(sprite != null ? Color.white : pathColor);
@@ -113,7 +113,7 @@ public class OneWayPath : MonoBehaviour
 
     private OneWayPathRotation RotationForState()
     {
-        if (state == OneWayPathState.Horizontal) return OneWayPathRotation.Rotation90;
+        if (kind == OneWayPathKind.Straight) return state == OneWayPathState.Vertical ? OneWayPathRotation.Rotation90 : OneWayPathRotation.Rotation0;
         // Positive Z rotation is counterclockwise: left/down becomes right/down at 90 degrees.
         if (state == OneWayPathState.RightDown) return OneWayPathRotation.Rotation90;
         if (state == OneWayPathState.UpRight) return OneWayPathRotation.Rotation180;

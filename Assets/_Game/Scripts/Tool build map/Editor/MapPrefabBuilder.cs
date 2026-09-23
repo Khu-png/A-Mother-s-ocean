@@ -50,9 +50,9 @@ public static class MapPrefabBuilder
 
     private static void CreateEmpty()
     {
-        string path = TileRoot + "/TileEmpty.prefab";
+        string path = TileRoot + "/EmptyTile.prefab";
         if (Exists(path)) return;
-        GameObject view = NewView("Tile Empty");
+        GameObject view = NewView("EmptyTile");
         MapTile tile = view.AddComponent<MapTile>();
         tile.Setup(Vector2Int.zero, Vector3.zero, 1f, GridVisual.SquareSprite(), Color.white);
         Save(view, path);
@@ -62,7 +62,7 @@ public static class MapPrefabBuilder
     {
         string path = TileRoot + "/BlockTile.prefab";
         if (Exists(path)) return;
-        GameObject view = NewTileRule("Block Tile", out MapTile tile);
+        GameObject view = NewTileRule("BlockTile", out MapTile tile);
         BlockTile block = view.AddComponent<BlockTile>();
         block.BindTile(tile);
         block.Setup(tile, Color.white);
@@ -82,9 +82,9 @@ public static class MapPrefabBuilder
 
     private static void CreateRotate()
     {
-        string path = TileRoot + "/RotateButton.prefab";
+        string path = TileRoot + "/RotateTile.prefab";
         if (Exists(path)) return;
-        GameObject view = NewTileRule("Rotate Button", out MapTile tile);
+        GameObject view = NewTileRule("RotateTile", out MapTile tile);
         RotateButton button = view.AddComponent<RotateButton>();
         button.BindTile(tile);
         button.Setup(tile, Color.white);

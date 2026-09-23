@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class Lose : UICanvas
 {
-    public void OnReplayButton()
+    public void OnClickReplay()
     {
         LevelManager.Ins.OnReplay();
     }
 
-    public void OnMainMenuButton()
+    public void OnClickMainMenu()
     {
         GameManager.Ins.OnInit();
     }

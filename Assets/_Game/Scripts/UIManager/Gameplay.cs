@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class Gameplay : UICanvas
 {
-    public void OnPauseButton()
+    public void OnClickPause()
     {
         GameManager.Ins.OnPause();
     }
 
-    public void OnReplayButton()
+    public void OnClickRestart()
     {
-        LevelManager.Ins.OnReplay();
+        LevelManager.Ins.OnRestart();
     }
 }

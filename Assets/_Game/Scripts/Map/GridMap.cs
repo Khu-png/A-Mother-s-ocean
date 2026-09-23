@@ -245,7 +245,7 @@ public class GridMap : MonoBehaviour
     {
         float left = -width * cellSize * 0.5f;
         float bottom = -height * cellSize * 0.5f;
-        return new Vector3(left + cell.x * cellSize + cellSize * 0.5f, bottom + cell.y * cellSize + cellSize * 0.5f, 0f);
+        return new Vector3(left + (cell.x + 0.5f) * cellSize, bottom + (cell.y + 0.5f) * cellSize, 0f);
     }
 
     private char CellCode(int row, int column)

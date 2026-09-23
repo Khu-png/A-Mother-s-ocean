@@ -5,20 +5,23 @@ public class MapTile : MonoBehaviour
     [SerializeField] private Vector2Int cell;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private TextMesh label;
+    private bool hasPrefabSprite;
 
     public Vector2Int Cell => cell;
+    public Sprite Sprite => spriteRenderer != null ? spriteRenderer.sprite : null;
+    public bool HasPrefabSprite => hasPrefabSprite;
 
     public void Setup(Vector2Int setupCell, Vector3 worldPosition, float cellSize, Sprite sprite, Color color)
     {
         cell = setupCell;
         transform.position = worldPosition;
         transform.localEulerAngles = Vector3.zero;
-        transform.localScale = Vector3.one * (cellSize * 0.92f);
 
         spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = MapTileAssetLibrary.SpriteOrFallback("tile_empty", sprite);
+        hasPrefabSprite = spriteRenderer.sprite != null;
+        if (spriteRenderer.sprite == null) spriteRenderer.sprite = MapTileAssetLibrary.SpriteOrFallback("tile_empty", sprite);
         spriteRenderer.sortingOrder = -1;
-        spriteRenderer.color = spriteRenderer.sprite == sprite ? color : Color.white;
+        spriteRenderer.color = color;
 
         label = label != null ? label : new GameObject("Label").AddComponent<TextMesh>();
         label.transform.SetParent(transform);
@@ -42,8 +45,9 @@ public class MapTile : MonoBehaviour
 
     public void SetVisualRotation(float zDegrees)
     {
-        transform.localEulerAngles = new Vector3(0f, 0f, zDegrees);
-        label.transform.localEulerAngles = new Vector3(0f, 0f, -zDegrees);
+        float rotation = Mathf.Repeat(zDegrees, 360f);
+        transform.localRotation = Quaternion.Euler(0f, 0f, rotation);
+        label.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Repeat(-rotation, 360f));
     }
 
     public void SetLabel(string text, Color color)
