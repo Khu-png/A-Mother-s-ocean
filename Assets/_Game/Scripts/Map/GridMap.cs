@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridMap : MonoBehaviour
+public partial class GridMap : MonoBehaviour
 {
     [Header("Grid")]
     [SerializeField] private float cellSize = 1f;
@@ -10,6 +10,7 @@ public class GridMap : MonoBehaviour
     [SerializeField] private Color pathColor = new Color(0.12f, 0.8f, 0.95f, 0.28f);
 
     [Header("Layout")]
+    [SerializeField] private LevelData levelData;
     [SerializeField] private string[] mapRows =
     {
         "F|T|A.",
@@ -41,17 +42,6 @@ public class GridMap : MonoBehaviour
     private readonly Dictionary<Vector2Int, RotateButton> rotateButtons = new Dictionary<Vector2Int, RotateButton>();
     private readonly Dictionary<Vector2Int, TargetPoint> targets = new Dictionary<Vector2Int, TargetPoint>();
     private readonly List<Vector2Int> currentRoute = new List<Vector2Int>();
-
-    private void Awake()
-    {
-        NormalizeSettings();
-        pathTrail = new PathTrail(transform, cellSize, pathColor);
-        GridVisual.BuildGrid(transform, width, height, cellSize, lineWidth, gridColor);
-        BuildMapTiles();
-        BuildPlayer();
-        MarkCurrentCell();
-        FitCamera();
-    }
 
     private void Update()
     {
@@ -241,22 +231,4 @@ public class GridMap : MonoBehaviour
         return currentRoute.Count >= 2 && currentRoute[currentRoute.Count - 2] == nextCell;
     }
 
-    private Vector3 CellToWorld(Vector2Int cell)
-    {
-        float left = -width * cellSize * 0.5f;
-        float bottom = -height * cellSize * 0.5f;
-        return new Vector3(left + (cell.x + 0.5f) * cellSize, bottom + (cell.y + 0.5f) * cellSize, 0f);
-    }
-
-    private char CellCode(int row, int column)
-    {
-        return column < mapRows[row].Length ? mapRows[row][column] : '.';
-    }
-
-    private Sprite TargetSprite() { return targetSprite != null ? targetSprite : GridVisual.CircleSprite(); }
-
-    private void FitCamera()
-    {
-        if (cameraController != null) cameraController.FitToGrid(width, height, cellSize);
-    }
 }

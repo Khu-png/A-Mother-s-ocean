@@ -11,13 +11,12 @@ public class MapBuilderWindow : EditorWindow
 
     private readonly char[] brushCodes = { '.', 'S', 'F', 'T', 'X', 'O', '|', '-', 'A', 'B', 'C', 'E' };
     private MapBuilderGridState grid = new MapBuilderGridState(6, 5);
-    private GridMap templateMap;
-    private GameObject levelPrefab;
+    private LevelData levelData;
     private Vector2 scroll;
     private int selectedBrush;
     private int width = 6;
     private int height = 5;
-    private bool createPrefab;
+    private bool createLevel;
     private int levelNumber = 1;
     private string saveMessage = string.Empty;
 
@@ -38,15 +37,12 @@ public class MapBuilderWindow : EditorWindow
 
     private void DrawTarget()
     {
-        EditorGUILayout.LabelField("Template", EditorStyles.boldLabel);
-        templateMap = (GridMap)EditorGUILayout.ObjectField("Grid Map", templateMap, typeof(GridMap), true);
+        EditorGUILayout.LabelField("Level Data", EditorStyles.boldLabel);
+        levelData = (LevelData)EditorGUILayout.ObjectField("Level", levelData, typeof(LevelData), false);
 
-        EditorGUILayout.LabelField("Level Asset", EditorStyles.boldLabel);
-        levelPrefab = (GameObject)EditorGUILayout.ObjectField("Level Prefab", levelPrefab, typeof(GameObject), false);
-
-        using (new EditorGUI.DisabledScope(levelPrefab == null))
+        using (new EditorGUI.DisabledScope(levelData == null))
         {
-            if (GUILayout.Button("Load From Prefab")) LoadFromPrefab();
+            if (GUILayout.Button("Load From Level Data")) LoadFromLevelData();
         }
     }
 
@@ -108,16 +104,16 @@ public class MapBuilderWindow : EditorWindow
     {
         EditorGUILayout.Space(8f);
 
-        using (new EditorGUI.DisabledScope(levelPrefab == null))
+        using (new EditorGUI.DisabledScope(levelData == null))
         {
-            if (GUILayout.Button("Apply To Prefab")) ApplyToPrefab();
+            if (GUILayout.Button("Apply To Level Data")) ApplyToLevelData();
         }
 
-        createPrefab = EditorGUILayout.Toggle("Create this as prefab", createPrefab);
-        using (new EditorGUI.DisabledScope(!createPrefab)) levelNumber = EditorGUILayout.IntField("Which Level", levelNumber);
-        using (new EditorGUI.DisabledScope(!createPrefab || templateMap == null))
+        createLevel = EditorGUILayout.Toggle("Create this as level", createLevel);
+        using (new EditorGUI.DisabledScope(!createLevel)) levelNumber = EditorGUILayout.IntField("Which Level", levelNumber);
+        using (new EditorGUI.DisabledScope(!createLevel))
         {
-            if (GUILayout.Button("Create Level Prefab")) SaveLevelPrefab();
+            if (GUILayout.Button("Create Level Data")) SaveLevelData();
         }
 
         if (saveMessage != string.Empty)
@@ -132,60 +128,47 @@ public class MapBuilderWindow : EditorWindow
         EditorGUILayout.TextArea(grid.ToCSharpRows(), GUILayout.MinHeight(90f));
     }
 
-    private void LoadFromPrefab()
+    private void LoadFromLevelData()
     {
-        SerializedProperty rows = RowsProperty();
-        string[] loadedRows = new string[rows.arraySize];
-        for (int i = 0; i < rows.arraySize; i++) loadedRows[i] = rows.GetArrayElementAtIndex(i).stringValue;
-        grid.LoadRows(loadedRows);
+        grid.LoadRows(levelData.MapRows);
         width = grid.Width;
         height = grid.Height;
     }
 
-    private void ApplyToPrefab()
+    private void ApplyToLevelData()
     {
-        GridMap prefabMap = PrefabGridMap();
-        Undo.RecordObject(prefabMap, "Apply Map Layout");
-        SerializedObject serializedMap = new SerializedObject(prefabMap);
-        SerializedProperty rows = serializedMap.FindProperty("mapRows");
-        string[] mapRows = grid.ToRows();
-        rows.arraySize = mapRows.Length;
-
-        for (int i = 0; i < mapRows.Length; i++) rows.GetArrayElementAtIndex(i).stringValue = mapRows[i];
-        serializedMap.ApplyModifiedProperties();
-        EditorUtility.SetDirty(prefabMap);
+        Undo.RecordObject(levelData, "Apply Map Layout");
+        levelData.SetMapRows(grid.ToRows());
+        EditorUtility.SetDirty(levelData);
         AssetDatabase.SaveAssets();
-        saveMessage = $"Save thành công vào prefab: {AssetDatabase.GetAssetPath(levelPrefab)}";
+        saveMessage = $"Save thành công vào level data: {AssetDatabase.GetAssetPath(levelData)}";
     }
 
-    private void SaveLevelPrefab()
+    private void SaveLevelData()
     {
         levelNumber = Mathf.Max(1, levelNumber);
-        EnsureLevelFolder();
-        string path = $"Assets/_Game/Prefab/Levels/Level_{levelNumber}.prefab";
-        PrefabUtility.SaveAsPrefabAsset(templateMap.gameObject, path);
+        EnsureLevelDataFolder();
+        string path = $"Assets/_Game/ScriptableObject/Map/Level_{levelNumber}.asset";
+        LevelData asset = AssetDatabase.LoadAssetAtPath<LevelData>(path);
+        if (asset == null)
+        {
+            asset = CreateInstance<LevelData>();
+            AssetDatabase.CreateAsset(asset, path);
+        }
+
+        asset.SetMapRows(grid.ToRows());
+        EditorUtility.SetDirty(asset);
         AssetDatabase.SaveAssets();
-        saveMessage = $"Save thành công vào prefab: {path}";
+        levelData = asset;
+        saveMessage = $"Save thành công vào level data: {path}";
     }
 
-    private void EnsureLevelFolder()
+    private void EnsureLevelDataFolder()
     {
-        if (AssetDatabase.IsValidFolder("Assets/_Game/Prefab/Levels")) return;
-        if (!AssetDatabase.IsValidFolder("Assets/_Game/Prefab")) AssetDatabase.CreateFolder("Assets/_Game", "Prefab");
-        AssetDatabase.CreateFolder("Assets/_Game/Prefab", "Levels");
-    }
-
-    private SerializedProperty RowsProperty()
-    {
-        return new SerializedObject(PrefabGridMap()).FindProperty("mapRows");
-    }
-
-    private GridMap PrefabGridMap()
-    {
-        string path = AssetDatabase.GetAssetPath(levelPrefab);
-        GridMap prefabMap = AssetDatabase.LoadAssetAtPath<GridMap>(path);
-        if (prefabMap == null) throw new UnityException("Chọn prefab không hợp lệ.");
-        return prefabMap;
+        const string root = "Assets/_Game/ScriptableObject";
+        const string map = root + "/Map";
+        if (!AssetDatabase.IsValidFolder(root)) AssetDatabase.CreateFolder("Assets/_Game/Scripts", "ScriptableObject");
+        if (!AssetDatabase.IsValidFolder(map)) AssetDatabase.CreateFolder(root, "Map");
     }
 
     private string CellLabel(char code)

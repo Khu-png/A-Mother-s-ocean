@@ -25,9 +25,14 @@ public class Mainmenu : UICanvas
         LevelManager.Ins.OnReplay();
     }
 
-    public void OnClickRestart()
+    public void OnClickResetData()
     {
-        LevelManager.Ins.OnRestart();
+        PlayerPrefs.DeleteKey(LevelManager.CurrentLevelKey);
+        PlayerPrefs.DeleteKey(CoinsKey);
+        PlayerPrefs.Save();
+        RefreshCoins();
+        if (currentLevelText != null)
+            currentLevelText.text = "<size=55%>LEVEL</size>\n1";
     }
 
     public void OnClickSettings()

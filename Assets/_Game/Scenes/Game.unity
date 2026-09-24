@@ -208,8 +208,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levels:
-  - {fileID: 200000003, guid: 51b1118452984fa9ae5457114e7fb8ec, type: 3}
-  - {fileID: 6970724451575465687, guid: 6c8e76e6f4587904294226ccea417873, type: 3}
+  - {fileID: 11400000, guid: 8b0d2dd5f4aa4ab6a4c2ddc8ad2c5e01, type: 2}
+  - {fileID: 11400000, guid: d6e9b7b6a6e04e5b8d16a0b0b812f2b4, type: 2}
+  - {fileID: 11400000, guid: 7406087c7b429ef4291f0a447bdff9eb, type: 2}
+  levelMap: {fileID: 1037034053}
   cameraController: {fileID: 519420033}
 --- !u!1 &519420028
 GameObject:
@@ -681,6 +683,17 @@ MonoBehaviour:
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
   m_ScrollDeltaPerTick: 6
+--- !u!114 &1037034053 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4108684998764424357, guid: 43e2888159e23ee4c8dcc0828719403b, type: 3}
+  m_PrefabInstance: {fileID: 6867523783678399230}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6153436634b64b90ab59c472c59eb654, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6867523783678399230
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -735,7 +748,11 @@ PrefabInstance:
       objectReference: {fileID: 519420033}
     - target: {fileID: 4819656965780968453, guid: 43e2888159e23ee4c8dcc0828719403b, type: 3}
       propertyPath: m_Name
-      value: Grid Map
+      value: Map Template
+      objectReference: {fileID: 0}
+    - target: {fileID: 4819656965780968453, guid: 43e2888159e23ee4c8dcc0828719403b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

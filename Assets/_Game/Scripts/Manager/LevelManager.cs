@@ -4,7 +4,8 @@ public class LevelManager : Singleton<LevelManager>
 {
     public const string CurrentLevelKey = "CurrentLevel";
     public static int SavedLevelNumber => Mathf.Max(1, PlayerPrefs.GetInt(CurrentLevelKey, 1));
-    [SerializeField] private GridMap[] levels;
+    [SerializeField] private LevelData[] levels;
+    [SerializeField] private GridMap levelMap;
     [SerializeField] private CameraController cameraController;
     private int currentLevelIndex;
     private GridMap currentLevel;
@@ -12,7 +13,9 @@ public class LevelManager : Singleton<LevelManager>
     private void Awake()
     {
         RegisterSingleton(this);
-        currentLevelIndex = SavedLevelNumber - 1;
+        currentLevelIndex = levels != null && levels.Length > 0
+            ? Mathf.Clamp(SavedLevelNumber - 1, 0, levels.Length - 1)
+            : 0;
     }
 
     private void Start()
@@ -38,20 +41,21 @@ public class LevelManager : Singleton<LevelManager>
 
     public void OnDespawn()
     {
-        if (currentLevel != null) Destroy(currentLevel.gameObject);
-        currentLevel = null;
+        if (currentLevel != null) currentLevel.ClearRuntimeMap();
     }
 
     public void OnLoadLevel(int levelIndex)
     {
-        if (!HasLevelPrefab(levelIndex)) throw new UnityException("Không có level hợp lệ.");
-        currentLevel = Instantiate(levels[levelIndex], transform);
+        if (!HasLevelData(levelIndex)) throw new UnityException("Không có dữ liệu level hợp lệ.");
+        if (levelMap == null) throw new UnityException("Scene Grid Map chưa được gán.");
+        currentLevel = levelMap;
+        currentLevel.Initialize(levels[levelIndex]);
     }
 
     public void OnWin()
     {
         int nextLevel = currentLevelIndex + 1;
-        if (!HasLevelPrefab(nextLevel))
+        if (!HasLevelData(nextLevel))
         {
             Debug.LogError("không có level tiếp theo");
             throw new UnityException("không có level tiếp theo");
@@ -77,7 +81,7 @@ public class LevelManager : Singleton<LevelManager>
     public void OnNextLevel()
     {
         int nextLevel = SavedLevelNumber - 1;
-        if (!HasLevelPrefab(nextLevel))
+        if (!HasLevelData(nextLevel))
         {
             Debug.LogError("không có level tiếp theo");
             throw new UnityException("không có level tiếp theo");
@@ -91,7 +95,7 @@ public class LevelManager : Singleton<LevelManager>
 
     public void OnRestart() => OnReplay();
 
-    private bool HasLevelPrefab(int index)
+    private bool HasLevelData(int index)
     {
         return levels != null && index >= 0 && index < levels.Length && levels[index] != null;
     }
