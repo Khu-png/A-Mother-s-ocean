@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2683196228481709051}
   - component: {fileID: 4108684998764424357}
-  - component: {fileID: 1526417289363200794}
   m_Layer: 0
   m_Name: MapTemplate
   m_TagString: Untagged
@@ -49,6 +48,7 @@ MonoBehaviour:
   lineWidth: 0.06
   gridColor: {r: 0.15, g: 0.55, b: 0.7, a: 0.7}
   pathColor: {r: 0.12, g: 0.8, b: 0.95, a: 0.28}
+  levelData: {fileID: 0}
   mapRows:
   - F-T-B.
   - .XAO-.
@@ -67,16 +67,3 @@ MonoBehaviour:
     finishPointPrefab: {fileID: 356433243040153167, guid: e38404381f4920b44b445298607257c3, type: 3}
   playerPrefab: {fileID: 1973450904327317224, guid: 2aad5cb193ee49e9ab52c72fbf340fa2, type: 3}
   cameraController: {fileID: 0}
---- !u!114 &1526417289363200794
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4819656965780968453}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f739afebad8f4ce6bc80e9b904c1d6a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gridMap: {fileID: 4108684998764424357}

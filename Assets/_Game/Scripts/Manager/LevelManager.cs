@@ -10,6 +10,11 @@ public class LevelManager : Singleton<LevelManager>
     private int currentLevelIndex;
     private GridMap currentLevel;
 
+    public void FitGameplayBackground(SpriteRenderer background)
+    {
+        if (cameraController != null) cameraController.FitBackground(background);
+    }
+
     private void Awake()
     {
         RegisterSingleton(this);
@@ -64,11 +69,6 @@ public class LevelManager : Singleton<LevelManager>
         PlayerPrefs.SetInt(CurrentLevelKey, nextLevel + 1);
         PlayerPrefs.Save();
         GameManager.Ins.OnFinish();
-    }
-
-    public void OnLose()
-    {
-        GameManager.Ins.OnLose();
     }
 
     public void OnReplay()

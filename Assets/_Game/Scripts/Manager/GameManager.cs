@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum GameState { MainMenu, Gameplay, Pause, Win, Lose }
+public enum GameState { MainMenu, Gameplay, Pause, Win }
 
 public class GameManager : Singleton<GameManager>
 {
@@ -22,7 +22,6 @@ public class GameManager : Singleton<GameManager>
 
     public void OnPlay()
     {
-        Time.timeScale = 1f;
         ChangeState(GameState.Gameplay);
         UIManager.Ins.CloseAll();
         UIManager.Ins.OpenUI<Gameplay>();
@@ -30,30 +29,20 @@ public class GameManager : Singleton<GameManager>
 
     public void OnPause()
     {
-        Time.timeScale = 0f;
         ChangeState(GameState.Pause);
         UIManager.Ins.OpenUI<Pause>();
     }
 
     public void OnResume()
     {
-        Time.timeScale = 1f;
         ChangeState(GameState.Gameplay);
         UIManager.Ins.CloseUI<Pause>();
     }
 
     public void OnFinish()
     {
-        Time.timeScale = 1f;
         ChangeState(GameState.Win);
         UIManager.Ins.OpenUI<Win>();
-    }
-
-    public void OnLose()
-    {
-        Time.timeScale = 1f;
-        ChangeState(GameState.Lose);
-        UIManager.Ins.OpenUI<Lose>();
     }
 
     private void Awake()

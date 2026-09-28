@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Level_2
   m_EditorClassIdentifier: 
   mapRows:
-  - F-T-B.
-  - .SAO-.
-  - XOTOTX
-  - .XOT-.
-  - ..XO..
+  - SX.-.
+  - .XOX.
+  - .XTX.
+  - TX.XT
+  - .X.X.
+  - OX.X.
+  - E.CXF

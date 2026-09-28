@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Level_3
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   mapRows:
-  - ......
-  - .S..F.
-  - ......
-  - ......
-  - ......
+  - F|T|E.
+  - .SAO-.
+  - XOTOTX
+  - .XOT-.
+  - ..XO..

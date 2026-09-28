@@ -145,6 +145,7 @@ GameObject:
   - component: {fileID: 7799615184282313327}
   - component: {fileID: 6650994070990567316}
   - component: {fileID: 9134940640121041201}
+  - component: {fileID: 6090414541049741207}
   m_Layer: 0
   m_Name: Win
   m_TagString: Untagged
@@ -228,6 +229,24 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6090414541049741207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4031106459264578269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3401376547e9734c9d60e25b6eb0337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Win
+  IsDestroyOnClose: 0
+  IsHandlingRabbitEars: 0
+  IsWidescreenProcessing: 0
+  m_RectTransform: {fileID: 0}
+  m_Animator: {fileID: 0}
+  popups: []
 --- !u!1 &5680902092771828611
 GameObject:
   m_ObjectHideFlags: 0

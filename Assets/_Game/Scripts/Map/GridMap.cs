@@ -45,6 +45,7 @@ public partial class GridMap : MonoBehaviour
 
     private void Update()
     {
+        if (!GameManager.IsState(GameState.Gameplay)) return;
         if (player != null && !player.IsMoving) ReadMoveInput();
     }
 

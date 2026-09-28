@@ -27,6 +27,8 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.IsState(GameState.Pause)) return;
+
         if (!IsMoving)
         {
             cachedTransform.position = moveTarget + Vector3.up * (Mathf.Sin(Time.time * idleBobSpeed) * idleBobHeight);
