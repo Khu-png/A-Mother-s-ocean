@@ -1,88 +1,121 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
-
-public enum SoundID
+public enum MusicID
 {
     BG_1 = 0,
 }
 
-public enum FxID
+public enum SoundID
 {
     Button = 0,
     SummonItem = 1,
 }
 
-
 public class SoundManager : Singleton<SoundManager>
 {
-    // [SerializeField] UserData userData; // dang comment vi thieu UserData
+    private const string MusicKey = "MusicEnabled";
+    private const string SoundKey = "SoundEnabled";
 
-    private AudioSource soundSource;
-    // private AudioSource[] fxSource = new AudioSource[Utilities.GetEnumCount<FxID>()]; // dang comment vi thieu Utilities
-    private AudioSource[] fxSource = new AudioSource[System.Enum.GetValues(typeof(FxID)).Length];
+    private AudioSource musicSource;
+    private AudioSource[] soundSources = new AudioSource[System.Enum.GetValues(typeof(SoundID)).Length];
 
-    [SerializeField] private AudioClip[] soundAus;
-    [SerializeField] private AudioClip[] fxAus;
+    [SerializeField] private AudioClip[] musicClips;
+    [SerializeField] private AudioClip[] soundClips;
 
-    private bool isLoaded = false;
-    private int indexSound;
+    private bool isMusicEnabled = true;
+    private bool isSoundEnabled = true;
+    private bool isLoaded;
 
-    public void Awake()
+    public bool IsMusicEnabled => isMusicEnabled;
+    public bool IsSoundEnabled => isSoundEnabled;
+
+    private void Awake()
     {
         RegisterSingleton(this);
         DontDestroyOnLoad(gameObject);
 
-        soundSource = gameObject.AddComponent<AudioSource>();
-        soundSource.loop = true;
+        musicSource = gameObject.AddComponent<AudioSource>();
+        musicSource.loop = true;
+        LoadSettings();
     }
 
     private void Start()
     {
-        Invoke(nameof(OnLoad), 1);
+        OnLoad();
     }
 
     private void OnLoad()
     {
-        if (soundAus.Length > 0)
+        isLoaded = true;
+        if (musicClips.Length > 0)
         {
-            isLoaded = true;
-
-            indexSound = Random.Range(0, soundAus.Length);
-            PlaySound((SoundID)indexSound);
+            PlayMusic(MusicID.BG_1);
         }
     }
 
-
-    public void PlaySound(SoundID ID)
+    public void PlayMusic(MusicID id)
     {
-        soundSource.clip = soundAus[(int)ID];
-        soundSource.Play();
+        if (!CanPlay(id, musicClips)) return;
+
+        musicSource.clip = musicClips[(int)id];
+        if (isMusicEnabled) musicSource.Play();
     }
 
-    public void PlayFx(FxID ID)
+    public void PlaySound(SoundID id)
     {
-        // if (DataManager.GameJsonData.information.IsAmbientsSounds && isLoaded) // dang comment vi thieu DataManager
-        if (isLoaded)
-        {
-            if (fxSource[(int)ID] == null)
-            {
-                fxSource[(int)ID] = new GameObject().AddComponent<AudioSource>();
-                fxSource[(int)ID].clip = fxAus[(int)ID];
-                fxSource[(int)ID].loop = false;
-                fxSource[(int)ID].transform.SetParent(transform);
-            }
-            fxSource[(int)ID].PlayOneShot(fxAus[(int)ID]);
+        if (!isSoundEnabled || !CanPlay(id, soundClips)) return;
 
-            //Debug.Log(ID);
-        }
+        AudioSource source = GetSoundSource(id);
+        source.PlayOneShot(soundClips[(int)id]);
     }
 
-    public void ChangeSound(SoundID ID, float time)
+    public void SetMusicEnabled(bool enabled)
     {
-        
+        isMusicEnabled = enabled;
+        PlayerPrefs.SetInt(MusicKey, enabled ? 1 : 0);
+
+        if (enabled && musicSource.clip != null) musicSource.Play();
+        if (!enabled) musicSource.Stop();
     }
 
+    public void SetSoundEnabled(bool enabled)
+    {
+        isSoundEnabled = enabled;
+        PlayerPrefs.SetInt(SoundKey, enabled ? 1 : 0);
+    }
+
+    public void ToggleMusic()
+    {
+        SetMusicEnabled(!isMusicEnabled);
+    }
+
+    public void ToggleSound()
+    {
+        SetSoundEnabled(!isSoundEnabled);
+        PlaySound(SoundID.Button);
+    }
+
+    private AudioSource GetSoundSource(SoundID id)
+    {
+        int index = (int)id;
+        if (soundSources[index] != null) return soundSources[index];
+
+        AudioSource source = new GameObject(id.ToString()).AddComponent<AudioSource>();
+        source.loop = false;
+        source.transform.SetParent(transform);
+        soundSources[index] = source;
+        return source;
+    }
+
+    private void LoadSettings()
+    {
+        isMusicEnabled = PlayerPrefs.GetInt(MusicKey, 1) == 1;
+        isSoundEnabled = PlayerPrefs.GetInt(SoundKey, 1) == 1;
+    }
+
+    private bool CanPlay(System.Enum id, AudioClip[] clips)
+    {
+        int index = System.Convert.ToInt32(id);
+        return isLoaded && index >= 0 && index < clips.Length && clips[index] != null;
+    }
 }

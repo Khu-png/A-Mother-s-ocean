@@ -37,7 +37,7 @@ public class Mainmenu : UICanvas
 
     public void OnClickSettings()
     {
-        Debug.Log("Main menu settings button");
+        UIManager.Ins.OpenUI<Settings>();
     }
 
     public void OnClickGift()
