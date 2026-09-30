@@ -175,12 +175,18 @@ public class UIManager : Singleton<UIManager>
 
     private void LateUpdate()
     {
-#if ENABLE_LEGACY_INPUT_MANAGER
-        if (Input.GetKey(KeyCode.Escape) && BackTopUI != null)
+#if ENABLE_INPUT_SYSTEM
+        bool backPressed = UnityEngine.InputSystem.Keyboard.current != null
+            && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        bool backPressed = Input.GetKeyDown(KeyCode.Escape);
+#else
+        bool backPressed = false;
+#endif
+        if (backPressed && BackTopUI != null)
         {
             BackActionEvents[BackTopUI]?.Invoke();
         }
-#endif
     }
 
     public void PushBackAction(UICanvas canvas, UnityAction action)

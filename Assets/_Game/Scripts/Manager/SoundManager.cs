@@ -73,6 +73,7 @@ public class SoundManager : Singleton<SoundManager>
     {
         isMusicEnabled = enabled;
         PlayerPrefs.SetInt(MusicKey, enabled ? 1 : 0);
+        PlayerPrefs.Save();
 
         if (enabled && musicSource.clip != null) musicSource.Play();
         if (!enabled) musicSource.Stop();
@@ -82,6 +83,12 @@ public class SoundManager : Singleton<SoundManager>
     {
         isSoundEnabled = enabled;
         PlayerPrefs.SetInt(SoundKey, enabled ? 1 : 0);
+        PlayerPrefs.Save();
+        if (!enabled)
+        {
+            foreach (AudioSource source in soundSources)
+                if (source != null) source.Stop();
+        }
     }
 
     public void ToggleMusic()

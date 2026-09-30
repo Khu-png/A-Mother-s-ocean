@@ -6,12 +6,21 @@ public class Mainmenu : UICanvas
     public const string CoinsKey = "Coins";
     [SerializeField] private TMP_Text currentLevelText;
     [SerializeField] private TMP_Text coinAmountText;
+    private string levelTextTemplate;
 
     private void OnEnable()
     {
-        if (currentLevelText != null)
-            currentLevelText.text = "<size=55%>LEVEL</size>\n" + LevelManager.SavedLevelNumber;
+        RefreshLevel();
         RefreshCoins();
+    }
+
+    private void RefreshLevel()
+    {
+        if (currentLevelText == null) return;
+
+        // Keep the prefab's rich-text styling; replace only the level placeholder.
+        if (levelTextTemplate == null) levelTextTemplate = currentLevelText.text;
+        currentLevelText.text = levelTextTemplate.Replace("{level}", LevelManager.SavedLevelNumber.ToString());
     }
 
     public void RefreshCoins()
@@ -31,8 +40,7 @@ public class Mainmenu : UICanvas
         PlayerPrefs.DeleteKey(CoinsKey);
         PlayerPrefs.Save();
         RefreshCoins();
-        if (currentLevelText != null)
-            currentLevelText.text = "<size=55%>LEVEL</size>\n1";
+        RefreshLevel();
     }
 
     public void OnClickSettings()

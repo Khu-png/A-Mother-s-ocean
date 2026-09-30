@@ -9,6 +9,7 @@ public class LevelManager : Singleton<LevelManager>
     [SerializeField] private CameraController cameraController;
     private int currentLevelIndex;
     private GridMap currentLevel;
+    public int CurrentLevelNumber => currentLevelIndex + 1;
 
     public void FitGameplayBackground(SpriteRenderer background)
     {
@@ -55,6 +56,7 @@ public class LevelManager : Singleton<LevelManager>
         if (levelMap == null) throw new UnityException("Scene Grid Map chưa được gán.");
         currentLevel = levelMap;
         currentLevel.Initialize(levels[levelIndex]);
+        currentLevelIndex = levelIndex;
     }
 
     public void OnWin()
@@ -88,8 +90,7 @@ public class LevelManager : Singleton<LevelManager>
         }
 
         OnDespawn();
-        currentLevelIndex = nextLevel;
-        OnLoadLevel(currentLevelIndex);
+        OnLoadLevel(nextLevel);
         OnInit();
     }
 

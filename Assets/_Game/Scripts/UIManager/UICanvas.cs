@@ -11,6 +11,8 @@ public class UICanvas : MonoBehaviour
 
     [SerializeField] protected RectTransform m_RectTransform;
     [SerializeField] private Animator m_Animator;
+    [SerializeField] private CanvasGroup panelGroup;
+    private Coroutine closing;
 
     private void Start()
     {
@@ -84,13 +86,22 @@ public class UICanvas : MonoBehaviour
     //mo canvas
     public virtual void Open()
     {
+        CancelCloseAnimation();
         gameObject.SetActive(true);
+        if (panelGroup != null) panelGroup.interactable = true;
+        if (m_Animator != null)
+        {
+            m_Animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+            m_Animator.Play("Open", 0, 0f);
+            m_Animator.Update(0f);
+        }
     }
 
     //close canvas directly
     //dong truc tiep, ngay lap tuc
     public virtual void CloseDirectly()
     {
+        CancelCloseAnimation();
         UIManager.Ins.RemoveBackUI(this);
         gameObject.SetActive(false);
         if (IsDestroyOnClose)
@@ -98,6 +109,36 @@ public class UICanvas : MonoBehaviour
             Destroy(gameObject);
         }
         
+    }
+
+    public void CloseAnimated(System.Action onClosed = null)
+    {
+        if (closing != null || !gameObject.activeInHierarchy) return;
+        if (m_Animator == null)
+        {
+            CloseDirectly();
+            onClosed?.Invoke();
+            return;
+        }
+        closing = StartCoroutine(PlayCloseAnimation(onClosed));
+    }
+
+    private IEnumerator PlayCloseAnimation(System.Action onClosed)
+    {
+        if (panelGroup != null) panelGroup.interactable = false;
+        m_Animator.Play("Close", 0, 0f);
+        m_Animator.Update(0f);
+        do { yield return null; }
+        while (m_Animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
+        closing = null;
+        CloseDirectly();
+        onClosed?.Invoke();
+    }
+
+    private void CancelCloseAnimation()
+    {
+        if (closing != null) StopCoroutine(closing);
+        closing = null;
     }
 
     //close canvas with delay time, used to anim UI action

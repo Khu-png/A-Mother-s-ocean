@@ -5,9 +5,19 @@ public enum GameState { MainMenu, Gameplay, Pause, Win }
 public class GameManager : Singleton<GameManager>
 {
     private static GameState gameState;
+    private static float resumeTimeScale = 1f;
 
     public static void ChangeState(GameState state)
     {
+        if (state == GameState.Pause && gameState != GameState.Pause)
+        {
+            resumeTimeScale = Time.timeScale;
+            Time.timeScale = 0f;
+        }
+        else if (gameState == GameState.Pause && state != GameState.Pause)
+        {
+            Time.timeScale = resumeTimeScale;
+        }
         gameState = state;
     }
 
@@ -29,12 +39,14 @@ public class GameManager : Singleton<GameManager>
 
     public void OnPause()
     {
+        if (!IsState(GameState.Gameplay)) return;
+        if (UIManager.Ins.OpenUI<Pause>() == null) return;
         ChangeState(GameState.Pause);
-        UIManager.Ins.OpenUI<Pause>();
     }
 
     public void OnResume()
     {
+        if (!IsState(GameState.Pause)) return;
         ChangeState(GameState.Gameplay);
         UIManager.Ins.CloseUI<Pause>();
     }
@@ -70,5 +82,10 @@ public class GameManager : Singleton<GameManager>
     {
         OnInit();
         //UIManager.Ins.OpenUI<UIMainMenu>();
+    }
+
+    private void OnDestroy()
+    {
+        if (IsState(GameState.Pause)) ChangeState(GameState.MainMenu);
     }
 }

@@ -1,9 +1,9 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class Gameplay : UICanvas
 {
-    [SerializeField] private Text levelText;
+    [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private SpriteRenderer oceanBackground;
 
     private void LateUpdate()
@@ -15,12 +15,17 @@ public class Gameplay : UICanvas
     private void OnEnable()
     {
         if (levelText != null)
-            levelText.text = "<size=55%>LEVEL</size>\n" + LevelManager.SavedLevelNumber;
+            levelText.text = $"Level {LevelManager.Ins.CurrentLevelNumber:00}";
     }
 
     public void OnClickPause()
     {
         GameManager.Ins.OnPause();
+    }
+
+    public override void BackKey()
+    {
+        OnClickPause();
     }
 
     public void OnClickRestart()

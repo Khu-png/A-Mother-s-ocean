@@ -12,6 +12,7 @@ public class MapBuilderWindow : EditorWindow
     private readonly char[] brushCodes = { '.', 'S', 'F', 'T', 'X', 'O', '|', '-', 'A', 'B', 'C', 'E' };
     private MapBuilderGridState grid = new MapBuilderGridState(6, 5);
     private LevelData levelData;
+    [SerializeField] private LevelManager levelManager;
     private Vector2 scroll;
     private int selectedBrush;
     private int width = 6;
@@ -39,6 +40,7 @@ public class MapBuilderWindow : EditorWindow
     {
         EditorGUILayout.LabelField("Level Data", EditorStyles.boldLabel);
         levelData = (LevelData)EditorGUILayout.ObjectField("Level", levelData, typeof(LevelData), false);
+        levelManager = (LevelManager)EditorGUILayout.ObjectField("Level Manager", levelManager, typeof(LevelManager), true);
 
         using (new EditorGUI.DisabledScope(levelData == null))
         {
@@ -111,7 +113,7 @@ public class MapBuilderWindow : EditorWindow
 
         createLevel = EditorGUILayout.Toggle("Create this as level", createLevel);
         using (new EditorGUI.DisabledScope(!createLevel)) levelNumber = EditorGUILayout.IntField("Which Level", levelNumber);
-        using (new EditorGUI.DisabledScope(!createLevel))
+        using (new EditorGUI.DisabledScope(!createLevel || EditorApplication.isPlaying))
         {
             if (GUILayout.Button("Create Level Data")) SaveLevelData();
         }
@@ -147,27 +149,24 @@ public class MapBuilderWindow : EditorWindow
     private void SaveLevelData()
     {
         levelNumber = Mathf.Max(1, levelNumber);
-        EnsureLevelDataFolder();
         string path = $"Assets/_Game/ScriptableObject/Map/Level_{levelNumber}.asset";
-        LevelData asset = AssetDatabase.LoadAssetAtPath<LevelData>(path);
-        if (asset == null)
-        {
-            asset = CreateInstance<LevelData>();
-            AssetDatabase.CreateAsset(asset, path);
-        }
-
+        saveMessage = string.Empty;
+        MapLevelRegistration.Validate(levelManager, levelNumber, path);
+        EnsureLevelDataFolder();
+        LevelData asset = CreateInstance<LevelData>();
         asset.SetMapRows(grid.ToRows());
-        EditorUtility.SetDirty(asset);
+        AssetDatabase.CreateAsset(asset, path);
+        MapLevelRegistration.Assign(levelManager, levelNumber, asset);
         AssetDatabase.SaveAssets();
         levelData = asset;
-        saveMessage = $"Save thành công vào level data: {path}";
+        saveMessage = $"Đã tạo Level {levelNumber} và gán vào Level Manager. Hãy lưu scene/prefab.";
     }
 
     private void EnsureLevelDataFolder()
     {
         const string root = "Assets/_Game/ScriptableObject";
         const string map = root + "/Map";
-        if (!AssetDatabase.IsValidFolder(root)) AssetDatabase.CreateFolder("Assets/_Game/Scripts", "ScriptableObject");
+        if (!AssetDatabase.IsValidFolder(root)) AssetDatabase.CreateFolder("Assets/_Game", "ScriptableObject");
         if (!AssetDatabase.IsValidFolder(map)) AssetDatabase.CreateFolder(root, "Map");
     }
 

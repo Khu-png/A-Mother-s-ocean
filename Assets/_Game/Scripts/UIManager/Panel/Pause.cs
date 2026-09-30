@@ -1,21 +1,24 @@
 using UnityEngine;
 
-public class Pause : UICanvas
+public class Pause : OptionsPanel
 {
+    public override void BackKey()
+    {
+        OnClickResume();
+    }
+
     public void OnClickResume()
     {
-        GameManager.Ins.OnResume();
+        CloseAnimated(GameManager.Ins.OnResume);
     }
 
     public void OnClickReplay()
     {
-        Time.timeScale = 1f;
-        LevelManager.Ins.OnReplay();
+        CloseAnimated(LevelManager.Ins.OnReplay);
     }
 
     public void OnClickMainMenu()
     {
-        Time.timeScale = 1f;
-        GameManager.Ins.OnInit();
+        CloseAnimated(GameManager.Ins.OnInit);
     }
 }
