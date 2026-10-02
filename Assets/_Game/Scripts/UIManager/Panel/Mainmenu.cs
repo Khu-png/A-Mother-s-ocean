@@ -31,7 +31,7 @@ public class Mainmenu : UICanvas
 
     public void OnClickPlay()
     {
-        LevelManager.Ins.OnReplay();
+        LevelManager.Ins.OnPlay();
     }
 
     public void OnClickResetData()

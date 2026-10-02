@@ -12,57 +12,71 @@ public class UICanvas : MonoBehaviour
     [SerializeField] protected RectTransform m_RectTransform;
     [SerializeField] private Animator m_Animator;
     [SerializeField] private CanvasGroup panelGroup;
+    [SerializeField] private RectTransform[] safeAreaElements;
     private Coroutine closing;
+    private Vector2[] safeAreaAnchorMin;
+    private Vector2[] safeAreaAnchorMax;
+    private Rect appliedSafeArea;
+    private bool safeAreaAnchorsCached;
 
     private void Start()
     {
+        CacheSafeAreaAnchors();
+        ApplySafeArea();
+        appliedSafeArea = Screen.safeArea;
         OnInit();
+    }
+
+    private void Update()
+    {
+        if (Screen.safeArea == appliedSafeArea) return;
+        ApplySafeArea();
+        appliedSafeArea = Screen.safeArea;
     }
 
     //Init default Canvas
     //khoi tao gia tri canvas
     protected void OnInit()
     {
-        // xu ly tai tho
-        float ratio = (float)Screen.height / (float)Screen.width;
-        if (IsHandlingRabbitEars && m_RectTransform != null)
-        {
-            if (ratio > 2.1f)
-            {
-                Vector2 leftBottom = m_RectTransform.offsetMin;
-                Vector2 rightTop = m_RectTransform.offsetMax;
-                rightTop.y = -100f;
-                m_RectTransform.offsetMax = rightTop;
-                leftBottom.y = 0f;
-                m_RectTransform.offsetMin = leftBottom;
-            }
-        }
-
-        //=> CODE BY: MINH AN
-        //TODO: Xu ly man hinh with/height qua rong - xu ly voi man hinh co ti le with/height < 2.1f
-        if (IsWidescreenProcessing && m_RectTransform != null)
-        {
-            ratio = (float)Screen.width / (float)Screen.height;
-            if (ratio < 2.1f)
-            {
-                //size tieu chuan
-                float ratioDefault = 850 / 1920f;
-                float ratioThis = ratio;
-
-                float value = 1 - (ratioThis - ratioDefault);
-
-                float with = m_RectTransform.rect.width * value;
-
-                m_RectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, with);
-            }
-
-        }
-
         //Set parent cho popup child
         //cai nay tien cho viec truy suat truc tiep tu thang con ve thang cha quan ly
         for (int i = 0; i < popups.Length; i++)
         {
             popups[i].ParentsPopup = this;
+        }
+    }
+
+    private void CacheSafeAreaAnchors()
+    {
+        if (safeAreaAnchorsCached) return;
+        int count = safeAreaElements != null ? safeAreaElements.Length : 0;
+        safeAreaAnchorMin = new Vector2[count];
+        safeAreaAnchorMax = new Vector2[count];
+        for (int i = 0; i < count; i++)
+        {
+            if (safeAreaElements[i] == null) continue;
+            safeAreaAnchorMin[i] = safeAreaElements[i].anchorMin;
+            safeAreaAnchorMax[i] = safeAreaElements[i].anchorMax;
+        }
+        safeAreaAnchorsCached = true;
+    }
+
+    private void ApplySafeArea()
+    {
+        if (Screen.width <= 0 || Screen.height <= 0 || safeAreaElements == null) return;
+        if (safeAreaAnchorMin == null || safeAreaAnchorMin.Length != safeAreaElements.Length)
+            CacheSafeAreaAnchors();
+
+        Rect safeArea = Screen.safeArea;
+        Vector2 safeMin = new Vector2(safeArea.xMin / Screen.width, safeArea.yMin / Screen.height);
+        Vector2 safeMax = new Vector2(safeArea.xMax / Screen.width, safeArea.yMax / Screen.height);
+        Vector2 safeSize = safeMax - safeMin;
+        for (int i = 0; i < safeAreaElements.Length; i++)
+        {
+            RectTransform element = safeAreaElements[i];
+            if (element == null) continue;
+            element.anchorMin = safeMin + Vector2.Scale(safeAreaAnchorMin[i], safeSize);
+            element.anchorMax = safeMin + Vector2.Scale(safeAreaAnchorMax[i], safeSize);
         }
     }
 
@@ -88,6 +102,7 @@ public class UICanvas : MonoBehaviour
     {
         CancelCloseAnimation();
         gameObject.SetActive(true);
+        ApplySafeArea();
         if (panelGroup != null) panelGroup.interactable = true;
         if (m_Animator != null)
         {

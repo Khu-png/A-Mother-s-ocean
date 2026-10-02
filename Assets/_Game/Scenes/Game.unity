@@ -364,7 +364,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 519420031}
-  fitCameraOnPlay: 0
+  fitCameraOnPlay: 1
   cameraPadding: 0.45
 --- !u!1 &619394800
 GameObject:

@@ -10,6 +10,15 @@ public class LevelManager : Singleton<LevelManager>
     private int currentLevelIndex;
     private GridMap currentLevel;
     public int CurrentLevelNumber => currentLevelIndex + 1;
+    public bool HasPlayerMoved { get; private set; }
+    public event System.Action PlayerMoved;
+
+    public void NotifyPlayerMoved()
+    {
+        if (HasPlayerMoved) return;
+        HasPlayerMoved = true;
+        PlayerMoved?.Invoke();
+    }
 
     public void FitGameplayBackground(SpriteRenderer background)
     {
@@ -42,7 +51,13 @@ public class LevelManager : Singleton<LevelManager>
 
     public void OnPlay()
     {
-        GameManager.Ins.OnPlay();
+        int savedLevelIndex = SavedLevelNumber - 1;
+        if (!HasLevelData(savedLevelIndex))
+            throw new UnityException("Không có dữ liệu level đã lưu.");
+
+        OnDespawn();
+        OnLoadLevel(savedLevelIndex);
+        OnInit();
     }
 
     public void OnDespawn()
@@ -57,6 +72,7 @@ public class LevelManager : Singleton<LevelManager>
         currentLevel = levelMap;
         currentLevel.Initialize(levels[levelIndex]);
         currentLevelIndex = levelIndex;
+        HasPlayerMoved = false;
     }
 
     public void OnWin()

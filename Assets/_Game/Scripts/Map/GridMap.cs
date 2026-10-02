@@ -42,15 +42,16 @@ public partial class GridMap : MonoBehaviour
     private readonly Dictionary<Vector2Int, RotateButton> rotateButtons = new Dictionary<Vector2Int, RotateButton>();
     private readonly Dictionary<Vector2Int, TargetPoint> targets = new Dictionary<Vector2Int, TargetPoint>();
     private readonly List<Vector2Int> currentRoute = new List<Vector2Int>();
+    private readonly GridInputReader inputReader = new GridInputReader();
 
     private void Update()
     {
-        if (!GameManager.IsState(GameState.Gameplay)) return;
-        if (player != null && !player.IsMoving) ReadMoveInput();
+        ReadMoveInput();
     }
 
     public void ResetPlayerToStart()
     {
+        inputReader.Reset();
         if (player == null) return;
         pathTrail.Clear();
         ResetTargets();
@@ -144,7 +145,8 @@ public partial class GridMap : MonoBehaviour
 
     private void ReadMoveInput()
     {
-        Vector2Int direction = GridInputReader.ReadDirection();
+        bool canMove = GameManager.IsState(GameState.Gameplay) && player != null && !player.IsMoving;
+        Vector2Int direction = inputReader.ReadDirection(canMove);
         if (direction != Vector2Int.zero) TryMove(direction);
     }
 
@@ -167,6 +169,7 @@ public partial class GridMap : MonoBehaviour
         playerCell = nextCell;
         MarkCurrentCell();
         player.MoveTo(playerCell, CellToWorld(playerCell));
+        LevelManager.Ins.NotifyPlayerMoved();
         if (!isBacktracking && rotateButtons.ContainsKey(playerCell)) ActivateRotateButton();
         RefreshFinish();
     }
