@@ -200,7 +200,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6968357842755941048}
         m_TargetAssemblyTypeName: Lose, Assembly-CSharp
-        m_MethodName: OnReplayButton
+        m_MethodName: OnClickReplay
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

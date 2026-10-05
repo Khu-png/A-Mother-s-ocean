@@ -103,6 +103,7 @@ public class Gameplay : UICanvas
 
     public void OnClickPause()
     {
+        SoundManager.Ins.PlayButtonSound();
         GameManager.Ins.OnPause();
     }
 
@@ -113,6 +114,7 @@ public class Gameplay : UICanvas
 
     public void OnClickRestart()
     {
+        SoundManager.Ins.PlayButtonSound();
         LevelManager.Ins.OnRestart();
     }
 }

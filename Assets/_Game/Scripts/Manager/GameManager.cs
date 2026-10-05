@@ -7,6 +7,26 @@ public class GameManager : Singleton<GameManager>
     private static GameState gameState;
     private static float resumeTimeScale = 1f;
 
+    private void Awake()
+    {
+        RegisterSingleton(this);
+#if ENABLE_LEGACY_INPUT_MANAGER
+        Input.multiTouchEnabled = false;
+#endif
+        Application.targetFrameRate = 60;
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+    }
+
+    private void Start()
+    {
+        OnInit();
+    }
+
+    private void OnDestroy()
+    {
+        if (IsState(GameState.Pause)) Time.timeScale = resumeTimeScale;
+    }
+
     public static void ChangeState(GameState state)
     {
         if (state == GameState.Pause && gameState != GameState.Pause)
@@ -19,6 +39,14 @@ public class GameManager : Singleton<GameManager>
             Time.timeScale = resumeTimeScale;
         }
         gameState = state;
+        PlayStateMusic(state);
+    }
+
+    private static void PlayStateMusic(GameState state)
+    {
+        if (SoundManager.Ins == null) return;
+        if (state == GameState.MainMenu) SoundManager.Ins.PlayMusic("Menu");
+        else if (state == GameState.Gameplay) SoundManager.Ins.PlayMusic("Gameplay");
     }
 
     public static bool IsState(GameState state) => gameState == state;
@@ -53,31 +81,9 @@ public class GameManager : Singleton<GameManager>
 
     public void OnFinish()
     {
+        if (IsState(GameState.Win)) return;
         ChangeState(GameState.Win);
+        SoundManager.Ins.PlaySound("Win");
         UIManager.Ins.OpenUI<Win>();
-    }
-
-    private void Awake()
-    {
-        RegisterSingleton(this);
-#if ENABLE_LEGACY_INPUT_MANAGER
-        //tranh viec nguoi choi cham da diem vao man hinh
-        Input.multiTouchEnabled = false;
-#endif
-        //target frame rate ve 60 fps
-        Application.targetFrameRate = 60;
-        //tranh viec tat man hinh
-        Screen.sleepTimeout = SleepTimeout.NeverSleep;
-    }
-
-    private void Start()
-    {
-        OnInit();
-        //UIManager.Ins.OpenUI<UIMainMenu>();
-    }
-
-    private void OnDestroy()
-    {
-        if (IsState(GameState.Pause)) ChangeState(GameState.MainMenu);
     }
 }

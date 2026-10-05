@@ -17,7 +17,7 @@ public abstract class OptionsPanel : UICanvas
     public void OnClickMusic()
     {
         SoundManager.Ins.ToggleMusic();
-        SoundManager.Ins.PlaySound(SoundID.Button);
+        SoundManager.Ins.PlayButtonSound();
         RefreshIcons();
     }
 
@@ -30,8 +30,13 @@ public abstract class OptionsPanel : UICanvas
     public void OnClickVibration()
     {
         VibrationSettings.Toggle();
-        SoundManager.Ins.PlaySound(SoundID.Button);
+        SoundManager.Ins.PlayButtonSound();
         RefreshIcons();
+    }
+
+    public void OnClickTutorial()
+    {
+        SoundManager.Ins.PlayButtonSound();
     }
 
     private void RefreshIcons()

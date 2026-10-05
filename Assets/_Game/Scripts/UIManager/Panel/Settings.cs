@@ -4,11 +4,13 @@ public class Settings : OptionsPanel
 {
     public void OnClickClose()
     {
+        SoundManager.Ins.PlayButtonSound();
         CloseAnimated();
     }
 
     public void OnClickExit()
     {
+        SoundManager.Ins.PlayButtonSound();
         CloseAnimated(ExitGame);
     }
 

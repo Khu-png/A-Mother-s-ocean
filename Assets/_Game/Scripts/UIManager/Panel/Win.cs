@@ -32,11 +32,13 @@ public class Win : UICanvas
 
     public void OnClickNext()
     {
+        SoundManager.Ins.PlayButtonSound();
         LevelManager.Ins.OnNextLevel();
     }
 
     public void OnClickReplay()
     {
+        SoundManager.Ins.PlayButtonSound();
         LevelManager.Ins.OnReplay();
     }
 }

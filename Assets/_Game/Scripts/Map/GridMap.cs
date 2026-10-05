@@ -145,9 +145,18 @@ public partial class GridMap : MonoBehaviour
 
     private void ReadMoveInput()
     {
-        bool canMove = GameManager.IsState(GameState.Gameplay) && player != null && !player.IsMoving;
+        bool canMove = GameManager.IsState(GameState.Gameplay) && player != null && !player.IsMoving && !AreTilesRotating();
         Vector2Int direction = inputReader.ReadDirection(canMove);
         if (direction != Vector2Int.zero) TryMove(direction);
+    }
+
+    private bool AreTilesRotating()
+    {
+        foreach (OneWayPath path in oneWayPaths.Values)
+        {
+            if (path.Tile.IsRotating) return true;
+        }
+        return false;
     }
 
     private void TryMove(Vector2Int direction)
@@ -155,6 +164,7 @@ public partial class GridMap : MonoBehaviour
         Vector2Int nextCell = playerCell + direction;
         if (!CanMove(playerCell, nextCell, direction)) return;
         bool isBacktracking = IsBacktrackingToPreviousCell(nextCell);
+        bool rotatesTiles = rotateButtons.ContainsKey(isBacktracking ? playerCell : nextCell);
 
         if (isBacktracking)
         {
@@ -169,8 +179,10 @@ public partial class GridMap : MonoBehaviour
         playerCell = nextCell;
         MarkCurrentCell();
         player.MoveTo(playerCell, CellToWorld(playerCell));
+        SoundManager.Ins.PlaySound("Move");
         LevelManager.Ins.NotifyPlayerMoved();
         if (!isBacktracking && rotateButtons.ContainsKey(playerCell)) ActivateRotateButton();
+        if (rotatesTiles) SoundManager.Ins.PlaySound("Rotate");
         RefreshFinish();
     }
 

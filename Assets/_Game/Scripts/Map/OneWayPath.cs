@@ -73,7 +73,7 @@ public class OneWayPath : MonoBehaviour
             ToggleCornerState();
         }
 
-        ApplyVisual();
+        ApplyVisual(true);
     }
 
     public void ToggleBack()
@@ -87,7 +87,7 @@ public class OneWayPath : MonoBehaviour
             ToggleCornerBack();
         }
 
-        ApplyVisual();
+        ApplyVisual(true);
     }
 
     public void ResetState()
@@ -96,12 +96,12 @@ public class OneWayPath : MonoBehaviour
         ApplyVisual();
     }
 
-    private void ApplyVisual()
+    private void ApplyVisual(bool animate = false)
     {
         visualRotation = RotationForState();
         Sprite sprite = tile.HasPrefabSprite ? tile.Sprite : MapTileAssetLibrary.Sprite(SpriteName());
         tile.SetSprite(sprite);
-        tile.SetVisualRotation(RotationDegrees(visualRotation));
+        tile.SetVisualRotation(RotationDegrees(visualRotation), animate);
         tile.SetColor(sprite != null ? Color.white : pathColor);
         tile.SetLabel(sprite != null ? string.Empty : DirectionSymbol(), Color.white);
     }

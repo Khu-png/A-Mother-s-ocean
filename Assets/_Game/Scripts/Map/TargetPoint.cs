@@ -38,7 +38,9 @@ public class TargetPoint : MonoBehaviour
 
     public void Collect()
     {
+        if (IsCollected) return;
         IsCollected = true;
+        SoundManager.Ins.PlaySound("Collect");
         gameObject.SetActive(false);
     }
 
