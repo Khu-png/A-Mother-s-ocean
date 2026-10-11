@@ -13,4 +13,8 @@ MonoBehaviour:
   m_Name: Level_4
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   mapRows:
-  - S....F
+  - S....
+  - .T...
+  - .....
+  - ...T.
+  - ....F

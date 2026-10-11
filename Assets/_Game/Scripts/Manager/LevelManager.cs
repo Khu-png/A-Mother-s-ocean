@@ -41,7 +41,7 @@ public class LevelManager : Singleton<LevelManager>
     {
         if (currentLevel == null) OnLoadLevel(currentLevelIndex);
 
-        GameManager.Ins.OnPlay();
+        GameManager.Ins.ShowGameplay();
         if (currentLevel != null)
         {
             currentLevel.SetCameraController(cameraController);
@@ -55,9 +55,7 @@ public class LevelManager : Singleton<LevelManager>
         if (!HasLevelData(savedLevelIndex))
             throw new UnityException("Không có dữ liệu level đã lưu.");
 
-        OnDespawn();
-        OnLoadLevel(savedLevelIndex);
-        OnInit();
+        LoadingManager.Ins.LoadGameplay(savedLevelIndex);
     }
 
     public void OnDespawn()

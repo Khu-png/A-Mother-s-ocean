@@ -175,6 +175,7 @@ public class UIManager : Singleton<UIManager>
 
     private void LateUpdate()
     {
+        if (LoadingManager.Ins.IsLoading) return;
 #if ENABLE_INPUT_SYSTEM
         bool backPressed = UnityEngine.InputSystem.Keyboard.current != null
             && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame;

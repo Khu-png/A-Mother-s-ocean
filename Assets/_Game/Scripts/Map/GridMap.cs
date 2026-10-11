@@ -145,7 +145,7 @@ public partial class GridMap : MonoBehaviour
 
     private void ReadMoveInput()
     {
-        bool canMove = GameManager.IsState(GameState.Gameplay) && player != null && !player.IsMoving && !AreTilesRotating();
+        bool canMove = !LoadingManager.Ins.IsLoading && GameManager.IsState(GameState.Gameplay) && player != null && !player.IsMoving && !AreTilesRotating();
         Vector2Int direction = inputReader.ReadDirection(canMove);
         if (direction != Vector2Int.zero) TryMove(direction);
     }

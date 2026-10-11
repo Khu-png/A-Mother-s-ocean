@@ -53,16 +53,21 @@ public class GameManager : Singleton<GameManager>
 
     public void OnInit()
     {
-        ChangeState(GameState.MainMenu);
-        UIManager.Ins.CloseAll();
-        UIManager.Ins.OpenUI<Mainmenu>();
+        LoadingManager.Ins.LoadMainMenu();
     }
 
     public void OnPlay()
     {
+        if (LoadingManager.Ins.IsLoading) return;
+        LevelManager.Ins.OnPlay();
+    }
+
+    internal void ShowGameplay()
+    {
         ChangeState(GameState.Gameplay);
         UIManager.Ins.CloseAll();
-        UIManager.Ins.OpenUI<Gameplay>();
+        if (UIManager.Ins.OpenUI<Gameplay>() == null)
+            throw new UnityException("Gameplay prefab is missing from UIManager.");
     }
 
     public void OnPause()

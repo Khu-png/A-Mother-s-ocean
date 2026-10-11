@@ -1,12 +1,29 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class Mainmenu : UICanvas
 {
     public const string CoinsKey = "Coins";
     [SerializeField] private TMP_Text currentLevelText;
     [SerializeField] private TMP_Text coinAmountText;
+    [SerializeField] private VideoPlayer backgroundVideo;
+    [SerializeField] private RawImage videoImage;
+    [SerializeField] private Texture backgroundFallback;
     private string levelTextTemplate;
+    public VideoPlayer BackgroundVideo => backgroundVideo;
+
+    public void ShowBackgroundFallback()
+    {
+        if (videoImage != null) videoImage.texture = backgroundFallback;
+    }
+
+    public void ShowVideoBackground()
+    {
+        if (videoImage != null && backgroundVideo != null)
+            videoImage.texture = backgroundVideo.targetTexture;
+    }
 
     private void OnEnable()
     {
