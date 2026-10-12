@@ -13,6 +13,14 @@ public class LevelManager : Singleton<LevelManager>
     public bool HasPlayerMoved { get; private set; }
     public event System.Action PlayerMoved;
 
+    void Awake()
+    {
+        RegisterSingleton(this);
+        currentLevelIndex = levels != null && levels.Length > 0
+            ? Mathf.Clamp(SavedLevelNumber - 1, 0, levels.Length - 1)
+            : 0;
+    }
+
     public void NotifyPlayerMoved()
     {
         if (HasPlayerMoved) return;
@@ -23,18 +31,6 @@ public class LevelManager : Singleton<LevelManager>
     public void FitGameplayBackground(SpriteRenderer background)
     {
         if (cameraController != null) cameraController.FitBackground(background);
-    }
-
-    private void Awake()
-    {
-        RegisterSingleton(this);
-        currentLevelIndex = levels != null && levels.Length > 0
-            ? Mathf.Clamp(SavedLevelNumber - 1, 0, levels.Length - 1)
-            : 0;
-    }
-
-    private void Start()
-    {
     }
 
     public void OnInit()
@@ -78,7 +74,7 @@ public class LevelManager : Singleton<LevelManager>
         int nextLevel = currentLevelIndex + 1;
         if (!HasLevelData(nextLevel))
         {
-            Debug.LogError("không có level tiếp theo");
+            GameDiagnostics.LogError("không có level tiếp theo");
             throw new UnityException("không có level tiếp theo");
         }
 
@@ -99,7 +95,7 @@ public class LevelManager : Singleton<LevelManager>
         int nextLevel = SavedLevelNumber - 1;
         if (!HasLevelData(nextLevel))
         {
-            Debug.LogError("không có level tiếp theo");
+            GameDiagnostics.LogError("không có level tiếp theo");
             throw new UnityException("không có level tiếp theo");
         }
 

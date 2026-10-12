@@ -5,11 +5,11 @@ public static class GridVisual
     private static Sprite squareSprite;
     private static Sprite circleSprite;
 
-    public static void BuildGrid(Transform parent, int width, int height, float cellSize, float lineWidth, Color color)
+    public static void BuildGrid(Transform parent, int width, int height, float cellSize, float lineWidth, Color color, Material lineMaterial)
     {
+        if (lineMaterial == null) throw new System.InvalidOperationException("Assign Grid Material on the GridMap prefab.");
         Transform gridRoot = new GameObject("Grid").transform;
         gridRoot.SetParent(parent);
-        Material lineMaterial = new Material(Shader.Find("Sprites/Default"));
         float left = -width * cellSize * 0.5f;
         float right = width * cellSize * 0.5f;
         float bottom = -height * cellSize * 0.5f;
@@ -18,13 +18,13 @@ public static class GridVisual
         for (int x = 0; x <= width; x++)
         {
             float worldX = left + x * cellSize;
-            CreateLine(gridRoot, $"Vertical {x}", new Vector3(worldX, bottom, 0f), new Vector3(worldX, top, 0f), lineMaterial, lineWidth, color);
+            CreateLine(gridRoot, $"Vertical{x}", new Vector3(worldX, bottom, 0f), new Vector3(worldX, top, 0f), lineMaterial, lineWidth, color);
         }
 
         for (int y = 0; y <= height; y++)
         {
             float worldY = bottom + y * cellSize;
-            CreateLine(gridRoot, $"Horizontal {y}", new Vector3(left, worldY, 0f), new Vector3(right, worldY, 0f), lineMaterial, lineWidth, color);
+            CreateLine(gridRoot, $"Horizontal{y}", new Vector3(left, worldY, 0f), new Vector3(right, worldY, 0f), lineMaterial, lineWidth, color);
         }
     }
 
@@ -50,8 +50,8 @@ public static class GridVisual
         {
             for (int x = 0; x < textureSize; x++)
             {
-                float distance = Vector2.Distance(new Vector2(x, y), center);
-                texture.SetPixel(x, y, distance <= radius ? Color.white : Color.clear);
+                float squaredDistance = (new Vector2(x, y) - center).sqrMagnitude;
+                texture.SetPixel(x, y, squaredDistance <= radius * radius ? Color.white : Color.clear);
             }
         }
 
@@ -66,7 +66,7 @@ public static class GridVisual
         line.transform.SetParent(parent);
         line.positionCount = 2;
         line.useWorldSpace = false;
-        line.material = material;
+        line.sharedMaterial = material;
         line.startColor = color;
         line.endColor = color;
         line.startWidth = lineWidth;

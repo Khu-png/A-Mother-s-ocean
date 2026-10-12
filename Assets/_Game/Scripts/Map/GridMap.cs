@@ -7,6 +7,7 @@ public partial class GridMap : MonoBehaviour
     [SerializeField] private float cellSize = 1f;
     [SerializeField] private float lineWidth = 0.06f;
     [SerializeField] private Color gridColor = new Color(0.15f, 0.55f, 0.7f, 0.7f);
+    [SerializeField] private Material gridMaterial;
     [SerializeField] private Color pathColor = new Color(0.12f, 0.8f, 0.95f, 0.28f);
 
     [Header("Layout")]
@@ -33,6 +34,7 @@ public partial class GridMap : MonoBehaviour
     private Player player;
     private FinishPoint finishPoint;
     private PathTrail pathTrail;
+    private Transform runtimeRoot;
     private Vector2Int startCell;
     private Vector2Int finishCell;
     private Vector2Int playerCell;
@@ -44,7 +46,7 @@ public partial class GridMap : MonoBehaviour
     private readonly List<Vector2Int> currentRoute = new List<Vector2Int>();
     private readonly GridInputReader inputReader = new GridInputReader();
 
-    private void Update()
+    void Update()
     {
         ReadMoveInput();
     }
@@ -70,33 +72,6 @@ public partial class GridMap : MonoBehaviour
         FitCamera();
     }
 
-    private void NormalizeSettings()
-    {
-        prefabs = prefabs ?? new MapPrefabSet();
-        cellSize = Mathf.Max(0.1f, cellSize);
-        lineWidth = Mathf.Max(0.01f, lineWidth);
-        height = Mathf.Max(1, mapRows.Length);
-        width = 1;
-        for (int i = 0; i < mapRows.Length; i++) width = Mathf.Max(width, mapRows[i].Length);
-    }
-
-    private void BuildMapTiles()
-    {
-        Transform tileRoot = new GameObject("Map Tiles").transform;
-        tileRoot.SetParent(transform);
-
-        for (int row = 0; row < height; row++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                int y = height - 1 - row;
-                char code = CellCode(row, x);
-                Vector2Int cell = new Vector2Int(x, y);
-                BuildTile(tileRoot, cell, code);
-            }
-        }
-    }
-
     private void BuildTile(Transform root, Vector2Int cell, char code)
     {
         BlockTile block;
@@ -116,27 +91,28 @@ public partial class GridMap : MonoBehaviour
     private void BuildStart(Vector2Int cell)
     {
         startCell = cell;
-        StartPoint point = prefabs.CreateStart(transform);
+        StartPoint point = prefabs.CreateStart(runtimeRoot);
         point.Setup(cell, CellToWorld(cell), cellSize, GridVisual.SquareSprite(), Color.white);
     }
 
     private void BuildFinish(Vector2Int cell)
     {
         finishCell = cell;
-        finishPoint = prefabs.CreateFinish(transform);
+        finishPoint = prefabs.CreateFinish(runtimeRoot);
         finishPoint.Setup(cell, CellToWorld(cell), cellSize, GridVisual.SquareSprite(), Color.white, Color.white);
     }
 
     private void BuildTarget(Vector2Int cell)
     {
-        TargetPoint target = prefabs.CreateTarget(transform, cell);
+        TargetPoint target = prefabs.CreateTarget(runtimeRoot, cell);
         target.Setup(cell, CellToWorld(cell), cellSize, TargetSprite(), targetSprite != null ? Color.white : Color.yellow);
         targets.Add(cell, target);
     }
 
     private void BuildPlayer()
     {
-        player = playerPrefab != null ? Instantiate(playerPrefab, transform) : new GameObject("Player").AddComponent<Player>();
+        player = playerPrefab != null ? Instantiate(playerPrefab, runtimeRoot) : new GameObject("Player").AddComponent<Player>();
+        player.transform.SetParent(runtimeRoot, true);
         playerCell = startCell;
         player.SetCell(playerCell, CellToWorld(playerCell), cellSize);
         currentRoute.Clear();
@@ -179,10 +155,10 @@ public partial class GridMap : MonoBehaviour
         playerCell = nextCell;
         MarkCurrentCell();
         player.MoveTo(playerCell, CellToWorld(playerCell));
-        SoundManager.Ins.PlaySound("Move");
+        SoundManager.Ins.PlaySound(GameConstants.MOVE_SOUND);
         LevelManager.Ins.NotifyPlayerMoved();
         if (!isBacktracking && rotateButtons.ContainsKey(playerCell)) ActivateRotateButton();
-        if (rotatesTiles) SoundManager.Ins.PlaySound("Rotate");
+        if (rotatesTiles) SoundManager.Ins.PlaySound(GameConstants.ROTATE_SOUND);
         RefreshFinish();
     }
 
@@ -198,9 +174,16 @@ public partial class GridMap : MonoBehaviour
         return !oneWayPaths.ContainsKey(cell) || oneWayPaths[cell].Allows(direction);
     }
 
-    private void RotateOneWayTiles() { foreach (OneWayPath path in oneWayPaths.Values) path.ToggleState(); }
+    private void RotateOneWayTiles()
+    {
+        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleState();
+    }
 
-    private void ActivateRotateButton() { RotateOneWayTiles(); rotateButtons[playerCell].Pulse(); }
+    private void ActivateRotateButton()
+    {
+        RotateOneWayTiles();
+        rotateButtons[playerCell].Pulse();
+    }
 
     private void ResetOneWayPaths()
     {
@@ -223,7 +206,10 @@ public partial class GridMap : MonoBehaviour
         if (targets.ContainsKey(cell)) targets[cell].ResetTarget();
     }
 
-    private void RevertOneWayTiles() { foreach (OneWayPath path in oneWayPaths.Values) path.ToggleBack(); }
+    private void RevertOneWayTiles()
+    {
+        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleBack();
+    }
 
     private void RefreshFinish()
     {

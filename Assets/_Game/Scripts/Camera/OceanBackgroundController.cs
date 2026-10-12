@@ -10,15 +10,23 @@ public class OceanBackgroundController : MonoBehaviour
     [SerializeField] private float breathingScale = 0.018f;
 
     private Vector3 baseScale;
+    private Transform cachedTransform;
+    private Transform cameraTransform;
 
-    private void Start()
+    void Awake()
+    {
+        cachedTransform = transform;
+        if (targetCamera != null) cameraTransform = targetCamera.transform;
+    }
+
+    void Start()
     {
         FitToCamera();
     }
 
-    private void LateUpdate()
+    void LateUpdate()
     {
-        if (targetCamera == null || spriteRenderer == null)
+        if (targetCamera == null || cameraTransform == null || spriteRenderer == null)
         {
             return;
         }
@@ -31,9 +39,9 @@ public class OceanBackgroundController : MonoBehaviour
             Mathf.Cos(wave * 0.73f) * driftAmount,
             0f);
 
-        Vector3 cameraPosition = targetCamera.transform.position;
-        transform.position = new Vector3(cameraPosition.x, cameraPosition.y, transform.position.z) + drift;
-        transform.localScale = baseScale * (1f + Mathf.Sin(wave * 1.7f) * breathingScale);
+        Vector3 cameraPosition = cameraTransform.position;
+        cachedTransform.position = new Vector3(cameraPosition.x, cameraPosition.y, cachedTransform.position.z) + drift;
+        cachedTransform.localScale = baseScale * (1f + Mathf.Sin(wave * 1.7f) * breathingScale);
     }
 
     private void FitToCamera()

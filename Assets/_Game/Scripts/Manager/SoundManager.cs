@@ -17,8 +17,8 @@ public class SoundManager : Singleton<SoundManager>
         public AudioClip clip;
     }
 
-    private const string MusicKey = "MusicEnabled";
-    private const string SoundKey = "SoundEnabled";
+    private const string MUSIC_KEY = "MusicEnabled";
+    private const string SOUND_KEY = "SoundEnabled";
 
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource soundSource;
@@ -31,17 +31,23 @@ public class SoundManager : Singleton<SoundManager>
     private bool isMusicEnabled = true;
     private bool isSoundEnabled = true;
     private bool isLoaded;
+    private bool isMusicSuspended;
 
     public bool IsMusicEnabled => isMusicEnabled;
     public bool IsSoundEnabled => isSoundEnabled;
 
-    private void Awake()
+    void Awake()
     {
         RegisterSingleton(this);
 
         LoadSettings();
         BuildClipLookup();
         isLoaded = true;
+    }
+
+    void OnValidate()
+    {
+        BuildClipLookup();
     }
 
     public void PlayMusic(string id)
@@ -51,7 +57,18 @@ public class SoundManager : Singleton<SoundManager>
         if (musicSource.clip == clip && musicSource.isPlaying) return;
 
         musicSource.clip = clip;
-        if (isMusicEnabled) musicSource.Play();
+        if (isMusicEnabled && !isMusicSuspended) musicSource.Play();
+    }
+
+    public void StopMusic()
+    {
+        if (musicSource != null) musicSource.Stop();
+    }
+
+    public void SetMusicSuspended(bool suspended)
+    {
+        isMusicSuspended = suspended;
+        if (suspended) StopMusic();
     }
 
     public void PlaySound(string id)
@@ -63,7 +80,7 @@ public class SoundManager : Singleton<SoundManager>
         soundSource.PlayOneShot(clip);
     }
 
-    public void PlayButtonSound(string id = "Button")
+    public void PlayButtonSound(string id = GameConstants.BUTTON_SOUND)
     {
         if (!isLoaded || !isSoundEnabled) return;
 
@@ -78,18 +95,18 @@ public class SoundManager : Singleton<SoundManager>
     public void SetMusicEnabled(bool enabled)
     {
         isMusicEnabled = enabled;
-        PlayerPrefs.SetInt(MusicKey, enabled ? 1 : 0);
+        PlayerPrefs.SetInt(MUSIC_KEY, enabled ? 1 : 0);
         PlayerPrefs.Save();
 
         if (musicSource == null) return;
-        if (enabled && musicSource.clip != null) musicSource.Play();
+        if (enabled && !isMusicSuspended && musicSource.clip != null) musicSource.Play();
         if (!enabled) musicSource.Stop();
     }
 
     public void SetSoundEnabled(bool enabled)
     {
         isSoundEnabled = enabled;
-        PlayerPrefs.SetInt(SoundKey, enabled ? 1 : 0);
+        PlayerPrefs.SetInt(SOUND_KEY, enabled ? 1 : 0);
         PlayerPrefs.Save();
         if (!enabled && soundSource != null) soundSource.Stop();
     }
@@ -106,8 +123,8 @@ public class SoundManager : Singleton<SoundManager>
 
     private void LoadSettings()
     {
-        isMusicEnabled = PlayerPrefs.GetInt(MusicKey, 1) == 1;
-        isSoundEnabled = PlayerPrefs.GetInt(SoundKey, 1) == 1;
+        isMusicEnabled = PlayerPrefs.GetInt(MUSIC_KEY, 1) == 1;
+        isSoundEnabled = PlayerPrefs.GetInt(SOUND_KEY, 1) == 1;
     }
 
     private void BuildClipLookup()
@@ -118,18 +135,14 @@ public class SoundManager : Singleton<SoundManager>
         {
             if (string.IsNullOrWhiteSpace(entry.id)) continue;
             if (!musicLookup.TryAdd(entry.id, entry.clip))
-                Debug.LogWarning($"Music ID bị trùng: {entry.id}. Giữ clip đầu tiên.", this);
+                GameDiagnostics.LogWarning($"Music ID bị trùng: {entry.id}. Giữ clip đầu tiên.", this);
         }
         foreach (SoundEntry entry in soundEntries)
         {
             if (string.IsNullOrWhiteSpace(entry.id)) continue;
             if (!soundLookup.TryAdd(entry.id, entry.clip))
-                Debug.LogWarning($"Sound ID bị trùng: {entry.id}. Giữ clip đầu tiên.", this);
+                GameDiagnostics.LogWarning($"Sound ID bị trùng: {entry.id}. Giữ clip đầu tiên.", this);
         }
     }
 
-    private void OnValidate()
-    {
-        BuildClipLookup();
-    }
 }

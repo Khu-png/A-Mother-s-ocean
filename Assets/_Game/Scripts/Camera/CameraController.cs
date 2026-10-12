@@ -5,21 +5,35 @@ public class CameraController : MonoBehaviour
     [SerializeField] private UnityEngine.Camera targetCamera;
     [SerializeField] private bool fitCameraOnPlay = false;
     [SerializeField] private float cameraPadding = 0.45f;
+    private Transform cameraTransform;
+    private SpriteRenderer cachedBackground;
+    private Transform backgroundTransform;
+
+    void Awake()
+    {
+        if (targetCamera != null) cameraTransform = targetCamera.transform;
+    }
 
     public void FitBackground(SpriteRenderer background)
     {
         if (targetCamera == null || background == null || background.sprite == null) return;
+        if (cameraTransform == null) cameraTransform = targetCamera.transform;
+        if (cachedBackground != background)
+        {
+            cachedBackground = background;
+            backgroundTransform = background.transform;
+        }
 
         float height = targetCamera.orthographicSize * 2f;
         Vector2 spriteSize = background.sprite.bounds.size;
         float scale = Mathf.Max(height / spriteSize.y, height * targetCamera.aspect / spriteSize.x) * 1.02f;
-        Transform view = background.transform;
+        Transform view = backgroundTransform;
         Vector3 worldScale = view.lossyScale;
         if (Mathf.Abs(worldScale.x) < 0.0001f || Mathf.Abs(worldScale.y) < 0.0001f) return;
         view.localScale = new Vector3(view.localScale.x * scale / Mathf.Abs(worldScale.x),
             view.localScale.y * scale / Mathf.Abs(worldScale.y), view.localScale.z);
-        view.position = targetCamera.transform.position + targetCamera.transform.forward * 20f;
-        view.rotation = targetCamera.transform.rotation;
+        view.position = cameraTransform.position + cameraTransform.forward * 20f;
+        view.rotation = cameraTransform.rotation;
     }
 
     public void FitToGrid(int gridWidth, int gridHeight, float cellSize)

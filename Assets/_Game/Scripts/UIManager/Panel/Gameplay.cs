@@ -18,19 +18,26 @@ public class Gameplay : UICanvas
     private Color swipeStartColor;
     private float swipeTimer;
     private bool swipeInitialized;
+    private RectTransform swipeTransform;
 
-    private void LateUpdate()
+    void LateUpdate()
     {
         if (oceanBackground != null && LevelManager.Ins != null)
             LevelManager.Ins.FitGameplayBackground(oceanBackground);
         AnimateSwipeIcon();
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         levelManager = LevelManager.Ins;
         levelManager.PlayerMoved += HideTutorial;
         RefreshTutorial();
+    }
+
+    void OnDisable()
+    {
+        if (levelManager != null) levelManager.PlayerMoved -= HideTutorial;
+        ResetSwipeIcon();
     }
 
     public override void Open()
@@ -38,9 +45,9 @@ public class Gameplay : UICanvas
         base.Open();
         RefreshTutorial();
         if (tutorial == null)
-            Debug.LogWarning("Gameplay: hãy gán object Tutorial vào field Tutorial trong prefab.", this);
+            GameDiagnostics.LogWarning("Gameplay: hãy gán object Tutorial vào field Tutorial trong prefab.", this);
         if (swipeIcon == null)
-            Debug.LogWarning("Gameplay: hãy gán Image bàn tay vào field Swipe Icon trong prefab.", this);
+            GameDiagnostics.LogWarning("Gameplay: hãy gán Image bàn tay vào field Swipe Icon trong prefab.", this);
     }
 
     private void RefreshTutorial()
@@ -50,12 +57,6 @@ public class Gameplay : UICanvas
         InitializeSwipeIcon();
         if (tutorial != null)
             tutorial.SetActive(levelManager.CurrentLevelNumber == 1 && !levelManager.HasPlayerMoved);
-    }
-
-    private void OnDisable()
-    {
-        if (levelManager != null) levelManager.PlayerMoved -= HideTutorial;
-        ResetSwipeIcon();
     }
 
     private void HideTutorial()
@@ -69,7 +70,8 @@ public class Gameplay : UICanvas
         if (swipeIcon == null) return;
         if (!swipeInitialized)
         {
-            swipeStartPosition = swipeIcon.rectTransform.anchoredPosition;
+            swipeTransform = swipeIcon.rectTransform;
+            swipeStartPosition = swipeTransform.anchoredPosition;
             swipeStartColor = swipeIcon.color;
             swipeInitialized = true;
         }
@@ -87,7 +89,7 @@ public class Gameplay : UICanvas
         float cycleTime = moveTime + fadeTime + Mathf.Max(0f, repeatDelay);
         swipeTimer = (swipeTimer + Time.deltaTime) % cycleTime;
         float movement = Mathf.SmoothStep(0f, 1f, swipeTimer / moveTime);
-        swipeIcon.rectTransform.anchoredPosition = swipeStartPosition + Vector2.right * swipeDistance * movement;
+        swipeTransform.anchoredPosition = swipeStartPosition + Vector2.right * swipeDistance * movement;
         Color color = swipeStartColor;
         color.a *= 1f - Mathf.Clamp01((swipeTimer - moveTime) / fadeTime);
         swipeIcon.color = color;
@@ -97,7 +99,7 @@ public class Gameplay : UICanvas
     {
         swipeTimer = 0f;
         if (!swipeInitialized || swipeIcon == null) return;
-        swipeIcon.rectTransform.anchoredPosition = swipeStartPosition;
+        swipeTransform.anchoredPosition = swipeStartPosition;
         swipeIcon.color = swipeStartColor;
     }
 

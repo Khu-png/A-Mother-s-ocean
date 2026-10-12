@@ -6,6 +6,14 @@ using UnityEngine;
 public class GameUnit : MonoBehaviour
 {
     private Transform tf;
+    private Coroutine despawnRoutine;
+    public PoolType poolType;
+
+    void OnDisable()
+    {
+        if (despawnRoutine != null) StopCoroutine(despawnRoutine);
+        despawnRoutine = null;
+    }
     public Transform TF
     {
         get
@@ -19,15 +27,16 @@ public class GameUnit : MonoBehaviour
         }
     }
 
-    public PoolType poolType;
-
     public void OnDespawn(float delay)
     {
-        Invoke(nameof(OnDespawn), delay);
+        if (despawnRoutine != null) StopCoroutine(despawnRoutine);
+        despawnRoutine = StartCoroutine(DespawnAfterDelay(delay));
     }
 
-    private void OnDespawn()
+    private IEnumerator DespawnAfterDelay(float delay)
     {
+        yield return new WaitForSeconds(Mathf.Max(0f, delay));
+        despawnRoutine = null;
         HBPool.Despawn(this);
     }
 

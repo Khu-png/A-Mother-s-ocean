@@ -14,6 +14,12 @@ public class Mainmenu : UICanvas
     private string levelTextTemplate;
     public VideoPlayer BackgroundVideo => backgroundVideo;
 
+    void OnEnable()
+    {
+        RefreshLevel();
+        RefreshCoins();
+    }
+
     public void ShowBackgroundFallback()
     {
         if (videoImage != null) videoImage.texture = backgroundFallback;
@@ -23,12 +29,6 @@ public class Mainmenu : UICanvas
     {
         if (videoImage != null && backgroundVideo != null)
             videoImage.texture = backgroundVideo.targetTexture;
-    }
-
-    private void OnEnable()
-    {
-        RefreshLevel();
-        RefreshCoins();
     }
 
     private void RefreshLevel()
@@ -71,30 +71,30 @@ public class Mainmenu : UICanvas
     public void OnClickGift()
     {
         SoundManager.Ins.PlayButtonSound();
-        Debug.Log("Main menu gift button");
+        GameDiagnostics.Log("Main menu gift button");
     }
 
     public void OnClickShop()
     {
         SoundManager.Ins.PlayButtonSound();
-        Debug.Log("Main menu shop button");
+        GameDiagnostics.Log("Main menu shop button");
     }
 
     public void OnClickHome()
     {
         SoundManager.Ins.PlayButtonSound();
-        Debug.Log("Main menu home button");
+        GameDiagnostics.Log("Main menu home button");
     }
 
     public void OnClickSkin()
     {
         SoundManager.Ins.PlayButtonSound();
-        Debug.Log("Main menu skin button");
+        GameDiagnostics.Log("Main menu skin button");
     }
 
     public void OnClickTank()
     {
         SoundManager.Ins.PlayButtonSound();
-        Debug.Log("Main menu tank button");
+        GameDiagnostics.Log("Main menu tank button");
     }
 }

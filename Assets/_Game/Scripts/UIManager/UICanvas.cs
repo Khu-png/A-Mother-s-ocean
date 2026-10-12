@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,7 +19,7 @@ public class UICanvas : MonoBehaviour
     private Rect appliedSafeArea;
     private bool safeAreaAnchorsCached;
 
-    private void Start()
+    void Start()
     {
         CacheSafeAreaAnchors();
         ApplySafeArea();
@@ -27,7 +27,7 @@ public class UICanvas : MonoBehaviour
         OnInit();
     }
 
-    private void Update()
+    void Update()
     {
         if (Screen.safeArea == appliedSafeArea) return;
         ApplySafeArea();
@@ -107,7 +107,7 @@ public class UICanvas : MonoBehaviour
         if (m_Animator != null)
         {
             m_Animator.updateMode = AnimatorUpdateMode.UnscaledTime;
-            m_Animator.Play("Open", 0, 0f);
+            m_Animator.Play(GameConstants.OPEN_ANIMATION, 0, 0f);
             m_Animator.Update(0f);
         }
     }
@@ -141,7 +141,7 @@ public class UICanvas : MonoBehaviour
     private IEnumerator PlayCloseAnimation(System.Action onClosed)
     {
         if (panelGroup != null) panelGroup.interactable = false;
-        m_Animator.Play("Close", 0, 0f);
+        m_Animator.Play(GameConstants.CLOSE_ANIMATION, 0, 0f);
         m_Animator.Update(0f);
         do { yield return null; }
         while (m_Animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
@@ -160,8 +160,15 @@ public class UICanvas : MonoBehaviour
     //dong canvas sau mot khoang thoi gian delay
     public virtual void Close(float delayTime)
     {
-        Debug.Log("Close");
-        Invoke(nameof(CloseDirectly), delayTime);
+        CancelCloseAnimation();
+        closing = StartCoroutine(CloseAfterDelay(delayTime));
+    }
+
+    private IEnumerator CloseAfterDelay(float delayTime)
+    {
+        yield return new WaitForSeconds(Mathf.Max(0f, delayTime));
+        closing = null;
+        CloseDirectly();
     }
 
 

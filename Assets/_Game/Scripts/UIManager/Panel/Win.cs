@@ -6,19 +6,19 @@ public class Win : UICanvas
 
     private GameObject confettiInstance;
 
+    void OnDisable()
+    {
+        ClearConfetti();
+    }
+
     public override void Open()
     {
         base.Open();
         ClearConfetti();
         if (confettiPrefab == null) return;
 
-        confettiInstance = Instantiate(confettiPrefab, transform, false);
+        if (confettiInstance == null) confettiInstance = Instantiate(confettiPrefab, transform, false);
         confettiInstance.SetActive(true);
-    }
-
-    private void OnDisable()
-    {
-        ClearConfetti();
     }
 
     private void ClearConfetti()
@@ -26,8 +26,6 @@ public class Win : UICanvas
         if (confettiInstance == null) return;
 
         confettiInstance.SetActive(false);
-        Destroy(confettiInstance);
-        confettiInstance = null;
     }
 
     public void OnClickNext()

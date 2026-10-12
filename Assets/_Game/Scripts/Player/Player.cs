@@ -18,14 +18,14 @@ public class Player : MonoBehaviour
     public bool IsMoving { get; private set; }
     public Vector2Int CurrentCell { get; private set; }
 
-    private void Awake()
+    void Awake()
     {
         cachedTransform = transform;
         EnsureRenderer();
         moveDuration = Mathf.Max(0.01f, moveDuration);
     }
 
-    private void Update()
+    void Update()
     {
         if (GameManager.IsState(GameState.Pause)) return;
 

@@ -46,6 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellSize: 1.2
   lineWidth: 0.06
+  gridMaterial: {fileID: 2100000, guid: 2b744a2781694e6b9b1273b8f84a60e8, type: 2}
   gridColor: {r: 0.15, g: 0.55, b: 0.7, a: 0.7}
   pathColor: {r: 0.12, g: 0.8, b: 0.95, a: 0.28}
   levelData: {fileID: 0}

@@ -1,4 +1,4 @@
-﻿///
+///
 /// Create by linh soi - Abi Game studio
 /// mentor Minh tito - CTO Abi Game studio
 /// 
@@ -36,10 +36,27 @@ public class UIManager : Singleton<UIManager>
     //canvas chua dung cac canvas con, nen la mot canvas - root de chua cac canvas nay
     public Transform CanvasParentTF;
 
-    private void Awake()
+    void Awake()
     {
         RegisterSingleton(this);
         if (CanvasParentTF == null) CanvasParentTF = transform;
+    }
+
+    void LateUpdate()
+    {
+        if (LoadingManager.Ins.IsLoading) return;
+#if ENABLE_INPUT_SYSTEM
+        bool backPressed = UnityEngine.InputSystem.Keyboard.current != null
+            && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        bool backPressed = Input.GetKeyDown(KeyCode.Escape);
+#else
+        bool backPressed = false;
+#endif
+        if (backPressed && BackTopUI != null)
+        {
+            BackActionEvents[BackTopUI]?.Invoke();
+        }
     }
 
     #region Canvas
@@ -96,7 +113,7 @@ public class UIManager : Singleton<UIManager>
     //lay component cua UI hien tai
     public T GetUI<T>() where T : UICanvas
     {
-        //Debug.LogError(typeof(T));
+        //GameDiagnostics.LogError(typeof(T));
         if (!IsLoaded<T>())
         {
             T prefab = GetUIPrefab<T>();
@@ -112,7 +129,7 @@ public class UIManager : Singleton<UIManager>
     //dong tat ca UI ngay lap tuc -> tranh truong hop dang mo UI nao dong ma bi chen 2 UI cung mot luc
     public void CloseAll()
     {
-        foreach (var item in uiCanvas)
+        foreach (KeyValuePair<System.Type, UICanvas> item in uiCanvas)
         {
             if (item.Value != null && item.Value.gameObject.activeInHierarchy)
             {
@@ -172,23 +189,6 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-
-    private void LateUpdate()
-    {
-        if (LoadingManager.Ins.IsLoading) return;
-#if ENABLE_INPUT_SYSTEM
-        bool backPressed = UnityEngine.InputSystem.Keyboard.current != null
-            && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-        bool backPressed = Input.GetKeyDown(KeyCode.Escape);
-#else
-        bool backPressed = false;
-#endif
-        if (backPressed && BackTopUI != null)
-        {
-            BackActionEvents[BackTopUI]?.Invoke();
-        }
-    }
 
     public void PushBackAction(UICanvas canvas, UnityAction action)
     {

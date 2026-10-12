@@ -3,60 +3,66 @@ using UnityEngine;
 
 public class PathTrail
 {
-    private readonly Transform parent;
-    private readonly float cellSize;
-    private readonly Color color;
-    private readonly Dictionary<Vector2Int, SpriteRenderer> marks = new Dictionary<Vector2Int, SpriteRenderer>();
-    private Transform root;
+    private readonly Transform ROOT;
+    private readonly float CELL_SIZE;
+    private readonly Color COLOR;
+    private readonly Dictionary<Vector2Int, PathMarkFeedback> MARKS = new Dictionary<Vector2Int, PathMarkFeedback>();
+    private readonly Stack<PathMarkFeedback> AVAILABLE_MARKS = new Stack<PathMarkFeedback>();
 
-    public PathTrail(Transform setupParent, float setupCellSize, Color setupColor)
+    public PathTrail(Transform setupParent, float setupCellSize, Color setupColor, int capacity)
     {
-        parent = setupParent;
-        cellSize = setupCellSize;
-        color = setupColor;
+        ROOT = new GameObject("PathMarks").transform;
+        ROOT.SetParent(setupParent, false);
+        CELL_SIZE = setupCellSize;
+        COLOR = setupColor;
+        // A route can visit each grid cell once; prewarm outside movement callbacks.
+        for (int index = 0; index < capacity; index++) AVAILABLE_MARKS.Push(CreateMark());
     }
 
     public bool HasMark(Vector2Int cell)
     {
-        return marks.ContainsKey(cell);
+        return MARKS.ContainsKey(cell);
     }
 
     public void Mark(Vector2Int cell, Vector3 worldPosition)
     {
-        if (marks.ContainsKey(cell)) return;
-        if (root == null)
-        {
-            root = new GameObject("Path Marks").transform;
-            root.SetParent(parent);
-        }
-
-        SpriteRenderer mark = new GameObject($"Path {cell.x} {cell.y}").AddComponent<SpriteRenderer>();
-        mark.transform.SetParent(root);
-        mark.transform.position = worldPosition;
-        Vector3 scale = Vector3.one * (cellSize * 0.72f);
-        mark.transform.localScale = scale;
-        mark.sprite = GridVisual.SquareSprite();
-        mark.color = color;
-        mark.sortingOrder = 1;
-        mark.gameObject.AddComponent<PathMarkFeedback>().Setup(mark, color, scale);
-        marks.Add(cell, mark);
+        if (MARKS.ContainsKey(cell) || AVAILABLE_MARKS.Count == 0) return;
+        PathMarkFeedback mark = AVAILABLE_MARKS.Pop();
+        mark.Restart(worldPosition);
+        mark.gameObject.SetActive(true);
+        MARKS.Add(cell, mark);
     }
 
     public void Remove(Vector2Int cell)
     {
-        if (!marks.ContainsKey(cell)) return;
-        SpriteRenderer mark = marks[cell];
-        if (mark != null) Object.Destroy(mark.gameObject);
-        marks.Remove(cell);
+        if (!MARKS.ContainsKey(cell)) return;
+        ReturnMark(MARKS[cell]);
+        MARKS.Remove(cell);
     }
 
     public void Clear()
     {
-        foreach (SpriteRenderer mark in marks.Values)
-        {
-            if (mark != null) Object.Destroy(mark.gameObject);
-        }
+        foreach (PathMarkFeedback mark in MARKS.Values) ReturnMark(mark);
+        MARKS.Clear();
+    }
 
-        marks.Clear();
+    private PathMarkFeedback CreateMark()
+    {
+        GameObject view = new GameObject("PathMark");
+        view.transform.SetParent(ROOT, false);
+        SpriteRenderer renderer = view.AddComponent<SpriteRenderer>();
+        renderer.sprite = GridVisual.SquareSprite();
+        renderer.color = COLOR;
+        renderer.sortingOrder = 1;
+        PathMarkFeedback feedback = view.AddComponent<PathMarkFeedback>();
+        feedback.Setup(renderer, COLOR, Vector3.one * (CELL_SIZE * 0.72f));
+        view.SetActive(false);
+        return feedback;
+    }
+
+    private void ReturnMark(PathMarkFeedback mark)
+    {
+        mark.gameObject.SetActive(false);
+        AVAILABLE_MARKS.Push(mark);
     }
 }

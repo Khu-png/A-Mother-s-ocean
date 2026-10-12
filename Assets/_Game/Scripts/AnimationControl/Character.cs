@@ -9,7 +9,7 @@ namespace ChangeAnim
         [SerializeField] Animator anim;
         private string animName;
 
-        private void Start()
+        void Start()
         {
             ChangeAnim(Constants.ANIM_IDLE);
         }
@@ -18,7 +18,7 @@ namespace ChangeAnim
         {
             if (this.animName != animName)
             {
-                anim.ResetTrigger(this.animName);
+                if (!string.IsNullOrEmpty(this.animName)) anim.ResetTrigger(this.animName);
                 this.animName = animName;
                 anim.SetTrigger(this.animName);
             }

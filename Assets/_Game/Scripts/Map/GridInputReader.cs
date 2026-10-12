@@ -41,15 +41,15 @@ public class GridInputReader
         if (screen != null)
         {
             int fingers = 0;
-            foreach (var finger in screen.touches)
-                if (finger.press.isPressed) fingers++;
+            for (int index = 0; index < screen.touches.Count; index++)
+                if (screen.touches[index].press.isPressed) fingers++;
             if (fingers > 1)
             {
                 Reset();
                 return Vector2Int.zero;
             }
 
-            var touch = screen.primaryTouch;
+            UnityEngine.InputSystem.Controls.TouchControl touch = screen.primaryTouch;
             if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Canceled)
             {
                 Reset();
@@ -89,7 +89,7 @@ public class GridInputReader
         Reset();
         if (!wasTracking || IsOverUI(position)) return Vector2Int.zero;
         float threshold = Mathf.Clamp(Mathf.Min(Screen.width, Screen.height) * 0.04f, 20f, 80f);
-        if (delta.magnitude < threshold) return Vector2Int.zero;
+        if (delta.sqrMagnitude < threshold * threshold) return Vector2Int.zero;
         if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
             return delta.x > 0f ? Vector2Int.right : Vector2Int.left;
         return delta.y > 0f ? Vector2Int.up : Vector2Int.down;
@@ -101,8 +101,8 @@ public class GridInputReader
         if (events == null) return false;
         uiHits.Clear();
         events.RaycastAll(new PointerEventData(events) { position = position }, uiHits);
-        foreach (RaycastResult hit in uiHits)
-            if (hit.module is GraphicRaycaster) return true;
+        for (int index = 0; index < uiHits.Count; index++)
+            if (uiHits[index].module is GraphicRaycaster) return true;
         return false;
     }
 

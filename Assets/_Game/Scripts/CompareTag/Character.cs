@@ -6,7 +6,7 @@ namespace CompareTagName
 {
     public class Character : MonoBehaviour
     {
-        private void OnTriggerEnter(Collider other)
+        void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag(Constants.TAG_BRICK))
             {

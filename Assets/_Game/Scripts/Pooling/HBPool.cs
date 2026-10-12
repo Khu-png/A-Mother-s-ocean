@@ -96,7 +96,7 @@ public static class HBPool
 
     public static void CollectAll()
     {
-        foreach (var pool in poolInstance)
+        foreach (KeyValuePair<PoolType, Pool> pool in poolInstance)
         {
             pool.Value.Collect();
         }

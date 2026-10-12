@@ -7,22 +7,22 @@ public class GameManager : Singleton<GameManager>
     private static GameState gameState;
     private static float resumeTimeScale = 1f;
 
-    private void Awake()
+    void Awake()
     {
         RegisterSingleton(this);
 #if ENABLE_LEGACY_INPUT_MANAGER
         Input.multiTouchEnabled = false;
 #endif
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = GameConstants.TARGET_FRAME_RATE;
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
-    private void Start()
+    void Start()
     {
         OnInit();
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
         if (IsState(GameState.Pause)) Time.timeScale = resumeTimeScale;
     }
@@ -45,8 +45,7 @@ public class GameManager : Singleton<GameManager>
     private static void PlayStateMusic(GameState state)
     {
         if (SoundManager.Ins == null) return;
-        if (state == GameState.MainMenu) SoundManager.Ins.PlayMusic("Menu");
-        else if (state == GameState.Gameplay) SoundManager.Ins.PlayMusic("Gameplay");
+        if (state == GameState.Gameplay) SoundManager.Ins.PlayMusic(GameConstants.GAMEPLAY_MUSIC);
     }
 
     public static bool IsState(GameState state) => gameState == state;
@@ -88,7 +87,7 @@ public class GameManager : Singleton<GameManager>
     {
         if (IsState(GameState.Win)) return;
         ChangeState(GameState.Win);
-        SoundManager.Ins.PlaySound("Win");
+        SoundManager.Ins.PlaySound(GameConstants.WIN_SOUND);
         UIManager.Ins.OpenUI<Win>();
     }
 }

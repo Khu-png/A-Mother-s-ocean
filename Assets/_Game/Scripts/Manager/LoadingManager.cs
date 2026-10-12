@@ -20,11 +20,20 @@ public class LoadingManager : Singleton<LoadingManager>
     public bool IsLoading { get; private set; }
     public float Progress { get; private set; }
 
-    private void Awake()
+    void Awake()
     {
         RegisterSingleton(this);
         if (loadingCanvas != null) loadingCanvas.SetActive(true);
         SetProgress(0f);
+    }
+
+    void OnDisable()
+    {
+        if (loadingRoutine != null) StopCoroutine(loadingRoutine);
+        ReleaseVideoEvents();
+        menuVideo = null;
+        loadingRoutine = null;
+        IsLoading = false;
     }
 
     public void LoadMainMenu()
@@ -44,10 +53,11 @@ public class LoadingManager : Singleton<LoadingManager>
         if (IsLoading) return false;
         if (loadingCanvas == null || progressSlider == null)
         {
-            Debug.LogError("LoadingManager requires a loading canvas and progress slider.", this);
+            GameDiagnostics.LogError("LoadingManager requires a loading canvas and progress slider.", this);
             return false;
         }
         IsLoading = true;
+        if (SoundManager.Ins != null) SoundManager.Ins.SetMusicSuspended(true);
         loadingCanvas.SetActive(true);
         progressSlider.interactable = false;
         SetProgress(0f);
@@ -66,7 +76,7 @@ public class LoadingManager : Singleton<LoadingManager>
         // Allow Start/LateUpdate and canvas layout to finish behind the cover.
         yield return null;
         yield return null;
-        yield return FinishLoading();
+        yield return FinishLoading(GameConstants.GAMEPLAY_MUSIC);
     }
 
     private bool PrepareGameplay(int levelIndex, bool openUI)
@@ -83,7 +93,7 @@ public class LoadingManager : Singleton<LoadingManager>
         }
         catch (System.Exception exception)
         {
-            Debug.LogException(exception, this);
+            GameDiagnostics.LogException(exception, this);
             loadingRoutine = null;
             IsLoading = false;
             LoadMainMenu();
@@ -103,23 +113,26 @@ public class LoadingManager : Singleton<LoadingManager>
         Mainmenu menu = UIManager.Ins.OpenUI<Mainmenu>();
         if (menu == null)
         {
-            Debug.LogError("Mainmenu prefab is missing from UIManager.", this);
+            GameDiagnostics.LogError("Mainmenu prefab is missing from UIManager.", this);
             IsLoading = false;
             loadingRoutine = null;
             yield break;
         }
         yield return MoveProgress(0.45f);
         yield return PrepareVideo(menu);
-        yield return FinishLoading();
+        yield return FinishLoading(GameConstants.MENU_MUSIC);
     }
 
-    private IEnumerator FinishLoading()
+    private IEnumerator FinishLoading(string musicId)
     {
         yield return MoveProgress(1f);
         yield return new WaitForSecondsRealtime(0.15f);
         loadingCanvas.SetActive(false);
         IsLoading = false;
         loadingRoutine = null;
+        if (SoundManager.Ins == null) yield break;
+        SoundManager.Ins.SetMusicSuspended(false);
+        SoundManager.Ins.PlayMusic(musicId);
     }
 
     private IEnumerator PrepareVideo(Mainmenu menu)
@@ -130,6 +143,23 @@ public class LoadingManager : Singleton<LoadingManager>
             yield return MoveProgress(0.95f);
             yield break;
         }
+        BeginVideoPreparation();
+        yield return WaitForVideo(false, 0.78f);
+        if (!videoFailed)
+        {
+            yield return MoveProgress(0.8f);
+            menuVideo.Play();
+            yield return WaitForVideo(true, 0.93f);
+        }
+        ReleaseVideoEvents();
+        ShowVideoResult(menu);
+        if (!videoFailed) yield return new WaitForSecondsRealtime(videoWarmupTime);
+        menuVideo = null;
+        yield return MoveProgress(0.95f);
+    }
+
+    private void BeginVideoPreparation()
+    {
         firstFrameReady = false;
         videoFailed = false;
         menuVideo.errorReceived += OnVideoError;
@@ -137,40 +167,36 @@ public class LoadingManager : Singleton<LoadingManager>
         menuVideo.sendFrameReadyEvents = true;
         menuVideo.Stop();
         menuVideo.Prepare();
+    }
 
+    private IEnumerator WaitForVideo(bool waitForFrame, float progressTarget)
+    {
         float deadline = Time.realtimeSinceStartup + videoTimeout;
-        while (!menuVideo.isPrepared && !videoFailed && Time.realtimeSinceStartup < deadline)
+        while (!IsVideoReady(waitForFrame) && !videoFailed && Time.realtimeSinceStartup < deadline)
         {
-            AdvanceProgress(0.78f);
+            AdvanceProgress(progressTarget);
             yield return null;
         }
-        if (!menuVideo.isPrepared) videoFailed = true;
-        if (!videoFailed)
-        {
-            yield return MoveProgress(0.8f);
-            menuVideo.Play();
-            deadline = Time.realtimeSinceStartup + videoTimeout;
-            while (!firstFrameReady && !videoFailed && Time.realtimeSinceStartup < deadline)
-            {
-                AdvanceProgress(0.93f);
-                yield return null;
-            }
-            if (!firstFrameReady) videoFailed = true;
-        }
-        ReleaseVideoEvents();
+        if (!IsVideoReady(waitForFrame)) videoFailed = true;
+    }
+
+    private bool IsVideoReady(bool waitForFrame)
+    {
+        return waitForFrame ? firstFrameReady : menuVideo.isPrepared;
+    }
+
+    private void ShowVideoResult(Mainmenu menu)
+    {
         if (videoFailed)
         {
             menuVideo.Stop();
             menu.ShowBackgroundFallback();
-            Debug.LogWarning("Menu video could not start; showing the static background.", menu);
+            GameDiagnostics.LogWarning("Menu video could not start; showing the static background.", menu);
         }
         else
         {
             menu.ShowVideoBackground();
-            yield return new WaitForSecondsRealtime(videoWarmupTime);
         }
-        menuVideo = null;
-        yield return MoveProgress(0.95f);
     }
 
     private IEnumerator MoveProgress(float target)
@@ -199,7 +225,7 @@ public class LoadingManager : Singleton<LoadingManager>
     private void OnVideoError(VideoPlayer source, string message)
     {
         videoFailed = true;
-        Debug.LogWarning($"Menu video: {message}", source);
+        GameDiagnostics.LogWarning($"Menu video: {message}", source);
     }
 
     private void ReleaseVideoEvents()
@@ -210,12 +236,4 @@ public class LoadingManager : Singleton<LoadingManager>
         menuVideo.sendFrameReadyEvents = false;
     }
 
-    private void OnDisable()
-    {
-        if (loadingRoutine != null) StopCoroutine(loadingRoutine);
-        ReleaseVideoEvents();
-        menuVideo = null;
-        loadingRoutine = null;
-        IsLoading = false;
-    }
 }

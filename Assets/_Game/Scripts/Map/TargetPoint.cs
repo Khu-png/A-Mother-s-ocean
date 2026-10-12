@@ -10,29 +10,36 @@ public class TargetPoint : MonoBehaviour
     private Vector3 basePosition;
     private Vector3 baseScale;
     private float timeOffset;
+    private Transform cachedTransform;
     public bool IsCollected { get; private set; }
     public Vector2Int Cell => cell;
 
-    private void Update()
+    void Awake()
+    {
+        cachedTransform = transform;
+    }
+
+    void Update()
     {
         float wave = Mathf.Sin(Time.time * bobSpeed + timeOffset);
-        transform.position = basePosition + Vector3.up * (wave * bobHeight);
-        transform.localScale = baseScale * (1f + wave * 0.045f);
+        cachedTransform.position = basePosition + Vector3.up * (wave * bobHeight);
+        cachedTransform.localScale = baseScale * (1f + wave * 0.045f);
     }
 
     public void Setup(Vector2Int setupCell, Vector3 worldPosition, float cellSize, Sprite sprite, Color color)
     {
         cell = setupCell;
+        cachedTransform = transform;
         basePosition = worldPosition;
         timeOffset = (cell.x * 0.73f + cell.y * 1.31f) % Mathf.PI;
-        transform.position = basePosition;
+        cachedTransform.position = basePosition;
 
         spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = sprite;
         spriteRenderer.color = color;
         spriteRenderer.sortingOrder = 3;
-        baseScale = transform.localScale;
-        transform.localScale = baseScale;
+        baseScale = cachedTransform.localScale;
+        cachedTransform.localScale = baseScale;
         ResetTarget();
     }
 
@@ -40,7 +47,7 @@ public class TargetPoint : MonoBehaviour
     {
         if (IsCollected) return;
         IsCollected = true;
-        SoundManager.Ins.PlaySound("Collect");
+        SoundManager.Ins.PlaySound(GameConstants.COLLECT_SOUND);
         gameObject.SetActive(false);
     }
 
@@ -48,8 +55,8 @@ public class TargetPoint : MonoBehaviour
     {
         IsCollected = false;
         gameObject.SetActive(true);
-        transform.position = basePosition;
-        transform.localScale = baseScale;
+        cachedTransform.position = basePosition;
+        cachedTransform.localScale = baseScale;
     }
 
 }

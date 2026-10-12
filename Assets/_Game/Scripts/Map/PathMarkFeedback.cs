@@ -6,23 +6,40 @@ public class PathMarkFeedback : MonoBehaviour
     private Color baseColor;
     private Vector3 baseScale;
     private float timer;
+    private Transform cachedTransform;
+
+    void Awake()
+    {
+        cachedTransform = transform;
+    }
+
+    void Update()
+    {
+        timer = Mathf.Min(1f, timer + Time.deltaTime * 8f);
+        float ease = timer * timer * (3f - 2f * timer);
+        cachedTransform.localScale = Vector3.Lerp(baseScale * 0.25f, baseScale, ease);
+        if (spriteRenderer == null) return;
+        Color color = baseColor;
+        color.a = baseColor.a * ease;
+        spriteRenderer.color = color;
+    }
 
     public void Setup(SpriteRenderer renderer, Color color, Vector3 scale)
     {
         spriteRenderer = renderer;
         baseColor = color;
         baseScale = scale;
-        transform.localScale = baseScale * 0.25f;
+        cachedTransform = transform;
+        cachedTransform.localScale = baseScale * 0.25f;
     }
 
-    private void Update()
+    public void Restart(Vector3 worldPosition)
     {
-        timer = Mathf.Min(1f, timer + Time.deltaTime * 8f);
-        float ease = timer * timer * (3f - 2f * timer);
-        transform.localScale = Vector3.Lerp(baseScale * 0.25f, baseScale, ease);
-        if (spriteRenderer == null) return;
+        timer = 0f;
+        cachedTransform.position = worldPosition;
+        cachedTransform.localScale = baseScale * 0.25f;
         Color color = baseColor;
-        color.a = baseColor.a * ease;
+        color.a = 0f;
         spriteRenderer.color = color;
     }
 }
