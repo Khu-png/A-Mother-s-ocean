@@ -113,7 +113,7 @@ namespace AssetKits.ParticleImage.Editor
                         EditorUtility.DisplayProgressBar("Finding particle references in the project", assetFilePath, (float)i / assetGUIDs.Length);
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // ignored
                 }
@@ -135,7 +135,7 @@ namespace AssetKits.ParticleImage.Editor
                     File.WriteAllText(_assets[i].Path, assetFile);
                     _assets[i].Solved = true;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // ignored
                 }

@@ -25,6 +25,12 @@ specific topics below; they do not replace the rest of the PDF standard:
 - Assigning an explicit transform parent or supplied material is different from
   retrieving it. Ordinary gameObject access and typed registry lookups are not
   scene searches. Inspect the operation rather than banning words in identifiers.
+- Never add defensive null checks, silent early returns, fallback object creation,
+  or similar guards merely to patch over missing references, invalid ownership,
+  incorrect initialization order, or another structural defect. Fix the source
+  of the invalid state and make required dependencies explicit. Keep a null check
+  only when null is an intentional, documented state in the feature design or an
+  external API contract requires handling it.
 
 Use these rules for new code and code touched by the requested task. Preserve
 Unity serialization, Inspector references, prefab links, and gameplay behavior.

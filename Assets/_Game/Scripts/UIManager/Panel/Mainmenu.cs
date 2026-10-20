@@ -1,49 +1,69 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-public class Mainmenu : UICanvas
+public sealed class Mainmenu : UICanvas
 {
-    public const string CoinsKey = "Coins";
+    private enum BackgroundMode
+    {
+        StaticImage,
+        Video
+    }
+
+    [Header("Menu")]
+    [SerializeField] private MenuCatalog catalog;
+    [SerializeField] private MenuNavigationController navigation;
+    [SerializeField] private MenuGiftPage giftPage;
+    [SerializeField] private MenuShopPage shopPage;
+    [SerializeField] private MenuSkinPage skinPage;
     [SerializeField] private TMP_Text currentLevelText;
     [SerializeField] private TMP_Text coinAmountText;
+    [SerializeField] private Button playButton;
+    [SerializeField] private Button settingsButton;
+
+    [Header("Optional Video Background")]
+    [SerializeField] private BackgroundMode backgroundMode;
     [SerializeField] private VideoPlayer backgroundVideo;
     [SerializeField] private RawImage videoImage;
     [SerializeField] private Texture backgroundFallback;
-    private string levelTextTemplate;
-    public VideoPlayer BackgroundVideo => backgroundVideo;
+    private bool initialized;
+
+    public VideoPlayer BackgroundVideo => backgroundMode == BackgroundMode.Video
+        ? backgroundVideo
+        : null;
+    public MenuTabId CurrentTab => navigation.CurrentTab;
+
+    public override void Open()
+    {
+        base.Open();
+        Refresh();
+    }
 
     void OnEnable()
     {
-        RefreshLevel();
-        RefreshCoins();
+        if (!initialized) Initialize();
+    }
+
+    void OnDestroy()
+    {
+        playButton.onClick.RemoveListener(OnClickPlay);
+        settingsButton.onClick.RemoveListener(OnClickSettings);
     }
 
     public void ShowBackgroundFallback()
     {
-        if (videoImage != null) videoImage.texture = backgroundFallback;
+        if (backgroundMode == BackgroundMode.Video) videoImage.texture = backgroundFallback;
     }
 
     public void ShowVideoBackground()
     {
-        if (videoImage != null && backgroundVideo != null)
-            videoImage.texture = backgroundVideo.targetTexture;
-    }
-
-    private void RefreshLevel()
-    {
-        if (currentLevelText == null) return;
-
-        // Keep the prefab's rich-text styling; replace only the level placeholder.
-        if (levelTextTemplate == null) levelTextTemplate = currentLevelText.text;
-        currentLevelText.text = levelTextTemplate.Replace("{level}", LevelManager.SavedLevelNumber.ToString());
+        if (backgroundMode == BackgroundMode.Video) videoImage.texture = backgroundVideo.targetTexture;
     }
 
     public void RefreshCoins()
     {
-        if (coinAmountText != null)
-            coinAmountText.text = Mathf.Max(0, PlayerPrefs.GetInt(CoinsKey, 0)).ToString();
+        coinAmountText.text = MenuPlayerProgress.Coins.ToString();
     }
 
     public void OnClickPlay()
@@ -56,10 +76,9 @@ public class Mainmenu : UICanvas
     {
         SoundManager.Ins.PlayButtonSound();
         PlayerPrefs.DeleteKey(LevelManager.CurrentLevelKey);
-        PlayerPrefs.DeleteKey(CoinsKey);
+        PlayerPrefs.DeleteKey(MenuPlayerProgress.CoinsKey);
         PlayerPrefs.Save();
-        RefreshCoins();
-        RefreshLevel();
+        Refresh();
     }
 
     public void OnClickSettings()
@@ -68,33 +87,42 @@ public class Mainmenu : UICanvas
         UIManager.Ins.OpenUI<Settings>();
     }
 
-    public void OnClickGift()
+    public void OnClickGift() => SelectTab(MenuTabId.Gift);
+    public void OnClickShop() => SelectTab(MenuTabId.Shop);
+    public void OnClickHome() => SelectTab(MenuTabId.Home);
+    public void OnClickSkin() => SelectTab(MenuTabId.Skin);
+    public void OnClickTank() => SelectTab(MenuTabId.Tank);
+
+    private void Initialize()
     {
-        SoundManager.Ins.PlayButtonSound();
-        GameDiagnostics.Log("Main menu gift button");
+        initialized = true;
+        MenuPlayerProgress.Initialize(catalog.DefaultSkinId);
+        navigation.Initialize();
+        giftPage.Initialize(catalog);
+        shopPage.Initialize(catalog, RefreshAfterPurchase);
+        skinPage.Initialize(catalog);
+        playButton.onClick.AddListener(OnClickPlay);
+        settingsButton.onClick.AddListener(OnClickSettings);
     }
 
-    public void OnClickShop()
+    private void Refresh()
     {
-        SoundManager.Ins.PlayButtonSound();
-        GameDiagnostics.Log("Main menu shop button");
+        currentLevelText.text = $"LEVEL\n{LevelManager.SavedLevelNumber}";
+        RefreshCoins();
+        giftPage.Refresh();
+        shopPage.Refresh();
+        skinPage.Refresh();
     }
 
-    public void OnClickHome()
+    private void SelectTab(MenuTabId tab)
     {
         SoundManager.Ins.PlayButtonSound();
-        GameDiagnostics.Log("Main menu home button");
+        navigation.Select(tab);
     }
 
-    public void OnClickSkin()
+    private void RefreshAfterPurchase()
     {
-        SoundManager.Ins.PlayButtonSound();
-        GameDiagnostics.Log("Main menu skin button");
-    }
-
-    public void OnClickTank()
-    {
-        SoundManager.Ins.PlayButtonSound();
-        GameDiagnostics.Log("Main menu tank button");
+        RefreshCoins();
+        skinPage.Refresh();
     }
 }

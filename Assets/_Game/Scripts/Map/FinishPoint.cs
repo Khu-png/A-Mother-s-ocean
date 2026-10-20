@@ -12,19 +12,24 @@ public class FinishPoint : MonoBehaviour
     public bool IsOpen { get; private set; }
     public Vector2Int Cell => cell;
 
-    public void Setup(Vector2Int setupCell, Vector3 worldPosition, float cellSize, Sprite sprite, Color setupClosedColor, Color setupOpenColor)
+    public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Sprite sprite, Color setupClosedColor, Color setupOpenColor)
     {
         cell = setupCell;
         closedColor = setupClosedColor;
         openColor = setupOpenColor;
         closedSprite = MapTileAssetLibrary.Sprite("tile_finish_closed");
         openSprite = MapTileAssetLibrary.Sprite("tile_finish_open");
-        transform.position = worldPosition;
+        transform.localPosition = localPosition;
 
         spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = closedSprite != null ? closedSprite : sprite;
         spriteRenderer.sortingOrder = 2;
         SetOpen(false);
+    }
+
+    public void SetLocalPosition(Vector3 localPosition)
+    {
+        transform.localPosition = localPosition;
     }
 
     public void SetOpen(bool isOpen)

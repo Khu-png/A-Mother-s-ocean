@@ -16,7 +16,9 @@ public static class HBRuleSmokeCheck
             CheckPathReuse();
             CheckMapOwnership();
             CheckMaterialReference();
-            File.WriteAllText(REPORT_PATH, "PASS: Path reuse, map ownership, prefab material and shader.");
+            CheckMapBuilderLimits();
+            File.WriteAllText(REPORT_PATH,
+                "PASS: Path reuse, map ownership, material, shader and map size limits.");
             GameDiagnostics.Log("Coding refactor checks passed.");
         }
         catch (Exception exception)
@@ -75,6 +77,13 @@ public static class HBRuleSmokeCheck
             "Grid shader is invalid: " + (material != null && material.shader != null ? material.shader.name : "null"));
         SerializedObject serializedPrefab = new SerializedObject(prefab);
         Require(serializedPrefab.FindProperty("gridMaterial").objectReferenceValue == material, "Grid material is not wired.");
+    }
+
+    static void CheckMapBuilderLimits()
+    {
+        MapBuilderGridState grid = new MapBuilderGridState(100, 100);
+        Require(grid.Width == MapBuilderLimits.MAX_COLUMNS, "Map Builder column limit failed.");
+        Require(grid.Height == MapBuilderLimits.MAX_ROWS, "Map Builder row limit failed.");
     }
 
     static void Require(bool condition, string message)

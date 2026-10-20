@@ -52,8 +52,10 @@ public class MapBuilderWindow : EditorWindow
     {
         EditorGUILayout.Space(8f);
         EditorGUILayout.LabelField("Size", EditorStyles.boldLabel);
-        width = EditorGUILayout.IntField("Width", width);
-        height = EditorGUILayout.IntField("Height", height);
+        width = EditorGUILayout.IntSlider("Columns", width,
+            MapBuilderLimits.MIN_SIZE, MapBuilderLimits.MAX_COLUMNS);
+        height = EditorGUILayout.IntSlider("Rows", height,
+            MapBuilderLimits.MIN_SIZE, MapBuilderLimits.MAX_ROWS);
 
         if (GUILayout.Button("Resize Grid"))
         {

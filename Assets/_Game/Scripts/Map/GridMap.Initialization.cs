@@ -32,8 +32,12 @@ public partial class GridMap
         targets.Clear();
         currentRoute.Clear();
         player = null;
+        startPoint = null;
         finishPoint = null;
         pathTrail = null;
+        gridVisualRoot = null;
+        boardLayout = default;
+        appliedLayoutRevision = int.MinValue;
     }
 
     private void BuildMap()
@@ -42,12 +46,13 @@ public partial class GridMap
         NormalizeSettings();
         runtimeRoot = new GameObject("RuntimeMap").transform;
         runtimeRoot.SetParent(transform, false);
+        PrepareSafeArenaLayout();
         pathTrail = new PathTrail(runtimeRoot, cellSize, pathColor, width * height);
-        GridVisual.BuildGrid(runtimeRoot, width, height, cellSize, lineWidth, gridColor, gridMaterial);
         BuildMapTiles();
         BuildPlayer();
         MarkCurrentCell();
-        FitCamera();
+        RelayoutRuntimeObjects();
+        RebuildGridVisual();
     }
 
     private void NormalizeSettings()
@@ -58,6 +63,7 @@ public partial class GridMap
         height = Mathf.Max(1, mapRows.Length);
         width = 1;
         for (int i = 0; i < mapRows.Length; i++) width = Mathf.Max(width, mapRows[i].Length);
+        boardLayout = new GridBoardLayout(width, height, cellSize, 0f);
     }
 
     private void BuildMapTiles()

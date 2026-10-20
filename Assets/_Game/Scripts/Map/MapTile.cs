@@ -27,11 +27,11 @@ public class MapTile : MonoBehaviour
         StopRotation();
     }
 
-    public void Setup(Vector2Int setupCell, Vector3 worldPosition, float cellSize, Sprite sprite, Color color)
+    public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Sprite sprite, Color color)
     {
         cell = setupCell;
         cachedTransform = transform;
-        cachedTransform.position = worldPosition;
+        cachedTransform.localPosition = localPosition;
         cachedTransform.localEulerAngles = Vector3.zero;
 
         spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
@@ -42,13 +42,18 @@ public class MapTile : MonoBehaviour
 
         label = label != null ? label : new GameObject("Label").AddComponent<TextMesh>();
         labelTransform = label.transform;
-        labelTransform.SetParent(cachedTransform);
+        labelTransform.SetParent(cachedTransform, false);
         labelTransform.localPosition = new Vector3(0f, 0f, -0.01f);
         labelTransform.localScale = Vector3.one * (0.18f / cellSize);
         label.anchor = TextAnchor.MiddleCenter;
         label.alignment = TextAlignment.Center;
         label.fontStyle = FontStyle.Bold;
         SetLabel(string.Empty, Color.white);
+    }
+
+    public void SetLocalPosition(Vector3 localPosition)
+    {
+        cachedTransform.localPosition = localPosition;
     }
 
     public void SetColor(Color color)

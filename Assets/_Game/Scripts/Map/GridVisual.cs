@@ -5,27 +5,28 @@ public static class GridVisual
     private static Sprite squareSprite;
     private static Sprite circleSprite;
 
-    public static void BuildGrid(Transform parent, int width, int height, float cellSize, float lineWidth, Color color, Material lineMaterial)
+    public static Transform BuildGrid(Transform parent, GridBoardLayout layout,
+        float lineWidth, Color color, Material lineMaterial)
     {
         if (lineMaterial == null) throw new System.InvalidOperationException("Assign Grid Material on the GridMap prefab.");
         Transform gridRoot = new GameObject("Grid").transform;
-        gridRoot.SetParent(parent);
-        float left = -width * cellSize * 0.5f;
-        float right = width * cellSize * 0.5f;
-        float bottom = -height * cellSize * 0.5f;
-        float top = height * cellSize * 0.5f;
+        gridRoot.SetParent(parent, false);
 
-        for (int x = 0; x <= width; x++)
+        for (int x = 0; x <= layout.Columns; x++)
         {
-            float worldX = left + x * cellSize;
-            CreateLine(gridRoot, $"Vertical{x}", new Vector3(worldX, bottom, 0f), new Vector3(worldX, top, 0f), lineMaterial, lineWidth, color);
+            float localX = layout.VerticalBoundary(x);
+            CreateLine(gridRoot, $"Vertical{x}", new Vector3(localX, layout.Bottom, 0f),
+                new Vector3(localX, layout.Top, 0f), lineMaterial, lineWidth, color);
         }
 
-        for (int y = 0; y <= height; y++)
+        for (int y = 0; y <= layout.Rows; y++)
         {
-            float worldY = bottom + y * cellSize;
-            CreateLine(gridRoot, $"Horizontal{y}", new Vector3(left, worldY, 0f), new Vector3(right, worldY, 0f), lineMaterial, lineWidth, color);
+            float localY = layout.HorizontalBoundary(y);
+            CreateLine(gridRoot, $"Horizontal{y}", new Vector3(layout.Left, localY, 0f),
+                new Vector3(layout.Right, localY, 0f), lineMaterial, lineWidth, color);
         }
+
+        return gridRoot;
     }
 
     public static Sprite SquareSprite()
@@ -63,7 +64,7 @@ public static class GridVisual
     private static void CreateLine(Transform parent, string lineName, Vector3 start, Vector3 end, Material material, float lineWidth, Color color)
     {
         LineRenderer line = new GameObject(lineName).AddComponent<LineRenderer>();
-        line.transform.SetParent(parent);
+        line.transform.SetParent(parent, false);
         line.positionCount = 2;
         line.useWorldSpace = false;
         line.sharedMaterial = material;

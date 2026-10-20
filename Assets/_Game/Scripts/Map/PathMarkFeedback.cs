@@ -33,10 +33,10 @@ public class PathMarkFeedback : MonoBehaviour
         cachedTransform.localScale = baseScale * 0.25f;
     }
 
-    public void Restart(Vector3 worldPosition)
+    public void Restart(Vector3 localPosition)
     {
         timer = 0f;
-        cachedTransform.position = worldPosition;
+        cachedTransform.localPosition = localPosition;
         cachedTransform.localScale = baseScale * 0.25f;
         Color color = baseColor;
         color.a = 0f;

@@ -64,6 +64,7 @@ public class LevelManager : Singleton<LevelManager>
         if (!HasLevelData(levelIndex)) throw new UnityException("Không có dữ liệu level hợp lệ.");
         if (levelMap == null) throw new UnityException("Scene Grid Map chưa được gán.");
         currentLevel = levelMap;
+        currentLevel.SetCameraController(cameraController);
         currentLevel.Initialize(levels[levelIndex]);
         currentLevelIndex = levelIndex;
         HasPlayerMoved = false;
@@ -78,6 +79,8 @@ public class LevelManager : Singleton<LevelManager>
             throw new UnityException("không có level tiếp theo");
         }
 
+        if (levels[currentLevelIndex].GrantsGiftChest)
+            MenuPlayerProgress.GrantChestForLevel(currentLevelIndex + 1);
         PlayerPrefs.SetInt(CurrentLevelKey, nextLevel + 1);
         PlayerPrefs.Save();
         GameManager.Ins.OnFinish();

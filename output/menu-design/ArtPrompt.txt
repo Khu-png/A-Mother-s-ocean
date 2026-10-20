@@ -1,0 +1,21 @@
+Mode: built-in image_gen, transparent background enabled.
+Reference: approved gift-preview-v1.png, style reference only.
+Asset: MenuObjects.png, RGBA transparent sprite atlas for A Mother's Ocean.
+Request: twelve isolated hand-painted glossy casual ocean UI objects in a 3 by 4
+layout, coral pink/purple/teal and pearl highlights, without text or numbers.
+Objects: closed purple-gold shell reward chest; gray locked chest; blank wide
+pearl button; blue undo bubble; gold lightbulb bubble; purple shuffle bubble;
+gift chest icon; coral storefront icon; coral house icon; shell net icon;
+baby-shark aquarium bowl icon; translucent blue square tile.
+Constraints: no screen mockup, no device frame, true transparency and separated
+objects. Sprite import rectangles are measured from the returned image instead
+of assuming the generated object positions perfectly match equal grid cells.
+Existing project mother shark asset is reused without image generation.
+
+Second asset: BabySharkHappy.png, built-in image_gen edit, transparency enabled.
+Target/reference: existing baby_shark_sprite.png.
+Request: preserve full body, gray-blue color, large blue eyes, white belly,
+spots, fins and right-facing pose. Change worried eyebrows and mouth into a
+cheerful relaxed smile. Remove the broad dark aura, retain a fine cyan rim light.
+Constraints: one isolated shark, full silhouette, true alpha, no new anatomy,
+no props, no text, no backdrop. Saved separately; original sprite is unchanged.

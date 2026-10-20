@@ -11,8 +11,10 @@ public class LevelData : ScriptableObject
 		".XOT-.",
 		"..XO.."
 	};
+	[SerializeField] private bool grantsGiftChest;
 
 	public string[] MapRows => mapRows;
+	public bool GrantsGiftChest => grantsGiftChest;
 
 	public void SetMapRows(string[] rows)
 	{

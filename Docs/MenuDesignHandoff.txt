@@ -1,0 +1,109 @@
+A MOTHER'S OCEAN - BẢN THẢO BÀN GIAO MENU CHO DEV
+
+1. PHẠM VI BẢN DỰNG
+Đã tạo bộ prefab giao diện riêng trong Assets/_Game/Prefab/UI/MenuDesign.
+MenuShellDesign.prefab chứa nền, HUD trên, vùng nội dung và thanh điều hướng.
+Pages chứa GiftPage, ShopPage, HomePage, SkinPage và TankPage.
+Components chứa mẫu SkinSlot, PowerUpOffer và BabySharkVisual để dev tái sử dụng.
+Các scene xem mẫu nằm trong Assets/_Game/Scenes/MenuDesign, mỗi scene mở một tab.
+Không đưa các scene thiết kế vào danh sách build của game.
+
+Đây là bản dựng giao diện để nối tiếp, không phải tính năng gameplay đã hoàn tất.
+Button đã có thành phần UI và màu cho trạng thái nhấn; OnClick chưa nối vào game.
+Scene thiết kế dùng xem tĩnh, chưa có EventSystem hay GraphicRaycaster riêng.
+Khi tích hợp, dùng hệ thống nhận input UI đang có trong scene game.
+Mainmenu.prefab và Game.unity hiện tại không bị thay thế bởi bản thiết kế này.
+HomePage là bản trình bày dựa trên Home hiện tại, không chứa script Mainmenu.
+Khi tích hợp, giữ các tham chiếu và hành vi Play/Settings/tiền/cấp độ đang có.
+
+2. BỐ CỤC CHUNG
+Thứ tự tab cố định: Gift - Shop - Home - Skin - Tank.
+Nền biển, HUD và thanh điều hướng nằm ngoài phần nội dung chuyển trang.
+Mỗi màn nằm trong PageContainer; vùng nhìn giới hạn bởi ContentViewport.
+Nội dung được giữ tỉ lệ bằng AspectRatioFitter Fit In Parent, tránh méo hình.
+Các phần tử trong khung dùng anchor theo tỉ lệ để co giãn cùng khung chứa.
+Chữ là TextMeshPro riêng; hình là Image riêng; không dùng ảnh chụp toàn màn làm UI.
+SafeAreaRoot hiện có khoảng đệm thiết kế. Dev cần nối root này với Screen.safeArea
+thực tế; khoảng đệm cố định hiện tại KHÔNG thay thế xử lý tai thỏ của thiết bị.
+Giữ nội dung và nút bấm trong SafeAreaRoot, nền có thể phủ ra toàn màn hình.
+
+3. GIFT - MỞ QUÀ TỪ MÀN RẤT KHÓ
+Mục đích: mở rương kiếm được sau khi vượt những màn rất khó, nhận power-up.
+Trung tâm là rương thưởng lớn, bên dưới có nút Open và các phần thưởng minh họa.
+Rương khóa nhỏ thể hiện điều kiện chưa đủ để nhận thưởng tiếp theo.
+Dev nối dữ liệu số rương chưa mở, cấu hình thưởng và kho power-up.
+Trạng thái cần hoàn thiện: chưa có rương; có rương; đang mở; đã nhận thưởng.
+Chỉ cộng thưởng một lần cho mỗi rương. Khi đang mở, tránh thao tác nhận lặp.
+Không tự thêm quà đăng nhập, đếm giờ, quảng cáo hoặc mua rương.
+Hàng power-up trong bản dựng chưa xác định là phần thưởng chắc chắn hay có thể nhận;
+cần chốt quy tắc thưởng trước khi thêm nội dung xác suất hoặc cam kết số lượng.
+
+4. SHOP - MUA SKIN VÀ POWER-UP
+Mục đích: xem ngoại hình cá mập và mua skin hoặc power-up.
+Phía trên là skin đang xem, tên, giá và nút Buy. Phía dưới là các ô power-up.
+Dev nối catalog skin, catalog power-up, giá, quyền sở hữu và hệ thống giao dịch.
+Trạng thái cần hoàn thiện: mua được; thiếu tiền; đã sở hữu skin; đang xử lý mua.
+Không bán trùng một skin đã sở hữu; power-up có thể mua thêm theo luật đã chốt.
+Giá 800/150/200/250 và số lượng x3 là dữ liệu minh họa, không phải giá cân bằng.
+Bản dựng dùng coin để minh họa; cần chốt tiền tệ trước khi tích hợp thanh toán.
+Chưa có IAP, quảng cáo, khuyến mãi hay đăng ký định kỳ.
+
+5. HOME - MÀN CHÍNH
+Giữ ý đồ Home hiện tại: bảng cấp độ, cá mập mẹ và nút Play.
+Dev giữ dữ liệu cấp độ đang lưu, số tiền và đường mở màn chơi hiện có.
+Nút Settings dùng hệ thống cài đặt đang có. Số 49/1580 trong scene mẫu là ví dụ.
+Không dùng dữ liệu scene mẫu để ghi đè tiến trình người chơi.
+
+6. SKIN - XEM VÀ CHỌN NGOẠI HÌNH
+Mục đích: xem thử và trang bị skin cá mập đã sở hữu.
+Phía trên là cá mập lớn, nút trước/sau, tên skin và nút trang bị.
+Phía dưới là danh sách skin, phân biệt đang dùng, đã sở hữu và chưa sở hữu.
+Dev nối danh sách skin, lựa chọn đang xem, skin đã mua và skin đang trang bị.
+Bấm thumbnail hoặc trước/sau chỉ đổi phần xem thử; Equip mới đổi skin đang dùng.
+Skin chưa sở hữu không được trang bị. Mua skin thực hiện tại Shop.
+Không thêm chỉ số chiến đấu hoặc nâng cấp sức mạnh gắn với skin.
+Đã dùng sprite cá mập gốc thay con bị lỗi giải phẫu trong preview.
+Các thumbnail màu Coral/Reef/Gold/Twilight/Ice hiện là biến thể màu minh họa,
+không phải bộ skin mỹ thuật cuối cùng; khi có art chính thức chỉ cần thay sprite.
+
+7. TANK - NGẮM CÁ MẬP CON
+Mục đích: không gian thư giãn để ngắm cá mập con bơi vui vẻ.
+Ưu tiên vùng nước thoáng, san hô quanh mép, ít thành phần giao diện.
+Ba cá mập trong scene là bố trí minh họa, không quyết định số cá thực tế.
+Dev nối dữ liệu cá mập con và chuyển động bơi nhẹ trong SwimmingArea.
+Giữ tỉ lệ hình, không dùng scale âm để đổi hướng; chuẩn bị sprite hướng đối diện
+hoặc cách hiển thị phù hợp khi triển khai chuyển động.
+Chưa có animation bơi trong bản dựng prefab tĩnh này.
+Tank dùng BabySharkHappy.png, bản cười vui tạo riêng từ nhân vật gốc;
+asset nhân vật gốc trong Resources không bị ghi đè.
+Không thêm cho ăn, chăm sóc, thu tiền, nhiệm vụ, chỉ số hay phần thưởng cho Tank.
+
+8. CHUYỂN TAB THEO VIDEO THAM KHẢO
+Đây là yêu cầu cho dev, chưa có controller chuyển trang trong bản dựng.
+Giữ HUD và thanh điều hướng đứng yên. Nội dung cũ trượt ra trong khi nội dung mới
+trượt vào cùng lúc; cắt phần vượt ContentViewport bằng RectMask2D.
+Hướng trượt dựa theo thứ tự Gift - Shop - Home - Skin - Tank.
+Tab đang chọn có SelectedHighlight, icon lớn hơn và nhô nhẹ, vùng bấm không đổi.
+Chỉ một highlight hoạt động. Bấm lại tab hiện tại không phát lại chuyển trang.
+Đề xuất ban đầu: khoảng 0,25 giây, chuyển động giảm tốc nhẹ; đây là đề xuất
+thiết kế, không phải quy tắc code của người dùng. Duyệt lại trên thiết bị thật.
+Xử lý bấm nhanh để màn và highlight luôn kết thúc đúng tab được chọn cuối cùng.
+Không bắt buộc chuyển qua mọi tab trung gian khi người chơi chọn tab ở xa.
+
+9. ĐIỂM NỐI CHÍNH TRONG HIERARCHY
+MenuShellDesign/SafeAreaRoot/Header/HeaderLayout: HUD, SettingsButton.
+MenuShellDesign/SafeAreaRoot/ContentViewport/PageContainer: các page prefab.
+MenuShellDesign/SafeAreaRoot/BottomNavigation/NavigationLayout: năm tab.
+Mỗi tab có SelectedHighlight, Icon với Button, và Label riêng.
+GiftPage/OpenRewardButton; ShopPage/BuySkinButton và các Offer/BuyButton.
+SkinPage/PreviousSkinButton, NextSkinButton, EquipSkinButton và các Slot.
+TankPage/SwimmingArea và các BabyShark: chủ thể để nối chuyển động.
+Các tham chiếu phải được gán rõ qua Inspector hoặc owner, theo AGENTS.md và HB.
+
+10. CẦN KIỂM TRA KHI TÍCH HỢP
+Kiểm tra 1080x1920, 720x1600 và thiết bị có tai thỏ/thanh điều hướng.
+Chữ không tràn, icon không bị cắt, các nút không đè vùng nội dung.
+Xác nhận giao dịch, nhận thưởng và trang bị ghi dữ liệu đúng qua lần mở game sau.
+Xác nhận việc chuyển tab không tạo nhiều HUD, nhiều nền video hoặc nhiều âm thanh.
+Hiệu năng chuyển trang và bơi cần đo trong Unity/device; bản dựng art không có
+kết quả profiling hay xác nhận hiệu năng runtime.

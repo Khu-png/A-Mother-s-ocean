@@ -3,6 +3,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Transform modelRoot;
     [SerializeField] private Color playerColor = new Color(1f, 0.78f, 0.22f, 1f);
     [SerializeField] private float moveDuration = 0.16f;
     [SerializeField] private float swimArcHeight = 0.08f;
@@ -31,7 +32,7 @@ public class Player : MonoBehaviour
 
         if (!IsMoving)
         {
-            cachedTransform.position = moveTarget + Vector3.up * (Mathf.Sin(Time.time * idleBobSpeed) * idleBobHeight);
+            cachedTransform.localPosition = moveTarget + Vector3.up * (Mathf.Sin(Time.time * idleBobSpeed) * idleBobHeight);
             return;
         }
 
@@ -39,35 +40,44 @@ public class Player : MonoBehaviour
         float progress = Mathf.Clamp01(moveTimer / moveDuration);
         float easedProgress = progress * progress * (3f - 2f * progress);
         Vector3 arcOffset = Vector3.up * (Mathf.Sin(progress * Mathf.PI) * swimArcHeight);
-        cachedTransform.position = Vector3.Lerp(moveStart, moveTarget, easedProgress) + arcOffset;
+        cachedTransform.localPosition = Vector3.Lerp(moveStart, moveTarget, easedProgress) + arcOffset;
         cachedTransform.localScale = baseScale * (1f + Mathf.Sin(progress * Mathf.PI) * 0.1f);
 
         if (progress >= 1f)
         {
-            cachedTransform.position = moveTarget;
+            cachedTransform.localPosition = moveTarget;
             cachedTransform.localScale = baseScale;
             IsMoving = false;
         }
     }
 
-    public void SetCell(Vector2Int cell, Vector3 worldPosition, float cellSize)
+    public void SetCell(Vector2Int cell, Vector3 localPosition, float cellSize)
     {
         CurrentCell = cell;
-        cachedTransform.position = worldPosition;
+        cachedTransform.localPosition = localPosition;
         baseScale = Vector3.one * FitSpriteScale(cellSize, 0.82f);
         cachedTransform.localScale = baseScale;
-        moveTarget = worldPosition;
+        moveTarget = localPosition;
         IsMoving = false;
     }
 
-    public void MoveTo(Vector2Int cell, Vector3 worldPosition)
+    public void MoveTo(Vector2Int cell, Vector3 localPosition)
     {
         CurrentCell = cell;
-        moveStart = cachedTransform.position;
-        moveTarget = worldPosition;
+        moveStart = cachedTransform.localPosition;
+        moveTarget = localPosition;
         moveTimer = 0f;
         IsMoving = true;
-        spriteRenderer.flipX = worldPosition.x < moveStart.x;
+        FaceDirection(localPosition - moveStart);
+    }
+
+    public void ApplyLayout(Vector3 localPosition)
+    {
+        moveStart = localPosition;
+        moveTarget = localPosition;
+        cachedTransform.localPosition = localPosition;
+        cachedTransform.localScale = baseScale;
+        IsMoving = false;
     }
 
     private void EnsureRenderer()
@@ -91,6 +101,12 @@ public class Player : MonoBehaviour
         Vector2 size = spriteRenderer.sprite.bounds.size;
         float longestSide = Mathf.Max(size.x, size.y);
         return longestSide > 0f ? cellSize * fill / longestSide : cellSize * fill;
+    }
+
+    private void FaceDirection(Vector3 direction)
+    {
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        modelRoot.localRotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     private Sprite CreateSquareSprite()

@@ -112,7 +112,7 @@ public class MapPrefabSet
     private T NewRule<T>(string name, Transform root) where T : Component
     {
         GameObject view = new GameObject(name);
-        view.transform.SetParent(root);
+        view.transform.SetParent(root, false);
         MapTile tile = view.AddComponent<MapTile>();
         T rule = view.AddComponent<T>();
         BindRule(rule, tile);
@@ -129,14 +129,14 @@ public class MapPrefabSet
     private MapTile NewTile(Transform root)
     {
         GameObject view = new GameObject("Tile");
-        view.transform.SetParent(root);
+        view.transform.SetParent(root, false);
         return view.AddComponent<MapTile>();
     }
 
     private T NewComponent<T>(string name, Transform root) where T : Component
     {
         GameObject view = new GameObject(name);
-        view.transform.SetParent(root);
+        view.transform.SetParent(root, false);
         return view.AddComponent<T>();
     }
 

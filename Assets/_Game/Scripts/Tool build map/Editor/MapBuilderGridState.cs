@@ -1,5 +1,12 @@
 using System.Text;
 
+public static class MapBuilderLimits
+{
+    public const int MIN_SIZE = 1;
+    public const int MAX_COLUMNS = 10;
+    public const int MAX_ROWS = 10;
+}
+
 public class MapBuilderGridState
 {
     private char[,] cells;
@@ -24,8 +31,8 @@ public class MapBuilderGridState
 
     public void Resize(int width, int height)
     {
-        Width = UnityEngine.Mathf.Max(1, width);
-        Height = UnityEngine.Mathf.Max(1, height);
+        Width = UnityEngine.Mathf.Clamp(width, MapBuilderLimits.MIN_SIZE, MapBuilderLimits.MAX_COLUMNS);
+        Height = UnityEngine.Mathf.Clamp(height, MapBuilderLimits.MIN_SIZE, MapBuilderLimits.MAX_ROWS);
         char[,] nextCells = CreateEmptyCells(Width, Height);
 
         if (cells != null)

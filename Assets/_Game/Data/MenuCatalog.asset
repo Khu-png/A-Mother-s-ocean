@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffdfe8dbf7427ff468db06be82547f53, type: 3}
+  m_Name: MenuCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::MenuCatalog
+  purchasesEnabled: 0
+  giftRewardsEnabled: 0
+  skins:
+  - id: classic
+    displayName: Classic
+    price: 0
+    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+  - id: coral
+    displayName: Coral
+    price: 500
+    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
+    tint: {r: 1, g: 0.65, b: 0.83, a: 1}
+  - id: reef
+    displayName: Reef
+    price: 750
+    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
+    tint: {r: 0.65, g: 1, b: 0.72, a: 1}
+  - id: gold
+    displayName: Gold
+    price: 1000
+    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
+    tint: {r: 1, g: 0.87, b: 0.4, a: 1}
+  - id: twilight
+    displayName: Twilight
+    price: 1250
+    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
+    tint: {r: 0.8, g: 0.65, b: 1, a: 1}
+  - id: ice
+    displayName: Ice
+    price: 1500
+    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
+    tint: {r: 0.65, g: 0.9, b: 1, a: 1}
+  powerUps:
+  - id: 0
+    amount: 1
+    price: 150
+  - id: 1
+    amount: 1
+    price: 200
+  - id: 2
+    amount: 1
+    price: 250
+  giftRewards:
+  - id: 0
+    amount: 1
+  - id: 1
+    amount: 1
+  - id: 2
+    amount: 1

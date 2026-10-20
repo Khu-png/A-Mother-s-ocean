@@ -40,6 +40,12 @@ where a specific added requirement is stricter, use that requirement:
 - Assigning an explicit parent/material is not dependency retrieval. Accessing
   gameObject, using a typed registry, or Editor SerializedObject.FindProperty
   does not perform a scene object search.
+- Never add defensive null checks, silent early returns, fallback object creation,
+  or similar guards as a patch for missing references, invalid ownership, broken
+  initialization order, or another structural defect. Correct the source of the
+  invalid state and make required dependencies explicit. Retain null handling only
+  when null is an intentional, documented feature state or part of an external API
+  contract.
 - Keep class responsibilities small even when using partial files. Do not use
   partial declarations solely to conceal a large or complicated class.
 - Review project-owned code under Assets/_Game; preserve third-party packages.

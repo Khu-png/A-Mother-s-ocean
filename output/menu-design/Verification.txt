@@ -1,0 +1,41 @@
+Menu design verification - Unity 6000.3.12f1
+
+Delivered: 9 prefabs, 5 static design scenes, transparent UI atlas, happy baby
+shark sprite, dedicated text material and Vietnamese developer handoff.
+
+Observed in Unity:
+- Gift, Shop, Home, Skin and Tank opened and rendered in 1080x1920 Game View
+  during the layout pass. Images, font and prefab references resolved.
+- After final proportional-anchor adjustment, Home and Tank were checked in
+  720x1600 Game View. HUD, content and five-tab bar stayed within the screen.
+- Final Tank uses the separate happy baby shark sprite with alpha transparency.
+- Latest Tank scene load logged no prefab mismatch, assertion, compilation or
+  failed-load errors.
+
+Import recovery:
+- Initial nested-prefab identifiers caused an import assertion. They were replaced
+  with deterministic large identifiers; Unity was restarted with user permission.
+- A ZIP backup was created before restart. Ctrl+S did not respond while the editor
+  was stalled; the scene had no unsaved marker at the preceding observation and
+  prefab Auto Save was on. No guarantee is made about inaccessible unsaved memory.
+- Old console entries from identifier changes and asset-index version warnings
+  remain in the editor/log. They are historical; do not confuse them with a clean
+  Console test. The log has not been deleted or cleared.
+
+Preservation:
+- SHA-256 comparisons with the pre-restart backup confirm Game.unity and the
+  original Mainmenu.prefab are unchanged by this work.
+- No project C# files were authored or changed for menu behavior.
+- Existing modified gameplay files were left in place.
+
+Not verified or implemented:
+- No physical device, notch/safe-area integration or profiling run.
+- No runtime tab controller, slide transition or swimming animation.
+- No purchases, inventory, chest rewards, equip/save logic or event wiring.
+- Static design scenes have no dedicated UI EventSystem/GraphicRaycaster.
+- Final Gift/Shop/Skin layouts still require a full device/resolution pass when
+  dev integrates them into the runtime menu.
+
+Handoff: Docs/MenuDesignHandoff.txt.
+Art generation mode and prompt briefs: output/menu-design/ArtPrompt.txt.
+Backup: output/menu-design/BeforeUnityRestart-20261017.zip.

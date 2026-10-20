@@ -16,7 +16,7 @@ namespace AssetKits.ParticleImage.Editor
             [MenuItem("GameObject/UI/Particle Image", priority = MenuPriority)]
             private static void CreateButton(MenuCommand menuCommand)
             {
-                var canvas = Object.FindObjectsOfType(typeof(Canvas)).Cast<Canvas>().FirstOrDefault();
+                Canvas canvas = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None).FirstOrDefault();
 
                 if (canvas)
                 {
@@ -56,12 +56,12 @@ namespace AssetKits.ParticleImage.Editor
                     Selection.activeObject = go;
                 }
                 
-                var eventSystem = Object.FindObjectsOfType(typeof(EventSystem)).Cast<EventSystem>().FirstOrDefault();
+                EventSystem eventSystem = Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None).FirstOrDefault();
 
                 if (eventSystem == null)
                 {
                     GameObject eSystem = new GameObject("EventSystem");
-                    EventSystem e = eSystem.AddComponent<EventSystem>();
+                    eSystem.AddComponent<EventSystem>();
                     eSystem.AddComponent<StandaloneInputModule>();
                 }
             }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -963,7 +962,7 @@ namespace AssetKits.ParticleImage
         public Vector3 deltaPosition => _deltaPosition;
 
         private Camera _camera;
-        private Camera camera
+        private Camera particleCamera
         {
             get
             {
@@ -987,7 +986,7 @@ namespace AssetKits.ParticleImage
         public bool moduleMovementFoldout;
         public bool moduleEventsFoldout;
 
-        void Awake()
+        new void Awake()
         {
             _noise.SetNoiseType(Noise.NoiseType.OpenSimplex2);
             _noise.SetFrequency(_noiseFrequency / 100f);
@@ -1001,9 +1000,8 @@ namespace AssetKits.ParticleImage
             }
         }
 
-        public void OnEnable()
+        public new void OnEnable()
         {
-            
             if (isMain)
             {
                 children = GetChildren();
@@ -1084,7 +1082,7 @@ namespace AssetKits.ParticleImage
             }
         }
 
-        void OnTransformParentChanged()
+        new void OnTransformParentChanged()
         {
             main = GetMain();
             if(isMain)
@@ -1269,7 +1267,7 @@ namespace AssetKits.ParticleImage
                     else
                     {
                         Vector3 canPos;
-                        Vector3 viewportPos = camera.WorldToViewportPoint(_emitterConstraintTransform.position);
+                        Vector3 viewportPos = particleCamera.WorldToViewportPoint(_emitterConstraintTransform.position);
 
                         canPos = new Vector3(viewportPos.x.Remap(0.5f, 1.5f, 0f, canvasRect.rect.width),
                             viewportPos.y.Remap(0.5f, 1.5f, 0f, canvasRect.rect.height), 0);
@@ -1637,7 +1635,7 @@ namespace AssetKits.ParticleImage
             return part;
         }
         
-        public Material material
+        public new Material material
         {
             get
             {
@@ -1795,7 +1793,7 @@ namespace AssetKits.ParticleImage
         /// <returns>Viewport position</returns>
         public Vector3 WorldToViewportPoint(Vector3 position)
         {
-            Vector3 pos = camera.WorldToViewportPoint(position);
+            Vector3 pos = particleCamera.WorldToViewportPoint(position);
             return pos;
         }
     }

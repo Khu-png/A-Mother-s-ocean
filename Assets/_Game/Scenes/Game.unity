@@ -344,13 +344,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalRotation: {x: 0.1305262, y: 0, z: 0, w: 0.9914449}
+  m_LocalPosition: {x: 0, y: 2.5881906, z: -9.659258}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
 --- !u!114 &519420033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,8 +364,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 519420031}
-  fitCameraOnPlay: 1
-  cameraPadding: 0.45
+  safeArena:
+    normalizedRect:
+      serializedVersion: 2
+      x: 0.04
+      y: 0.2
+      width: 0.92
+      height: 0.64
+    padding:
+      Left: 16
+      Right: 16
+      Top: 16
+      Bottom: 16
+    cellSpacing: 6
+    maximumCellSize: 180
+    showEditorPreview: 1
+    previewColor: {r: 0.1, g: 0.9, b: 0.8, a: 0.9}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -1127,7 +1141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiResources:
-  - {fileID: 300000, guid: 139a89fbbaef6bb4c845274be1b45e94, type: 3}
+  - {fileID: 5098442573387603460, guid: 56379ed7cb4a1d446880c51807f0956e, type: 3}
   - {fileID: 1326024517158735020, guid: a6970328d35a1f74f9501643e2bdd2da, type: 3}
   - {fileID: 8935792151765719535, guid: f4a090aadb839f54fa338b336f9f44d2, type: 3}
   - {fileID: 7799615184282313327, guid: 312146c2f74805846a867e44c169b37b, type: 3}

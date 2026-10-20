@@ -22,17 +22,17 @@ public class TargetPoint : MonoBehaviour
     void Update()
     {
         float wave = Mathf.Sin(Time.time * bobSpeed + timeOffset);
-        cachedTransform.position = basePosition + Vector3.up * (wave * bobHeight);
+        cachedTransform.localPosition = basePosition + Vector3.up * (wave * bobHeight);
         cachedTransform.localScale = baseScale * (1f + wave * 0.045f);
     }
 
-    public void Setup(Vector2Int setupCell, Vector3 worldPosition, float cellSize, Sprite sprite, Color color)
+    public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Sprite sprite, Color color)
     {
         cell = setupCell;
         cachedTransform = transform;
-        basePosition = worldPosition;
+        basePosition = localPosition;
         timeOffset = (cell.x * 0.73f + cell.y * 1.31f) % Mathf.PI;
-        cachedTransform.position = basePosition;
+        cachedTransform.localPosition = basePosition;
 
         spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = sprite;
@@ -41,6 +41,12 @@ public class TargetPoint : MonoBehaviour
         baseScale = cachedTransform.localScale;
         cachedTransform.localScale = baseScale;
         ResetTarget();
+    }
+
+    public void SetLocalPosition(Vector3 localPosition)
+    {
+        basePosition = localPosition;
+        cachedTransform.localPosition = localPosition;
     }
 
     public void Collect()
@@ -55,7 +61,7 @@ public class TargetPoint : MonoBehaviour
     {
         IsCollected = false;
         gameObject.SetActive(true);
-        cachedTransform.position = basePosition;
+        cachedTransform.localPosition = basePosition;
         cachedTransform.localScale = baseScale;
     }
 
