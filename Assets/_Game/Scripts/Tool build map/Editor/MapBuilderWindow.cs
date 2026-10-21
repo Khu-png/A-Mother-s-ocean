@@ -150,26 +150,8 @@ public class MapBuilderWindow : EditorWindow
 
     private void SaveLevelData()
     {
-        levelNumber = Mathf.Max(1, levelNumber);
-        string path = $"Assets/_Game/ScriptableObject/Map/Level_{levelNumber}.asset";
         saveMessage = string.Empty;
-        MapLevelRegistration.Validate(levelManager, levelNumber, path);
-        EnsureLevelDataFolder();
-        LevelData asset = CreateInstance<LevelData>();
-        asset.SetMapRows(grid.ToRows());
-        AssetDatabase.CreateAsset(asset, path);
-        MapLevelRegistration.Assign(levelManager, levelNumber, asset);
-        AssetDatabase.SaveAssets();
-        levelData = asset;
-        saveMessage = $"Đã tạo Level {levelNumber} và gán vào Level Manager. Hãy lưu scene/prefab.";
-    }
-
-    private void EnsureLevelDataFolder()
-    {
-        const string root = "Assets/_Game/ScriptableObject";
-        const string map = root + "/Map";
-        if (!AssetDatabase.IsValidFolder(root)) AssetDatabase.CreateFolder("Assets/_Game", "ScriptableObject");
-        if (!AssetDatabase.IsValidFolder(map)) AssetDatabase.CreateFolder(root, "Map");
+        saveMessage = MapLevelRegistration.Create(levelManager, levelNumber, grid.ToRows(), out levelData);
     }
 
     private string CellLabel(char code)

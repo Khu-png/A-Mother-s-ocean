@@ -211,6 +211,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8b0d2dd5f4aa4ab6a4c2ddc8ad2c5e01, type: 2}
   - {fileID: 11400000, guid: d6e9b7b6a6e04e5b8d16a0b0b812f2b4, type: 2}
   - {fileID: 11400000, guid: 7406087c7b429ef4291f0a447bdff9eb, type: 2}
+  - {fileID: 11400000, guid: fe0c0ba4c460e5f4693ca8c944b0c2de, type: 2}
+  - {fileID: 11400000, guid: 039c47e26f970ff418ee5997b7bb35af, type: 2}
   levelMap: {fileID: 1037034053}
   cameraController: {fileID: 519420033}
 --- !u!1 &519420028
@@ -344,13 +346,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1305262, y: 0, z: 0, w: 0.9914449}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 2.5881906, z: -9.659258}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &519420033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,7 +641,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.11202787, y: 0.22546667}
   m_AnchorMax: {x: 0.89136684, y: 0.2773031}
-  m_AnchoredPosition: {x: -0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &772454211

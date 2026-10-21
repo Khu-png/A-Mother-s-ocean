@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class PathTrail
 {
+    // Keep the highlight inside the tile border.
+    private const float TILE_INTERIOR_FRACTION = 0.85f;
     private readonly Transform ROOT;
     private readonly float CELL_SIZE;
     private readonly Color COLOR;
@@ -59,11 +61,11 @@ public class PathTrail
         GameObject view = new GameObject("PathMark");
         view.transform.SetParent(ROOT, false);
         SpriteRenderer renderer = view.AddComponent<SpriteRenderer>();
-        renderer.sprite = GridVisual.SquareSprite();
+        renderer.sprite = GridVisual.RoundedSquareSprite();
         renderer.color = COLOR;
         renderer.sortingOrder = 1;
         PathMarkFeedback feedback = view.AddComponent<PathMarkFeedback>();
-        feedback.Setup(renderer, COLOR, Vector3.one * (CELL_SIZE * 0.72f));
+        feedback.Setup(renderer, COLOR, Vector3.one * (CELL_SIZE * TILE_INTERIOR_FRACTION));
         view.SetActive(false);
         return feedback;
     }

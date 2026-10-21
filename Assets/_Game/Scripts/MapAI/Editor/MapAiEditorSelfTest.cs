@@ -3,7 +3,7 @@ using UnityEditor;
 
 public static class MapAiEditorSelfTest
 {
-    [MenuItem("Tools/A Mother's Ocean/Map AI Editor/Run Self Tests")]
+    [MenuItem("Tools/A Mother's Ocean/Run Map AI Editor Self Tests")]
     public static void Run()
     {
         RunAll();
@@ -24,8 +24,10 @@ public static class MapAiEditorSelfTest
         TestDeadEnd();
         TestTargetCompletion();
         TestTargetsRequireRevisit();
+        TestRotationChangesRouteAvailability();
         TestSupportedSizes();
         TestDeterministicGeneration();
+        TestMultipleUniqueSamples();
         TestConfiguredContent();
     }
 
@@ -83,6 +85,22 @@ public static class MapAiEditorSelfTest
         Require(!result.CanComplete, "Route requiring a revisited cell was accepted.");
     }
 
+    private static void TestRotationChangesRouteAvailability()
+    {
+        MapAiAnalysisResult result = Analyze(new[] { "SO|F" });
+        Require(result.CanComplete, "Entering the rotator did not open the pipe route.");
+        Require(result.CompletionPath.Count == 4, "Rotated route length is incorrect.");
+        MapAiAnalysisResult blocked = Analyze(new[] { "S.|F" });
+        Require(!blocked.CanComplete, "Unrotated vertical pipe allowed horizontal travel.");
+        Require(!Analyze(new[] { "SOO|F" }).CanComplete,
+            "Two rotations failed to restore the straight pipe orientation.");
+        MapAiMapData corner = new MapAiMapData(new[] { "SA" });
+        Require(MapAiMovementGraph.CanMove(corner, new UnityEngine.Vector2Int(0, 0),
+            new UnityEngine.Vector2Int(1, 0), 3), "Fourth corner rotation state is incorrect.");
+        Require(!MapAiMovementGraph.CanMove(corner, new UnityEngine.Vector2Int(0, 0),
+            new UnityEngine.Vector2Int(1, 0), 1), "Corner pipe ignored rotation state.");
+    }
+
     private static void TestDeterministicGeneration()
     {
         string[] rows =
@@ -125,6 +143,27 @@ public static class MapAiEditorSelfTest
                 new bool[width * height], settings);
             Require(generated.Success, $"Generation failed for {width}x{height}.");
         }
+    }
+
+    private static void TestMultipleUniqueSamples()
+    {
+        MapAiGenerationSettings settings = new MapAiGenerationSettings
+        {
+            Columns = 8,
+            Rows = 8,
+            Seed = 13579,
+            TargetCount = 1,
+            RockRatio = 0.25f
+        };
+        MapAiPreviewCollection previews = new MapAiPreviewCollection();
+        string message = previews.Generate(
+            new MapAiMapData(EmptyRows(8, 8)), new bool[64], settings, 5);
+        Require(previews.Count == 5, "Generator did not produce five unique maps.");
+        Require(message.Contains("5 of 5"), "Sample count was not reported.");
+        string[] first = previews.Current.Rows;
+        Require(previews.Move(1), "Could not move to the next sample.");
+        Require(string.Join("\n", first) != string.Join("\n", previews.Current.Rows),
+            "Different sample seeds produced the same map.");
     }
 
     private static void TestConfiguredContent()

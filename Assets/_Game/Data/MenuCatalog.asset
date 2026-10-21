@@ -12,39 +12,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffdfe8dbf7427ff468db06be82547f53, type: 3}
   m_Name: MenuCatalog
   m_EditorClassIdentifier: Assembly-CSharp::MenuCatalog
-  purchasesEnabled: 0
+  purchasesEnabled: 1
   giftRewardsEnabled: 0
   skins:
   - id: classic
     displayName: Classic
     price: 0
-    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
+    portrait: {fileID: 7400000000000000001, guid: ed3e2f6ec68942f5a8414ed9ff57cb3a, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
   - id: coral
     displayName: Coral
     price: 500
-    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
-    tint: {r: 1, g: 0.65, b: 0.83, a: 1}
+    portrait: {fileID: 7400000000000000002, guid: ed3e2f6ec68942f5a8414ed9ff57cb3a, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
   - id: reef
     displayName: Reef
     price: 750
-    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
-    tint: {r: 0.65, g: 1, b: 0.72, a: 1}
+    portrait: {fileID: 7400000000000000003, guid: ed3e2f6ec68942f5a8414ed9ff57cb3a, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
   - id: gold
     displayName: Gold
     price: 1000
-    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
-    tint: {r: 1, g: 0.87, b: 0.4, a: 1}
+    portrait: {fileID: 7400000000000000004, guid: ed3e2f6ec68942f5a8414ed9ff57cb3a, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
   - id: twilight
     displayName: Twilight
     price: 1250
-    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
-    tint: {r: 0.8, g: 0.65, b: 1, a: 1}
+    portrait: {fileID: 7400000000000000005, guid: ed3e2f6ec68942f5a8414ed9ff57cb3a, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
   - id: ice
     displayName: Ice
     price: 1500
-    portrait: {fileID: 4010279180245206073, guid: c1c750e109be1024fbac1435a2a27326, type: 3}
-    tint: {r: 0.65, g: 0.9, b: 1, a: 1}
+    portrait: {fileID: 7400000000000000006, guid: ed3e2f6ec68942f5a8414ed9ff57cb3a, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
   powerUps:
   - id: 0
     amount: 1

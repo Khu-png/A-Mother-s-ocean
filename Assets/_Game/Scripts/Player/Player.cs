@@ -3,8 +3,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Transform modelRoot;
-    [SerializeField] private Color playerColor = new Color(1f, 0.78f, 0.22f, 1f);
+    [SerializeField] private MenuCatalog skinCatalog;
     [SerializeField] private float moveDuration = 0.16f;
     [SerializeField] private float swimArcHeight = 0.08f;
     [SerializeField] private float idleBobHeight = 0.035f;
@@ -22,7 +21,7 @@ public class Player : MonoBehaviour
     void Awake()
     {
         cachedTransform = transform;
-        EnsureRenderer();
+        ApplyEquippedSkin();
         moveDuration = Mathf.Max(0.01f, moveDuration);
     }
 
@@ -55,6 +54,8 @@ public class Player : MonoBehaviour
     {
         CurrentCell = cell;
         cachedTransform.localPosition = localPosition;
+        cachedTransform.localRotation = Quaternion.identity;
+        spriteRenderer.flipX = false;
         baseScale = Vector3.one * FitSpriteScale(cellSize, 0.82f);
         cachedTransform.localScale = baseScale;
         moveTarget = localPosition;
@@ -63,12 +64,12 @@ public class Player : MonoBehaviour
 
     public void MoveTo(Vector2Int cell, Vector3 localPosition)
     {
+        FaceDirection(cell - CurrentCell);
         CurrentCell = cell;
         moveStart = cachedTransform.localPosition;
         moveTarget = localPosition;
         moveTimer = 0f;
         IsMoving = true;
-        FaceDirection(localPosition - moveStart);
     }
 
     public void ApplyLayout(Vector3 localPosition)
@@ -80,42 +81,25 @@ public class Player : MonoBehaviour
         IsMoving = false;
     }
 
-    private void EnsureRenderer()
+    private void ApplyEquippedSkin()
     {
-        if (spriteRenderer == null)
-        {
-            spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
-        }
-
-        if (spriteRenderer.sprite == null)
-        {
-            spriteRenderer.sprite = CreateSquareSprite();
-        }
-
-        spriteRenderer.color = playerColor;
-        spriteRenderer.sortingOrder = 5;
+        MenuPlayerProgress.Initialize(skinCatalog.DefaultSkinId);
+        MenuSkinOffer skin = skinCatalog.GetSkin(MenuPlayerProgress.EquippedSkin);
+        spriteRenderer.sprite = skin.Portrait;
+        spriteRenderer.color = skin.Tint;
     }
 
     private float FitSpriteScale(float cellSize, float fill)
     {
         Vector2 size = spriteRenderer.sprite.bounds.size;
         float longestSide = Mathf.Max(size.x, size.y);
-        return longestSide > 0f ? cellSize * fill / longestSide : cellSize * fill;
+        return cellSize * fill / longestSide;
     }
 
-    private void FaceDirection(Vector3 direction)
+    private void FaceDirection(Vector2Int direction)
     {
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        modelRoot.localRotation = Quaternion.Euler(0f, 0f, angle);
+        if (direction.x != 0) spriteRenderer.flipX = direction.x < 0;
+        cachedTransform.localRotation = Quaternion.identity;
     }
 
-    private Sprite CreateSquareSprite()
-    {
-        Texture2D texture = new Texture2D(1, 1);
-        texture.SetPixel(0, 0, Color.white);
-        texture.Apply();
-        texture.filterMode = FilterMode.Point;
-
-        return Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-    }
 }

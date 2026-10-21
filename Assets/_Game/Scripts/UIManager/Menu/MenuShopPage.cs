@@ -36,10 +36,12 @@ public sealed class MenuShopPage : MonoBehaviour
     [SerializeField] private TMP_Text featuredSkinPrice;
     [SerializeField] private TMP_Text featuredButtonLabel;
     [SerializeField] private Button featuredBuyButton;
-    [SerializeField, Min(0)] private int featuredSkinIndex = 1;
+    [SerializeField, Min(0)] private int featuredSkinIndex;
     [SerializeField] private MenuPowerUpOfferView[] powerUpViews;
     [SerializeField] private GameObject insufficientCoinsState;
     [SerializeField, Min(0f)] private float processingDuration = 0.25f;
+    [SerializeField] private Button previousSkinButton;
+    [SerializeField] private Button nextSkinButton;
     private MenuCatalog catalog;
     private Action purchaseCompleted;
     private bool processing;
@@ -54,6 +56,8 @@ public sealed class MenuShopPage : MonoBehaviour
             int offerIndex = i;
             powerUpViews[i].BuyButton.onClick.AddListener(() => BuyPowerUp(offerIndex));
         }
+        previousSkinButton.onClick.AddListener(SelectPreviousSkin);
+        nextSkinButton.onClick.AddListener(SelectNextSkin);
         Refresh();
     }
 
@@ -75,17 +79,39 @@ public sealed class MenuShopPage : MonoBehaviour
     void OnDestroy()
     {
         featuredBuyButton.onClick.RemoveListener(BuyFeaturedSkin);
+        previousSkinButton.onClick.RemoveListener(SelectPreviousSkin);
+        nextSkinButton.onClick.RemoveListener(SelectNextSkin);
+    }
+
+    private void SelectPreviousSkin()
+    {
+        SelectSkin((featuredSkinIndex - 1 + catalog.Skins.Length) % catalog.Skins.Length);
+    }
+
+    private void SelectNextSkin()
+    {
+        SelectSkin((featuredSkinIndex + 1) % catalog.Skins.Length);
+    }
+
+    private void SelectSkin(int index)
+    {
+        if (processing) return;
+        SoundManager.Ins.PlayButtonSound();
+        featuredSkinIndex = index;
+        Refresh();
     }
 
     private void BuyFeaturedSkin()
     {
         if (processing) return;
+        SoundManager.Ins.PlayButtonSound();
         StartCoroutine(ProcessSkinPurchase());
     }
 
     private void BuyPowerUp(int offerIndex)
     {
         if (processing) return;
+        SoundManager.Ins.PlayButtonSound();
         StartCoroutine(ProcessPowerUpPurchase(offerIndex));
     }
 

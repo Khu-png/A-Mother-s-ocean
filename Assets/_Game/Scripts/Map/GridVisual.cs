@@ -4,6 +4,7 @@ public static class GridVisual
 {
     private static Sprite squareSprite;
     private static Sprite circleSprite;
+    private static Sprite roundedSquareSprite;
 
     public static Transform BuildGrid(Transform parent, GridBoardLayout layout,
         float lineWidth, Color color, Material lineMaterial)
@@ -37,6 +38,31 @@ public static class GridVisual
         texture.Apply();
         squareSprite = Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
         return squareSprite;
+    }
+
+    public static Sprite RoundedSquareSprite()
+    {
+        if (roundedSquareSprite != null) return roundedSquareSprite;
+        const int TEXTURE_SIZE = 128;
+        const float CORNER_RADIUS = 6f;
+        Texture2D texture = new Texture2D(TEXTURE_SIZE, TEXTURE_SIZE);
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.filterMode = FilterMode.Bilinear;
+        float halfSize = TEXTURE_SIZE * 0.5f;
+        for (int y = 0; y < TEXTURE_SIZE; y++)
+        {
+            for (int x = 0; x < TEXTURE_SIZE; x++)
+            {
+                float dx = Mathf.Max(Mathf.Abs(x + 0.5f - halfSize) - (halfSize - CORNER_RADIUS), 0f);
+                float dy = Mathf.Max(Mathf.Abs(y + 0.5f - halfSize) - (halfSize - CORNER_RADIUS), 0f);
+                float alpha = Mathf.Clamp01(CORNER_RADIUS - Mathf.Sqrt(dx * dx + dy * dy));
+                texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+            }
+        }
+        texture.Apply(false, true);
+        roundedSquareSprite = Sprite.Create(texture, new Rect(0f, 0f, TEXTURE_SIZE, TEXTURE_SIZE),
+            new Vector2(0.5f, 0.5f), TEXTURE_SIZE);
+        return roundedSquareSprite;
     }
 
     public static Sprite CircleSprite()

@@ -43,6 +43,7 @@ public sealed class MapAiAnalysisResult
     public bool CompletionSearchLimited { get; set; }
     public bool SearchLimited { get; set; }
     public int SearchExpansions { get; set; }
+    public int DecisionPoints { get; set; }
     public int SuggestedSeconds { get; set; }
     public Vector2Int Start { get; set; }
     public Vector2Int Finish { get; set; }

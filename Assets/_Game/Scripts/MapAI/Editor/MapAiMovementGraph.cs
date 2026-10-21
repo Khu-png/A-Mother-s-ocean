@@ -47,24 +47,48 @@ public static class MapAiMovementGraph
 
     public static bool CanMove(MapAiMapData map, Vector2Int from, Vector2Int to)
     {
+        return CanMove(map, from, to, 0);
+    }
+
+    public static bool CanMove(MapAiMapData map, Vector2Int from,
+        Vector2Int to, int rotationPhase)
+    {
         if (!map.Contains(from) || !map.Contains(to)) return false;
         char fromCode = map.GetCell(from);
         char toCode = map.GetCell(to);
         if (MapCode.IsBlock(fromCode) || MapCode.IsBlock(toCode)) return false;
         Vector2Int editorDirection = to - from;
         Vector2Int gameDirection = new Vector2Int(editorDirection.x, -editorDirection.y);
-        return Allows(fromCode, gameDirection) && Allows(toCode, -gameDirection);
+        return Allows(fromCode, gameDirection, rotationPhase)
+            && Allows(toCode, -gameDirection, rotationPhase);
     }
 
-    private static bool Allows(char code, Vector2Int direction)
+    private static bool Allows(char code, Vector2Int direction, int rotationPhase)
     {
         if (!MapCode.IsOneWay(code)) return true;
-        OneWayPathState state = MapCode.PathState(code);
+        OneWayPathState state = MapCode.PathState(RotateCode(code, rotationPhase));
         if (state == OneWayPathState.Vertical) return direction == Vector2Int.up || direction == Vector2Int.down;
         if (state == OneWayPathState.Horizontal) return direction == Vector2Int.left || direction == Vector2Int.right;
         if (state == OneWayPathState.LeftDown) return direction == Vector2Int.left || direction == Vector2Int.down;
         if (state == OneWayPathState.LeftUp) return direction == Vector2Int.left || direction == Vector2Int.up;
         if (state == OneWayPathState.UpRight) return direction == Vector2Int.up || direction == Vector2Int.right;
         return direction == Vector2Int.right || direction == Vector2Int.down;
+    }
+
+    private static char RotateCode(char code, int rotationPhase)
+    {
+        char rotated = code;
+        for (int i = 0; i < rotationPhase; i++)
+        {
+            if (rotated == '|') rotated = '-';
+            else if (rotated == '-') rotated = '|';
+            else if (rotated == 'U' || rotated == 'D') rotated = 'R';
+            else if (rotated == 'R' || rotated == 'L') rotated = 'U';
+            else if (rotated == 'A') rotated = 'E';
+            else if (rotated == 'E') rotated = 'C';
+            else if (rotated == 'C') rotated = 'B';
+            else if (rotated == 'B') rotated = 'A';
+        }
+        return rotated;
     }
 }

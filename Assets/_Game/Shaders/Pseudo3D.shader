@@ -16,7 +16,7 @@ Shader "A Mothers Ocean/Pseudo 3D"
 
         Pass
         {
-            Tags { "LightMode" = "UniversalForward" }
+            Tags { "LightMode" = "SRPDefaultUnlit" }
             ZWrite On
             Cull Back
 

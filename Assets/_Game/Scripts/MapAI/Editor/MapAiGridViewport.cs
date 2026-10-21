@@ -10,7 +10,7 @@ public sealed class MapAiGridViewport
     [SerializeField] private Vector2 pan;
 
     public bool Draw(Rect area, MapAiGridDocument document, string[] displayedRows,
-        bool isPreview, char brush, bool lockMode, MapAiGridOverlay overlay,
+        bool isPreview, char? brush, bool lockMode, MapAiGridOverlay overlay,
         UnityEngine.Object undoOwner)
     {
         EditorGUI.DrawRect(area, new Color(0.09f, 0.11f, 0.13f));
@@ -68,10 +68,9 @@ public sealed class MapAiGridViewport
         Vector2Int cell, bool locked, GUIStyle cellStyle)
     {
         Color color = CellColor(code);
-        if (overlay.Shortest.Contains(cell)) color = Color.Lerp(color, new Color(0.1f, 0.7f, 1f), 0.55f);
+        if (overlay.Shortest.Contains(cell)) color = Color.Lerp(color, new Color(0.2f, 0.85f, 0.25f), 0.55f);
         if (overlay.DeadEnds.Contains(cell)) color = Color.Lerp(color, new Color(1f, 0.65f, 0.1f), 0.5f);
         if (overlay.Misleading.Contains(cell)) color = Color.Lerp(color, new Color(1f, 0.2f, 0.65f), 0.65f);
-        if (overlay.Selected.Contains(cell)) color = Color.Lerp(color, Color.white, 0.4f);
         EditorGUI.DrawRect(new Rect(rect.x + 1f, rect.y + 1f,
             rect.width - 2f, rect.height - 2f), color);
         GUI.Label(rect, code.ToString(), cellStyle);
@@ -79,15 +78,15 @@ public sealed class MapAiGridViewport
     }
 
     private static bool HandlePaint(Rect rect, MapAiGridDocument document,
-        int x, int y, char brush, bool lockMode, UnityEngine.Object undoOwner)
+        int x, int y, char? brush, bool lockMode, UnityEngine.Object undoOwner)
     {
         Event current = Event.current;
         if (current.type != EventType.MouseDown || current.button != 0
             || !rect.Contains(current.mousePosition)) return false;
-        if (!lockMode && document.IsLocked(x, y)) return false;
+        if (!lockMode && (!brush.HasValue || document.IsLocked(x, y))) return false;
         Undo.RecordObject(undoOwner, lockMode ? "Toggle Map Cell Lock" : "Paint Map Cell");
         if (lockMode) document.ToggleLock(x, y);
-        else document.SetCell(x, y, brush);
+        else document.SetCell(x, y, brush.Value);
         current.Use();
         return true;
     }
@@ -128,5 +127,31 @@ public sealed class MapAiGridOverlay
     public readonly HashSet<Vector2Int> Shortest = new HashSet<Vector2Int>();
     public readonly HashSet<Vector2Int> DeadEnds = new HashSet<Vector2Int>();
     public readonly HashSet<Vector2Int> Misleading = new HashSet<Vector2Int>();
-    public readonly HashSet<Vector2Int> Selected = new HashSet<Vector2Int>();
+
+    public static MapAiGridOverlay Build(MapAiAnalysisResult result,
+        MapAiAnalysisPanel analysisPanel)
+    {
+        MapAiGridOverlay overlay = new MapAiGridOverlay();
+        if (analysisPanel.OverlayMode == MapAiOverlayMode.CompletionPath)
+            overlay.Shortest.UnionWith(result.CompletionPath);
+        for (int i = 0; i < result.DeadEnds.Count; i++)
+        {
+            MapAiBranch branch = result.DeadEnds[i];
+            if (analysisPanel.OverlayMode == MapAiOverlayMode.DeadEnds)
+                overlay.DeadEnds.UnionWith(branch.Cells);
+            if (analysisPanel.OverlayMode == MapAiOverlayMode.MisleadingCandidates
+                && branch.IsMisleadingCandidate)
+                overlay.Misleading.UnionWith(branch.Cells);
+            if (analysisPanel.OverlayMode == MapAiOverlayMode.SelectedBranch
+                && analysisPanel.SelectedBranch == i)
+            {
+                if (branch.IsMisleadingCandidate) overlay.Misleading.UnionWith(branch.Cells);
+                else overlay.DeadEnds.UnionWith(branch.Cells);
+            }
+        }
+        if (analysisPanel.OverlayMode == MapAiOverlayMode.SelectedRoute
+            && analysisPanel.SelectedPath >= 0 && analysisPanel.SelectedPath < result.Paths.Count)
+            overlay.Shortest.UnionWith(result.Paths[analysisPanel.SelectedPath]);
+        return overlay;
+    }
 }

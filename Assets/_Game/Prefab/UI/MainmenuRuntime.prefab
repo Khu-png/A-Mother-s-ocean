@@ -805,7 +805,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Skin
+  m_text: Inv
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bad6fe02600c36f4a8b854656d73e38a, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 8809af02ac391a2cfca863f320f3f595, type: 2}
@@ -2588,7 +2588,7 @@ MonoBehaviour:
   featuredSkinPrice: {fileID: 1367257639275651223}
   featuredButtonLabel: {fileID: 4028074761354981928}
   featuredBuyButton: {fileID: 257534426337871105}
-  featuredSkinIndex: 1
+  featuredSkinIndex: 0
   powerUpViews:
   - quantity: {fileID: 4477389367668510453}
     price: {fileID: 3478372681304426564}
@@ -2604,6 +2604,8 @@ MonoBehaviour:
     buyButton: {fileID: 3756988403186679293}
   insufficientCoinsState: {fileID: 2986690381743007056}
   processingDuration: 0.25
+  previousSkinButton: {fileID: 8400000000000000000}
+  nextSkinButton: {fileID: 8400000000000000001}
 --- !u!114 &607676019120428691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4680,3 +4682,25 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 118355529398948631, guid: 1ca9694cc634caeb50f4b3d8a12f1320, type: 3}
   m_PrefabInstance: {fileID: 4018481931070529190}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8400000000000000000 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8300000000000000004, guid: 4f7856852a6c51173491dfb38d144fe3, type: 3}
+  m_PrefabInstance: {fileID: 3836524322637814312}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+--- !u!114 &8400000000000000001 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8300000000000000013, guid: 4f7856852a6c51173491dfb38d144fe3, type: 3}
+  m_PrefabInstance: {fileID: 3836524322637814312}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:

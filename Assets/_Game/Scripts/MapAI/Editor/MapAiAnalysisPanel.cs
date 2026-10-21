@@ -2,20 +2,26 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
+public enum MapAiOverlayMode
+{
+    Normal,
+    CompletionPath,
+    DeadEnds,
+    MisleadingCandidates,
+    SelectedRoute,
+    SelectedBranch
+}
+
 [Serializable]
 public sealed class MapAiAnalysisPanel
 {
     [SerializeField] private Vector2 scroll;
-    [SerializeField] private bool showShortest = true;
-    [SerializeField] private bool showDeadEnds = true;
-    [SerializeField] private bool showMisleading = true;
+    [SerializeField] private MapAiOverlayMode overlayMode;
     [SerializeField] private int selectedBranch = -1;
     [SerializeField] private int selectedPath = -1;
     [SerializeField] private string aiRequest = string.Empty;
 
-    public bool ShowShortest => showShortest;
-    public bool ShowDeadEnds => showDeadEnds;
-    public bool ShowMisleading => showMisleading;
+    public MapAiOverlayMode OverlayMode => overlayMode;
     public int SelectedBranch => selectedBranch;
     public int SelectedPath => selectedPath;
     public string AiRequest => aiRequest;
@@ -42,7 +48,8 @@ public sealed class MapAiAnalysisPanel
             ? "Playable" : "Needs attention");
         EditorGUILayout.LabelField("Shortest completion", result.CanComplete
             ? $"{Mathf.Max(0, result.CompletionPath.Count - 1)} steps" : "Unavailable");
-        EditorGUILayout.LabelField("Enumerated S-F paths", result.Paths.Count.ToString());
+        EditorGUILayout.LabelField("Complete solutions", result.Paths.Count.ToString());
+        EditorGUILayout.LabelField("Decision points", result.DecisionPoints.ToString());
         EditorGUILayout.LabelField("Dead-end branches", result.DeadEnds.Count.ToString());
         EditorGUILayout.LabelField("Misleading candidates", result.MisleadingCount.ToString());
         EditorGUILayout.LabelField("Suggested time", $"{result.SuggestedSeconds} seconds");
@@ -60,10 +67,25 @@ public sealed class MapAiAnalysisPanel
     private void DrawOverlays()
     {
         EditorGUILayout.Space(8f);
-        EditorGUILayout.LabelField("Overlays", EditorStyles.boldLabel);
-        showShortest = EditorGUILayout.ToggleLeft("Shortest path", showShortest);
-        showDeadEnds = EditorGUILayout.ToggleLeft("Dead ends", showDeadEnds);
-        showMisleading = EditorGUILayout.ToggleLeft("Misleading candidates", showMisleading);
+        EditorGUILayout.LabelField("Map Highlight", EditorStyles.boldLabel);
+        overlayMode = (MapAiOverlayMode)EditorGUILayout.EnumPopup("View mode", overlayMode);
+        DrawLegend();
+    }
+
+    private static void DrawLegend()
+    {
+        EditorGUILayout.BeginHorizontal();
+        DrawLegendItem(new Color(0.2f, 0.85f, 0.25f), "Completion path");
+        DrawLegendItem(new Color(1f, 0.65f, 0.1f), "Dead end");
+        DrawLegendItem(new Color(1f, 0.2f, 0.65f), "Misleading");
+        EditorGUILayout.EndHorizontal();
+    }
+
+    private static void DrawLegendItem(Color color, string label)
+    {
+        Rect swatch = GUILayoutUtility.GetRect(10f, 10f, GUILayout.Width(10f));
+        EditorGUI.DrawRect(swatch, color);
+        GUILayout.Label(label, EditorStyles.miniLabel);
     }
 
     private void DrawPaths(MapAiAnalysisResult result)
@@ -74,7 +96,19 @@ public sealed class MapAiAnalysisPanel
         for (int i = 0; i < visibleCount; i++)
         {
             string label = $"Route {i + 1} - {result.Paths[i].Count - 1} steps";
-            if (GUILayout.Toggle(selectedPath == i, label, "Button")) selectedPath = i;
+            bool selected = selectedPath == i;
+            bool active = GUILayout.Toggle(selected, label, "Button");
+            if (active)
+            {
+                selectedPath = i;
+                selectedBranch = -1;
+                overlayMode = MapAiOverlayMode.SelectedRoute;
+            }
+            else if (selected)
+            {
+                selectedPath = -1;
+                overlayMode = MapAiOverlayMode.Normal;
+            }
         }
         if (result.Paths.Count > visibleCount)
             EditorGUILayout.LabelField($"+ {result.Paths.Count - visibleCount} more routes");
@@ -89,10 +123,22 @@ public sealed class MapAiAnalysisPanel
             MapAiBranch branch = result.DeadEnds[i];
             string marker = branch.IsMisleadingCandidate ? "Candidate" : "Branch";
             string label = $"{marker} {i + 1} - depth {branch.Cells.Count - 1}";
-            if (GUILayout.Toggle(selectedBranch == i, label, "Button")) selectedBranch = i;
+            bool selected = selectedBranch == i;
+            bool active = GUILayout.Toggle(selected, label, "Button");
+            if (active)
+            {
+                selectedBranch = i;
+                selectedPath = -1;
+                overlayMode = MapAiOverlayMode.SelectedBranch;
+            }
+            else if (selected)
+            {
+                selectedBranch = -1;
+                overlayMode = MapAiOverlayMode.Normal;
+            }
         }
         EditorGUILayout.HelpBox(
-            "Candidates use geometric distance and required return distance. Line of sight is not verified.",
+            "Branch analysis uses the initial pipe state; route solving tracks rotation and backtracking. Line of sight is not verified.",
             MessageType.Info);
     }
 

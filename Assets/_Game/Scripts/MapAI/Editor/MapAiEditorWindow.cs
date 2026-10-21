@@ -13,6 +13,7 @@ public sealed class MapAiEditorWindow : EditorWindow
     [SerializeField] private MapAiControlPanel controls = new MapAiControlPanel();
     [SerializeField] private MapAiAnalysisPanel analysisPanel = new MapAiAnalysisPanel();
     [SerializeField] private MapAiGridViewport viewport = new MapAiGridViewport();
+    [SerializeField] private MapAiPreviewCollection previewCollection = new MapAiPreviewCollection();
     [SerializeField] private string[] previewRows = Array.Empty<string>();
     [SerializeField] private bool hasPreview;
     [SerializeField] private bool previewCanApply;
@@ -29,9 +30,11 @@ public sealed class MapAiEditorWindow : EditorWindow
         document.Initialize();
         generation.Columns = document.Width;
         generation.Rows = document.Height;
+        generation.ApplyPreset();
         Undo.undoRedoPerformed += HandleUndoRedo;
         AnalyzeCurrent();
-        if (hasPreview) AnalyzePreview();
+        if (hasPreview && previewCollection.Count > 0) SelectPreview();
+        else hasPreview = false;
     }
 
     void OnDisable()
@@ -50,10 +53,11 @@ public sealed class MapAiEditorWindow : EditorWindow
             Mathf.Max(40f, right.xMin - left.xMax - GAP * 2f), content.height);
 
         MapAiEditorCommand command = controls.Draw(left, generation,
-            hasPreview, previewCanApply, status);
+            hasPreview, previewCanApply, previewCollection.SelectedIndex,
+            previewCollection.Count, status);
         Execute(command);
         MapAiAnalysisResult displayedAnalysis = hasPreview ? previewAnalysis : analysis;
-        MapAiGridOverlay overlay = BuildOverlay(displayedAnalysis);
+        MapAiGridOverlay overlay = MapAiGridOverlay.Build(displayedAnalysis, analysisPanel);
         string[] displayedRows = hasPreview ? previewRows : document.ToRows();
         if (viewport.Draw(center, document, displayedRows, hasPreview,
             controls.BrushCode, controls.LockMode, overlay, this)) AnalyzeCurrent();
@@ -85,6 +89,9 @@ public sealed class MapAiEditorWindow : EditorWindow
         else if (command == MapAiEditorCommand.Generate) GeneratePreview();
         else if (command == MapAiEditorCommand.ApplyPreview) ApplyPreview();
         else if (command == MapAiEditorCommand.DiscardPreview) DiscardPreview();
+        else if (command == MapAiEditorCommand.CreateLevel) status = MapLevelRegistration.Create(controls.LevelManager, controls.LevelNumber, document.ToRows(), out levelData);
+        else if (command == MapAiEditorCommand.PreviousPreview) SelectAdjacentPreview(-1);
+        else if (command == MapAiEditorCommand.NextPreview) SelectAdjacentPreview(1);
     }
 
     private void Resize()
@@ -102,14 +109,28 @@ public sealed class MapAiEditorWindow : EditorWindow
             Undo.RecordObject(this, "Resize Grid For Generation");
             document.Resize(generation.Columns, generation.Rows);
         }
-        MapAiGenerationResult result = MapAiToolApi.Generate(
-            document.Snapshot(), document.ToLocks(), generation);
-        previewRows = result.Rows;
-        previewAnalysis = result.Analysis;
-        hasPreview = true;
-        previewCanApply = result.Success;
-        status = result.Message;
+        status = previewCollection.Generate(document.Snapshot(),
+            document.ToLocks(), generation, controls.SampleCount);
+        hasPreview = previewCollection.Count > 0;
+        if (hasPreview) SelectPreview();
+        else DiscardPreview();
         Repaint();
+    }
+
+    private void SelectAdjacentPreview(int direction)
+    {
+        if (!previewCollection.Move(direction)) return;
+        SelectPreview();
+        status = $"Sample {previewCollection.SelectedIndex + 1} of {previewCollection.Count}. {previewCollection.Current.Message}";
+    }
+
+    private void SelectPreview()
+    {
+        previewRows = previewCollection.Current.Rows;
+        previewAnalysis = MapAiAnalyzer.Analyze(new MapAiMapData(previewRows),
+            generation.SearchBudget, generation.Difficulty);
+        hasPreview = true;
+        previewCanApply = previewAnalysis.IsValid && previewAnalysis.CanComplete;
     }
 
     private void ApplyPreview()
@@ -122,6 +143,7 @@ public sealed class MapAiEditorWindow : EditorWindow
 
     private void DiscardPreview()
     {
+        previewCollection.Clear();
         previewRows = Array.Empty<string>();
         previewAnalysis = new MapAiAnalysisResult();
         hasPreview = false;
@@ -135,23 +157,6 @@ public sealed class MapAiEditorWindow : EditorWindow
         status = analysis.IsValid && analysis.CanComplete
             ? "Map is playable." : "Map needs attention before saving.";
         Repaint();
-    }
-
-    private MapAiGridOverlay BuildOverlay(MapAiAnalysisResult result)
-    {
-        MapAiGridOverlay overlay = new MapAiGridOverlay();
-        if (analysisPanel.ShowShortest) overlay.Shortest.UnionWith(result.CompletionPath);
-        for (int i = 0; i < result.DeadEnds.Count; i++)
-        {
-            MapAiBranch branch = result.DeadEnds[i];
-            if (analysisPanel.ShowDeadEnds) overlay.DeadEnds.UnionWith(branch.Cells);
-            if (analysisPanel.ShowMisleading && branch.IsMisleadingCandidate)
-                overlay.Misleading.UnionWith(branch.Cells);
-            if (analysisPanel.SelectedBranch == i) overlay.Selected.UnionWith(branch.Cells);
-        }
-        if (analysisPanel.SelectedPath >= 0 && analysisPanel.SelectedPath < result.Paths.Count)
-            overlay.Selected.UnionWith(result.Paths[analysisPanel.SelectedPath]);
-        return overlay;
     }
 
     private void LoadLevel()
@@ -209,16 +214,9 @@ public sealed class MapAiEditorWindow : EditorWindow
             return;
         }
         previewRows = proposal.Rows;
-        AnalyzePreview();
-        hasPreview = true;
-        previewCanApply = previewAnalysis.IsValid && previewAnalysis.CanComplete;
+        previewCollection.SetSingle(proposal.Rows, proposal.Explanation);
+        SelectPreview();
         status = proposal.Explanation;
-    }
-
-    private void AnalyzePreview()
-    {
-        previewAnalysis = MapAiAnalyzer.Analyze(new MapAiMapData(previewRows),
-            generation.SearchBudget, generation.Difficulty);
     }
 
     private bool MatchesDocumentSize(string[] rows)

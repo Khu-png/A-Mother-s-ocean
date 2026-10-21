@@ -16,10 +16,9 @@ public static class MapAiAnalyzer
         result.Finish = finishes[0];
         FindShortestPath(map, result);
         FindDistancesToFinish(map, result);
-        ValidateTargets(map, result);
         MapAiBranchAnalyzer.FindBranches(map, result);
         MapAiPathSearch.Enumerate(map, budget, result);
-        FindCompletionPath(map, result);
+        FindCompletionPath(result);
         result.SuggestedSeconds = SuggestedTime(result, difficulty);
         return result;
     }
@@ -55,11 +54,7 @@ public static class MapAiAnalyzer
         }
 
         result.IsReachable = result.ReachableFromStart.Contains(result.Finish);
-        if (!result.IsReachable)
-        {
-            result.Issues.Add("Không có đường hợp lệ từ S tới F theo luật di chuyển hiện tại.");
-            return;
-        }
+        if (!result.IsReachable) return;
 
         Vector2Int step = result.Finish;
         result.ShortestPath.Add(step);
@@ -92,25 +87,6 @@ public static class MapAiAnalyzer
         }
     }
 
-    private static void ValidateTargets(MapAiMapData map, MapAiAnalysisResult result)
-    {
-        List<Vector2Int> targets = map.Find('T');
-        for (int i = 0; i < targets.Count; i++)
-        {
-            Vector2Int target = targets[i];
-            if (!result.ReachableFromStart.Contains(target))
-            {
-                result.Issues.Add($"Không thể đi từ S tới target ({target.x}, {target.y}).");
-                result.IsValid = false;
-            }
-            if (!result.DistanceToFinish.ContainsKey(target))
-            {
-                result.Issues.Add($"Target tại ({target.x}, {target.y}) không thể tới F.");
-                result.IsValid = false;
-            }
-        }
-    }
-
     private static int SuggestedTime(MapAiAnalysisResult result, MapAiDifficulty difficulty)
     {
         int steps = Mathf.Max(0, result.CompletionPath.Count - 1);
@@ -121,20 +97,11 @@ public static class MapAiAnalyzer
         return Mathf.CeilToInt(steps * multiplier + branchAllowance);
     }
 
-    private static void FindCompletionPath(MapAiMapData map, MapAiAnalysisResult result)
+    private static void FindCompletionPath(MapAiAnalysisResult result)
     {
-        List<Vector2Int> targets = map.Find('T');
-        if (targets.Count == 0)
-        {
-            result.CanComplete = result.IsReachable;
-            result.CompletionPath.AddRange(result.ShortestPath);
-            return;
-        }
-
         for (int i = 0; i < result.Paths.Count; i++)
         {
             List<Vector2Int> path = result.Paths[i];
-            if (!ContainsAll(path, targets)) continue;
             if (result.CompletionPath.Count == 0 || path.Count < result.CompletionPath.Count)
             {
                 result.CompletionPath.Clear();
@@ -143,20 +110,18 @@ public static class MapAiAnalyzer
         }
 
         result.CanComplete = result.CompletionPath.Count > 0;
+        result.IsReachable = result.CanComplete;
+        if (result.CanComplete)
+        {
+            result.ShortestPath.Clear();
+            result.ShortestPath.AddRange(result.CompletionPath);
+        }
         result.CompletionSearchLimited = !result.CanComplete && result.SearchLimited;
         if (!result.CanComplete && !result.CompletionSearchLimited)
         {
             result.IsValid = false;
-            result.Issues.Add("Không có đường không lặp ô thu đủ target rồi tới F.");
+            result.Issues.Add("Không có đường hợp lệ thu đủ target rồi tới F.");
         }
     }
 
-    private static bool ContainsAll(List<Vector2Int> path, List<Vector2Int> targets)
-    {
-        for (int i = 0; i < targets.Count; i++)
-        {
-            if (!path.Contains(targets[i])) return false;
-        }
-        return true;
-    }
 }

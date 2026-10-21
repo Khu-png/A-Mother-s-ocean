@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +23,11 @@ public sealed class MenuSkinSlotView
         button.interactable = !selected;
     }
 
+    public void SetVisible(bool visible)
+    {
+        button.gameObject.SetActive(visible);
+    }
+
     private string OwnershipText(MenuSkinOffer offer)
     {
         if (MenuPlayerProgress.EquippedSkin == offer.Id) return "Equipped";
@@ -39,6 +45,7 @@ public sealed class MenuSkinPage : MonoBehaviour
     [SerializeField] private Button equipButton;
     [SerializeField] private MenuSkinSlotView[] slots;
     private MenuCatalog catalog;
+    private readonly List<int> OWNED_SKINS = new List<int>();
     private int selectedIndex;
 
     public void Initialize(MenuCatalog menuCatalog)
@@ -52,13 +59,17 @@ public sealed class MenuSkinPage : MonoBehaviour
             int slotIndex = i;
             slots[i].Button.onClick.AddListener(() => Select(slotIndex));
         }
-        selectedIndex = EquippedSkinIndex();
+        RebuildOwnedSkins();
+        selectedIndex = OWNED_SKINS.IndexOf(EquippedSkinIndex());
         Refresh();
     }
 
     public void Refresh()
     {
-        MenuSkinOffer selected = catalog.Skins[selectedIndex];
+        int selectedCatalogIndex = OWNED_SKINS[selectedIndex];
+        RebuildOwnedSkins();
+        selectedIndex = OWNED_SKINS.IndexOf(selectedCatalogIndex);
+        MenuSkinOffer selected = catalog.Skins[OWNED_SKINS[selectedIndex]];
         selectedPreview.sprite = selected.Portrait;
         selectedPreview.color = selected.Tint;
         selectedName.text = selected.DisplayName;
@@ -66,7 +77,14 @@ public sealed class MenuSkinPage : MonoBehaviour
         bool equipped = MenuPlayerProgress.EquippedSkin == selected.Id;
         equipButton.interactable = owned && !equipped;
         equipButtonLabel.text = equipped ? "Equipped" : owned ? "Equip" : "Locked";
-        for (int i = 0; i < slots.Length; i++) slots[i].Display(catalog.Skins[i], i == selectedIndex);
+        previousButton.interactable = OWNED_SKINS.Count > 1;
+        nextButton.interactable = OWNED_SKINS.Count > 1;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            bool visible = i < OWNED_SKINS.Count;
+            slots[i].SetVisible(visible);
+            if (visible) slots[i].Display(catalog.Skins[OWNED_SKINS[i]], i == selectedIndex);
+        }
     }
 
     void OnDestroy()
@@ -78,24 +96,35 @@ public sealed class MenuSkinPage : MonoBehaviour
 
     private void SelectPrevious()
     {
-        Select((selectedIndex - 1 + catalog.Skins.Length) % catalog.Skins.Length);
+        Select((selectedIndex - 1 + OWNED_SKINS.Count) % OWNED_SKINS.Count);
     }
 
     private void SelectNext()
     {
-        Select((selectedIndex + 1) % catalog.Skins.Length);
+        Select((selectedIndex + 1) % OWNED_SKINS.Count);
     }
 
     private void Select(int index)
     {
+        SoundManager.Ins.PlayButtonSound();
         selectedIndex = index;
         Refresh();
     }
 
     private void EquipSelected()
     {
-        MenuPlayerProgress.EquipSkin(catalog.Skins[selectedIndex].Id);
+        SoundManager.Ins.PlayButtonSound();
+        MenuPlayerProgress.EquipSkin(catalog.Skins[OWNED_SKINS[selectedIndex]].Id);
         Refresh();
+    }
+
+    private void RebuildOwnedSkins()
+    {
+        OWNED_SKINS.Clear();
+        for (int i = 0; i < catalog.Skins.Length; i++)
+        {
+            if (MenuPlayerProgress.IsSkinOwned(catalog.Skins[i].Id)) OWNED_SKINS.Add(i);
+        }
     }
 
     private int EquippedSkinIndex()

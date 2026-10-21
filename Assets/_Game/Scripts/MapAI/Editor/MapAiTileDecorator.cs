@@ -130,7 +130,7 @@ public static class MapAiTileDecorator
         return placed;
     }
 
-    private static char RouteCode(Vector2Int previous, Vector2Int cell,
+    public static char RouteCode(Vector2Int previous, Vector2Int cell,
         Vector2Int next, bool straight)
     {
         Vector2Int first = ToGameDirection(previous - cell);

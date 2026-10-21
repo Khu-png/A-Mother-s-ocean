@@ -39,4 +39,30 @@ public static class MapLevelRegistration
         if (manager.gameObject.scene.IsValid())
             EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
     }
+
+    public static string Create(LevelManager manager, int requestedLevelNumber,
+        string[] rows, out LevelData asset)
+    {
+        int levelNumber = Mathf.Max(1, requestedLevelNumber);
+        string path = $"Assets/_Game/ScriptableObject/Map/Level_{levelNumber}.asset";
+        Validate(manager, levelNumber, path);
+        EnsureLevelDataFolder();
+
+        asset = ScriptableObject.CreateInstance<LevelData>();
+        asset.SetMapRows(rows);
+        AssetDatabase.CreateAsset(asset, path);
+        Assign(manager, levelNumber, asset);
+        AssetDatabase.SaveAssets();
+        return $"Đã tạo Level {levelNumber} và gán vào Level Manager. Hãy lưu scene/prefab.";
+    }
+
+    private static void EnsureLevelDataFolder()
+    {
+        const string root = "Assets/_Game/ScriptableObject";
+        const string map = root + "/Map";
+        if (!AssetDatabase.IsValidFolder(root))
+            AssetDatabase.CreateFolder("Assets/_Game", "ScriptableObject");
+        if (!AssetDatabase.IsValidFolder(map))
+            AssetDatabase.CreateFolder(root, "Map");
+    }
 }

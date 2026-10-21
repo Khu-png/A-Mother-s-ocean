@@ -8,7 +8,10 @@ public enum MapAiEditorCommand
     Resize,
     Generate,
     ApplyPreview,
-    DiscardPreview
+    DiscardPreview,
+    CreateLevel,
+    PreviousPreview,
+    NextPreview
 }
 
 [Serializable]
@@ -27,13 +30,21 @@ public sealed class MapAiControlPanel
     [SerializeField] private Vector2 scroll;
     [SerializeField] private int selectedBrush;
     [SerializeField] private bool lockMode;
-    [SerializeField] private bool advanced;
+    [SerializeField] private bool reproducibility;
+    [SerializeField] private bool showLevelSave;
+    [SerializeField] private LevelManager levelManager;
+    [SerializeField] private int levelNumber = 1;
+    [SerializeField, Range(2, 10)] private int sampleCount = 5;
 
-    public char BrushCode => BRUSH_CODES[selectedBrush];
+    public char? BrushCode => selectedBrush < 0 ? (char?)null : BRUSH_CODES[selectedBrush];
     public bool LockMode => lockMode;
+    public LevelManager LevelManager => levelManager;
+    public int LevelNumber => levelNumber;
+    public int SampleCount => sampleCount;
 
     public MapAiEditorCommand Draw(Rect area, MapAiGenerationSettings settings,
-        bool hasPreview, bool canApplyPreview, string status)
+        bool hasPreview, bool canApplyPreview, int previewIndex,
+        int previewCount, string status)
     {
         MapAiEditorCommand command = MapAiEditorCommand.None;
         GUILayout.BeginArea(area, EditorStyles.helpBox);
@@ -50,16 +61,24 @@ public sealed class MapAiControlPanel
             settings.Difficulty = difficulty;
             settings.ApplyPreset();
         }
-        DrawGenerationSettings(settings);
+        MapAiPuzzleFocus focus = (MapAiPuzzleFocus)EditorGUILayout.EnumPopup(
+            "Puzzle focus", settings.PuzzleFocus);
+        if (focus != settings.PuzzleFocus)
+        {
+            settings.PuzzleFocus = focus;
+            settings.ApplyPreset();
+        }
 
         if (GUILayout.Button("Resize Grid")) command = MapAiEditorCommand.Resize;
-        advanced = EditorGUILayout.Foldout(advanced, "Advanced", true);
-        if (advanced) DrawAdvanced(settings);
-        if (GUILayout.Button("Generate Preview", GUILayout.Height(28f)))
+        sampleCount = EditorGUILayout.IntSlider("Unique samples", sampleCount, 2, 10);
+        reproducibility = EditorGUILayout.Foldout(reproducibility, "Reproducibility", true);
+        if (reproducibility) settings.Seed = EditorGUILayout.IntField("Seed", settings.Seed);
+        if (GUILayout.Button("Generate Samples", GUILayout.Height(28f)))
             command = MapAiEditorCommand.Generate;
 
         if (hasPreview)
         {
+            DrawPreviewNavigation(previewIndex, previewCount, ref command);
             EditorGUILayout.Space(6f);
             using (new EditorGUI.DisabledScope(!canApplyPreview))
             {
@@ -68,55 +87,68 @@ public sealed class MapAiControlPanel
             if (GUILayout.Button("Discard Preview")) command = MapAiEditorCommand.DiscardPreview;
         }
 
+        DrawLevelSave(hasPreview, ref command);
         DrawBrushes();
         lockMode = EditorGUILayout.ToggleLeft("Lock / unlock cells", lockMode);
         EditorGUILayout.HelpBox(lockMode
             ? "Click cells to protect them from generation."
-            : "Click a cell to paint with the selected tile.", MessageType.Info);
+            : selectedBrush < 0
+                ? "No tile selected. Choose a tile to paint."
+                : "Click a cell to paint with the selected tile.", MessageType.Info);
         if (status != string.Empty) EditorGUILayout.HelpBox(status, MessageType.None);
         EditorGUILayout.EndScrollView();
         GUILayout.EndArea();
         return command;
     }
 
-    private static void DrawGenerationSettings(MapAiGenerationSettings settings)
+    private static void DrawPreviewNavigation(int previewIndex, int previewCount,
+        ref MapAiEditorCommand command)
     {
-        int maximumTargets = Mathf.Max(0, settings.Columns * settings.Rows - 2);
-        settings.TargetCount = EditorGUILayout.IntSlider(
-            "Targets", settings.TargetCount, 0, maximumTargets);
-        settings.RockRatio = DrawPercent("Rocks (all cells)", settings.RockRatio, 75f);
-        settings.RotateRatio = DrawPercent("Rotate (walkable)", settings.RotateRatio, 50f);
-        settings.StraightOneWayRatio = DrawPercent(
-            "Straight 1-way (walkable)", settings.StraightOneWayRatio, 50f);
-        settings.CornerOneWayRatio = DrawPercent(
-            "Corner 1-way (walkable)", settings.CornerOneWayRatio, 50f);
-        settings.Seed = EditorGUILayout.IntField("Seed", settings.Seed);
+        if (previewCount < 2) return;
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Previous") && previewIndex > 0)
+            command = MapAiEditorCommand.PreviousPreview;
+        EditorGUILayout.LabelField($"Sample {previewIndex + 1} / {previewCount}",
+            EditorStyles.centeredGreyMiniLabel);
+        if (GUILayout.Button("Next") && previewIndex < previewCount - 1)
+            command = MapAiEditorCommand.NextPreview;
+        EditorGUILayout.EndHorizontal();
     }
 
-    private static float DrawPercent(string label, float ratio, float maximum)
+    private void DrawLevelSave(bool hasPreview, ref MapAiEditorCommand command)
     {
-        return EditorGUILayout.Slider(label, ratio * 100f, 0f, maximum) * 0.01f;
-    }
+        showLevelSave = EditorGUILayout.Foldout(showLevelSave, "Save As Game Level", true);
+        if (!showLevelSave) return;
 
-    private static void DrawAdvanced(MapAiGenerationSettings settings)
-    {
-        settings.ExtraConnectionChance = EditorGUILayout.Slider(
-            "Extra connections", settings.ExtraConnectionChance, 0f, 0.5f);
-        settings.SearchBudget.MaximumPaths = EditorGUILayout.IntField(
-            "Maximum paths", settings.SearchBudget.MaximumPaths);
-        settings.SearchBudget.MaximumPathLength = EditorGUILayout.IntField(
-            "Maximum path length", settings.SearchBudget.MaximumPathLength);
-        settings.SearchBudget.MaximumExpansions = EditorGUILayout.IntField(
-            "Search expansions", settings.SearchBudget.MaximumExpansions);
-        settings.SearchBudget.MaximumPaths = Mathf.Max(1, settings.SearchBudget.MaximumPaths);
-        settings.SearchBudget.MaximumPathLength = Mathf.Max(2, settings.SearchBudget.MaximumPathLength);
-        settings.SearchBudget.MaximumExpansions = Mathf.Max(100, settings.SearchBudget.MaximumExpansions);
+        levelManager = (LevelManager)EditorGUILayout.ObjectField(
+            "Level Manager", levelManager, typeof(LevelManager), true);
+        levelNumber = Mathf.Max(1, EditorGUILayout.IntField("Level number", levelNumber));
+        using (new EditorGUI.DisabledScope(EditorApplication.isPlaying || hasPreview))
+        {
+            if (GUILayout.Button("Create Level Data")) command = MapAiEditorCommand.CreateLevel;
+        }
+        if (hasPreview)
+            EditorGUILayout.HelpBox("Apply the preview before saving it as a level.", MessageType.Info);
     }
 
     private void DrawBrushes()
     {
         EditorGUILayout.Space(10f);
         EditorGUILayout.LabelField("Manual Editing", EditorStyles.boldLabel);
-        selectedBrush = GUILayout.SelectionGrid(selectedBrush, BRUSH_NAMES, 2);
+        for (int i = 0; i < BRUSH_NAMES.Length; i += 2)
+        {
+            EditorGUILayout.BeginHorizontal();
+            DrawBrushButton(i);
+            DrawBrushButton(i + 1);
+            EditorGUILayout.EndHorizontal();
+        }
+    }
+
+    private void DrawBrushButton(int brush)
+    {
+        bool selected = selectedBrush == brush;
+        bool pressed = GUILayout.Toggle(selected, BRUSH_NAMES[brush], EditorStyles.miniButton);
+        if (pressed) selectedBrush = brush;
+        else if (selected) selectedBrush = -1;
     }
 }
