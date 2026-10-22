@@ -7,15 +7,18 @@ public class StartPoint : MonoBehaviour
 
     public Vector2Int Cell => cell;
 
-    public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Sprite sprite, Color color)
+    public void Setup(Vector2Int setupCell, Vector3 localPosition, Color color)
     {
         cell = setupCell;
         transform.localPosition = localPosition;
 
-        spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = MapTileAssetLibrary.SpriteOrFallback("tile_start", sprite);
-        spriteRenderer.color = spriteRenderer.sprite == sprite ? color : Color.white;
+        spriteRenderer.color = color;
         spriteRenderer.sortingOrder = 0;
+    }
+
+    public void ConfigureRenderer(SpriteRenderer setupRenderer)
+    {
+        spriteRenderer = setupRenderer;
     }
 
     public void SetLocalPosition(Vector3 localPosition)

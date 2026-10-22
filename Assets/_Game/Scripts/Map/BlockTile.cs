@@ -16,9 +16,7 @@ public class BlockTile : MonoBehaviour
     {
         tile = setupTile;
         blockColor = color;
-        Sprite sprite = MapTileAssetLibrary.Sprite("tile_block");
-        tile.SetSprite(sprite);
-        tile.SetColor(sprite != null ? Color.white : blockColor);
-        tile.SetLabel(sprite != null ? string.Empty : "X", Color.white);
+        tile.SetColor(blockColor);
+        tile.SetLabel(string.Empty, Color.white);
     }
 }

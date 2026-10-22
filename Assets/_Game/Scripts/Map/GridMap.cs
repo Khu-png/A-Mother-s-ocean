@@ -78,7 +78,7 @@ public partial class GridMap : MonoBehaviour
         BlockTile block;
         OneWayPath path;
         RotateButton button;
-        MapTile tile = prefabs.CreateTile(root, cell, code, CellToLocalPosition(cell), cellSize, GridVisual.SquareSprite(), out block, out path, out button);
+        MapTile tile = prefabs.CreateTile(root, cell, code, CellToLocalPosition(cell), cellSize, out block, out path, out button);
         tiles.Add(cell, tile);
         if (block != null) blocks.Add(cell, block);
         if (path != null) oneWayPaths.Add(cell, path);
@@ -93,27 +93,26 @@ public partial class GridMap : MonoBehaviour
     {
         startCell = cell;
         startPoint = prefabs.CreateStart(runtimeRoot);
-        startPoint.Setup(cell, CellToLocalPosition(cell), cellSize, GridVisual.SquareSprite(), Color.white);
+        startPoint.Setup(cell, CellToLocalPosition(cell), Color.white);
     }
 
     private void BuildFinish(Vector2Int cell)
     {
         finishCell = cell;
         finishPoint = prefabs.CreateFinish(runtimeRoot);
-        finishPoint.Setup(cell, CellToLocalPosition(cell), cellSize, GridVisual.SquareSprite(), Color.white, Color.white);
+        finishPoint.Setup(cell, CellToLocalPosition(cell), Color.white, Color.white);
     }
 
     private void BuildTarget(Vector2Int cell)
     {
         TargetPoint target = prefabs.CreateTarget(runtimeRoot, cell);
-        target.Setup(cell, CellToLocalPosition(cell), cellSize, TargetSprite(), targetSprite != null ? Color.white : Color.yellow);
+        target.Setup(cell, CellToLocalPosition(cell), targetSprite, Color.white);
         targets.Add(cell, target);
     }
 
     private void BuildPlayer()
     {
-        player = playerPrefab != null ? Instantiate(playerPrefab, runtimeRoot) : new GameObject("Player").AddComponent<Player>();
-        player.transform.SetParent(runtimeRoot, false);
+        player = Instantiate(playerPrefab, runtimeRoot);
         playerCell = startCell;
         player.SetCell(playerCell, CellToLocalPosition(playerCell), cellSize);
         currentRoute.Clear();

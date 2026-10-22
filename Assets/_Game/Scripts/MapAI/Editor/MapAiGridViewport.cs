@@ -84,7 +84,7 @@ public sealed class MapAiGridViewport
         if (current.type != EventType.MouseDown || current.button != 0
             || !rect.Contains(current.mousePosition)) return false;
         if (!lockMode && (!brush.HasValue || document.IsLocked(x, y))) return false;
-        Undo.RecordObject(undoOwner, lockMode ? "Toggle Map Cell Lock" : "Paint Map Cell");
+        Undo.RecordObject(undoOwner, lockMode ? "Khóa/mở khóa ô bản đồ" : "Vẽ ô bản đồ");
         if (lockMode) document.ToggleLock(x, y);
         else document.SetCell(x, y, brush.Value);
         current.Use();
@@ -118,7 +118,7 @@ public sealed class MapAiGridViewport
         if (!isPreview) return;
         Rect label = new Rect(area.x + 10f, area.y + 10f, 150f, 22f);
         EditorGUI.DrawRect(label, new Color(0.12f, 0.45f, 0.62f, 0.9f));
-        GUI.Label(label, "PREVIEW - NOT APPLIED", style);
+        GUI.Label(label, "XEM TRƯỚC - CHƯA ÁP DỤNG", style);
     }
 }
 

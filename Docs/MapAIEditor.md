@@ -1,8 +1,8 @@
-# Map AI Editor
+# AI Map Designer
 
 ## Open The Tool
 
-Open `Tools > A Mother's Ocean > Map AI Editor` in Unity 6.
+Mở `Tools > A Mother's Ocean > AI Map Designer` trong Unity 6.
 
 The window has three areas:
 
@@ -12,18 +12,18 @@ The window has three areas:
 
 ## Workflow
 
-1. Select a `LevelData` asset and choose `Open`, or start from the current grid.
-2. Choose the requested dimensions. `Generate Samples` resizes the document automatically;
-   `Resize Grid` remains available when you want to resize before manual editing.
+1. Chọn tài nguyên `LevelData` rồi nhấn `Mở`, hoặc bắt đầu từ lưới hiện tại.
+2. Chọn kích thước mong muốn. `Tạo bản đồ mẫu` tự đổi kích thước tài liệu;
+   dùng `Đổi kích thước lưới` nếu muốn chỉnh kích thước trước khi vẽ thủ công.
 3. Choose difficulty and a puzzle focus (`TargetOrder`, `RotationTiming`, or
    `GlobalRotation`). Difficulty automatically configures target and tile counts.
-   Set `Unique samples` and select `Generate Samples`. Seed is under `Reproducibility`.
-4. Use `Previous` / `Next` to compare each unique valid map. Generation does not modify
+   Đặt `Số bản đồ khác nhau` rồi chọn `Tạo bản đồ mẫu`. Hạt giống nằm trong `Tái tạo kết quả`.
+4. Dùng `Trước` / `Sau` để so sánh từng bản đồ hợp lệ. Việc tạo mẫu không chỉnh sửa
    the document yet; each sample uses a deterministic seed derived from the selected seed.
-5. Select `Apply Preview` or `Discard Preview`.
-6. Use `Save` for the selected asset or `Save As` to create another `LevelData`.
-7. Expand `Save As Game Level`, assign the scene's `Level Manager`, enter the level number,
-   then choose `Create Level Data`. Save the scene or prefab after the level is registered.
+5. Chọn `Áp dụng bản xem trước` hoặc `Bỏ bản xem trước`.
+6. Nhấn `Lưu` để lưu tài nguyên đang chọn hoặc `Lưu thành` để tạo `LevelData` khác.
+7. Mở rộng `Lưu thành màn chơi`, gán `Quản lý màn chơi` trong scene, nhập số màn,
+   rồi chọn `Tạo dữ liệu màn chơi`. Lưu scene hoặc prefab sau khi đăng ký màn chơi.
 
 Manual paint, resize, lock, and preview application support Unity Undo/Redo. Locked cells
 are never changed by generation. A locked layout that prevents valid endpoint placement or
@@ -79,6 +79,6 @@ configured map-design assistant.
 
 ## Verification
 
-Run `Tools > A Mother's Ocean > Run Map AI Editor Self Tests` to check reachable and blocked
+Chạy `Tools > A Mother's Ocean > Chạy kiểm thử trình chỉnh sửa bản đồ` để kiểm tra bản đồ có đường đi và bị chặn
 maps, directional movement, bounded search, dead ends, target completion, non-repeating routes,
 deterministic seeds, locked cells, configured tile counts, ratios, and supported dimensions.

@@ -17,13 +17,13 @@ public static class MapAiTileDecorator
         int rotateCount = Mathf.RoundToInt(eligible.Count * settings.RotateRatio);
         int straightCount = Mathf.RoundToInt(eligible.Count * settings.StraightOneWayRatio);
         int cornerCount = Mathf.RoundToInt(eligible.Count * settings.CornerOneWayRatio);
-        if (!ValidateLockedCounts(cells, current, locks, rotateCount,
+        if (!ValidateExistingCounts(cells, rotateCount,
             straightCount, cornerCount, out issue)) return false;
 
         HashSet<Vector2Int> route = new HashSet<Vector2Int>(mainPath);
-        int missingRotate = rotateCount - CountLocked(cells, current, locks, IsRotate);
-        int missingStraight = straightCount - CountLocked(cells, current, locks, IsStraight);
-        int missingCorner = cornerCount - CountLocked(cells, current, locks, IsCorner);
+        int missingRotate = rotateCount - CountAll(cells, IsRotate);
+        int missingStraight = straightCount - CountAll(cells, IsStraight);
+        int missingCorner = cornerCount - CountAll(cells, IsCorner);
         if (!PlaceRotateOffRoute(cells, current, locks, route, missingRotate, random))
         {
             issue = "Không đủ ô ngoài tuyến chính để đặt tỷ lệ ô xoay yêu cầu.";
@@ -75,21 +75,30 @@ public static class MapAiTileDecorator
         return true;
     }
 
-    private static bool ValidateLockedCounts(char[,] cells, MapAiMapData current,
-        bool[] locks, int rotate, int straight, int corner, out string issue)
+    private static bool ValidateExistingCounts(char[,] cells,
+        int rotate, int straight, int corner, out string issue)
     {
-        if (CountLocked(cells, current, locks, IsRotate) > rotate)
-            issue = "Số ô xoay bị khóa vượt tỷ lệ yêu cầu.";
-        else if (CountLocked(cells, current, locks, IsStraight) > straight)
-            issue = "Số ô one-way thẳng bị khóa vượt tỷ lệ yêu cầu.";
-        else if (CountLocked(cells, current, locks, IsCorner) > corner)
-            issue = "Số ô one-way góc bị khóa vượt tỷ lệ yêu cầu.";
+        if (CountAll(cells, IsRotate) > rotate)
+            issue = "Puzzle focus hoặc ô khóa cần nhiều ô xoay hơn tỷ lệ đã chọn.";
+        else if (CountAll(cells, IsStraight) > straight)
+            issue = "Puzzle focus hoặc ô khóa cần nhiều one-way thẳng hơn tỷ lệ đã chọn.";
+        else if (CountAll(cells, IsCorner) > corner)
+            issue = "Puzzle focus hoặc ô khóa cần nhiều one-way góc hơn tỷ lệ đã chọn.";
         else
         {
             issue = string.Empty;
             return true;
         }
         return false;
+    }
+
+    private static int CountAll(char[,] cells, System.Predicate<char> matches)
+    {
+        int count = 0;
+        for (int y = 0; y < cells.GetLength(1); y++)
+        for (int x = 0; x < cells.GetLength(0); x++)
+            if (matches(cells[x, y])) count++;
+        return count;
     }
 
     private static bool PlaceDirectional(char[,] cells, List<Vector2Int> path,

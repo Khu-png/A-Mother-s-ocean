@@ -3,11 +3,11 @@ using UnityEditor;
 
 public static class MapAiEditorSelfTest
 {
-    [MenuItem("Tools/A Mother's Ocean/Run Map AI Editor Self Tests")]
+    [MenuItem("Tools/A Mother's Ocean/Chạy kiểm thử trình chỉnh sửa bản đồ")]
     public static void Run()
     {
         RunAll();
-        UnityEngine.Debug.Log("Map AI Editor self tests passed.");
+        UnityEngine.Debug.Log("Kiểm thử trình chỉnh sửa bản đồ đã thành công.");
     }
 
     public static void RunBatch()
@@ -29,6 +29,7 @@ public static class MapAiEditorSelfTest
         TestDeterministicGeneration();
         TestMultipleUniqueSamples();
         TestConfiguredContent();
+        MapAiFocusGenerationSelfTest.Run();
     }
 
     private static void TestReachableMap()
@@ -159,7 +160,7 @@ public static class MapAiEditorSelfTest
         string message = previews.Generate(
             new MapAiMapData(EmptyRows(8, 8)), new bool[64], settings, 5);
         Require(previews.Count == 5, "Generator did not produce five unique maps.");
-        Require(message.Contains("5 of 5"), "Sample count was not reported.");
+        Require(message.Contains("5/5"), "Sample count was not reported.");
         string[] first = previews.Current.Rows;
         Require(previews.Move(1), "Could not move to the next sample.");
         Require(string.Join("\n", first) != string.Join("\n", previews.Current.Rows),

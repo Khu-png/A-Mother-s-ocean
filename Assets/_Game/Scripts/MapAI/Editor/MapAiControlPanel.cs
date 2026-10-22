@@ -19,8 +19,9 @@ public sealed class MapAiControlPanel
 {
     private static readonly string[] BRUSH_NAMES =
     {
-        "Empty", "Start", "Finish", "Target", "Block", "Rotate",
-        "Vertical", "Horizontal", "Left Down", "Left Up", "Up Right", "Right Down"
+        "Trống", "Bắt đầu", "Đích", "Cá con", "Đá", "Xoay",
+        "Thẳng dọc", "Thẳng ngang", "Góc trái-dưới", "Góc trái-trên",
+        "Góc trên-phải", "Góc phải-dưới"
     };
     private static readonly char[] BRUSH_CODES =
     {
@@ -31,6 +32,7 @@ public sealed class MapAiControlPanel
     [SerializeField] private int selectedBrush;
     [SerializeField] private bool lockMode;
     [SerializeField] private bool reproducibility;
+    [SerializeField] private bool contentSettings = true;
     [SerializeField] private bool showLevelSave;
     [SerializeField] private LevelManager levelManager;
     [SerializeField] private int levelNumber = 1;
@@ -49,31 +51,35 @@ public sealed class MapAiControlPanel
         MapAiEditorCommand command = MapAiEditorCommand.None;
         GUILayout.BeginArea(area, EditorStyles.helpBox);
         scroll = EditorGUILayout.BeginScrollView(scroll);
-        EditorGUILayout.LabelField("Generation", EditorStyles.boldLabel);
-        settings.Columns = EditorGUILayout.IntSlider("Columns", settings.Columns,
+        EditorGUILayout.LabelField("Tạo bản đồ", EditorStyles.boldLabel);
+        settings.Columns = EditorGUILayout.IntSlider("Số cột", settings.Columns,
             MapBuilderLimits.MIN_SIZE, MapBuilderLimits.MAX_COLUMNS);
-        settings.Rows = EditorGUILayout.IntSlider("Rows", settings.Rows,
+        settings.Rows = EditorGUILayout.IntSlider("Số hàng", settings.Rows,
             MapBuilderLimits.MIN_SIZE, MapBuilderLimits.MAX_ROWS);
-        MapAiDifficulty difficulty = (MapAiDifficulty)EditorGUILayout.EnumPopup(
-            "Difficulty", settings.Difficulty);
+        MapAiDifficulty difficulty = (MapAiDifficulty)EditorGUILayout.IntPopup(
+            "Độ khó", (int)settings.Difficulty,
+            new[] { "Dễ", "Khó", "Siêu khó" }, new[] { 0, 1, 2 });
         if (difficulty != settings.Difficulty)
         {
             settings.Difficulty = difficulty;
             settings.ApplyPreset();
         }
-        MapAiPuzzleFocus focus = (MapAiPuzzleFocus)EditorGUILayout.EnumPopup(
-            "Puzzle focus", settings.PuzzleFocus);
+        MapAiPuzzleFocus focus = (MapAiPuzzleFocus)EditorGUILayout.IntPopup(
+            "Trọng tâm câu đố", (int)settings.PuzzleFocus,
+            new[] { "Thứ tự cứu cá con", "Thời điểm xoay", "Xoay toàn cục" },
+            new[] { 0, 1, 2 });
         if (focus != settings.PuzzleFocus)
         {
             settings.PuzzleFocus = focus;
             settings.ApplyPreset();
         }
+        DrawContentSettings(settings);
 
-        if (GUILayout.Button("Resize Grid")) command = MapAiEditorCommand.Resize;
-        sampleCount = EditorGUILayout.IntSlider("Unique samples", sampleCount, 2, 10);
-        reproducibility = EditorGUILayout.Foldout(reproducibility, "Reproducibility", true);
-        if (reproducibility) settings.Seed = EditorGUILayout.IntField("Seed", settings.Seed);
-        if (GUILayout.Button("Generate Samples", GUILayout.Height(28f)))
+        if (GUILayout.Button("Đổi kích thước lưới")) command = MapAiEditorCommand.Resize;
+        sampleCount = EditorGUILayout.IntSlider("Số bản đồ khác nhau", sampleCount, 2, 10);
+        reproducibility = EditorGUILayout.Foldout(reproducibility, "Tái tạo kết quả", true);
+        if (reproducibility) settings.Seed = EditorGUILayout.IntField("Hạt giống", settings.Seed);
+        if (GUILayout.Button("Tạo bản đồ mẫu", GUILayout.Height(28f)))
             command = MapAiEditorCommand.Generate;
 
         if (hasPreview)
@@ -82,23 +88,44 @@ public sealed class MapAiControlPanel
             EditorGUILayout.Space(6f);
             using (new EditorGUI.DisabledScope(!canApplyPreview))
             {
-                if (GUILayout.Button("Apply Preview")) command = MapAiEditorCommand.ApplyPreview;
+                if (GUILayout.Button("Áp dụng bản xem trước")) command = MapAiEditorCommand.ApplyPreview;
             }
-            if (GUILayout.Button("Discard Preview")) command = MapAiEditorCommand.DiscardPreview;
+            if (GUILayout.Button("Bỏ bản xem trước")) command = MapAiEditorCommand.DiscardPreview;
         }
 
         DrawLevelSave(hasPreview, ref command);
         DrawBrushes();
-        lockMode = EditorGUILayout.ToggleLeft("Lock / unlock cells", lockMode);
+        lockMode = EditorGUILayout.ToggleLeft("Khóa / mở khóa ô", lockMode);
         EditorGUILayout.HelpBox(lockMode
-            ? "Click cells to protect them from generation."
+            ? "Nhấp vào ô để khóa, không cho công cụ thay đổi khi tạo bản đồ."
             : selectedBrush < 0
-                ? "No tile selected. Choose a tile to paint."
-                : "Click a cell to paint with the selected tile.", MessageType.Info);
+                ? "Chưa chọn ô vẽ. Hãy chọn một loại ô."
+                : "Nhấp vào ô để vẽ loại ô đã chọn.", MessageType.Info);
         if (status != string.Empty) EditorGUILayout.HelpBox(status, MessageType.None);
         EditorGUILayout.EndScrollView();
         GUILayout.EndArea();
         return command;
+    }
+
+    private void DrawContentSettings(MapAiGenerationSettings settings)
+    {
+        contentSettings = EditorGUILayout.Foldout(contentSettings, "Nội dung bản đồ", true);
+        if (!contentSettings) return;
+
+        int maximumTargets = Mathf.Max(0, settings.Columns * settings.Rows - 2);
+        settings.TargetCount = EditorGUILayout.IntSlider(
+            "Số cá con", settings.TargetCount, 0, maximumTargets);
+        settings.RockRatio = EditorGUILayout.Slider(
+            "Tỷ lệ đá", settings.RockRatio, 0f, 0.75f);
+        settings.RotateRatio = EditorGUILayout.Slider(
+            "Tỷ lệ ô xoay", settings.RotateRatio, 0f, 0.5f);
+        settings.StraightOneWayRatio = EditorGUILayout.Slider(
+            "Tỷ lệ ống thẳng một chiều", settings.StraightOneWayRatio, 0f, 0.5f);
+        settings.CornerOneWayRatio = EditorGUILayout.Slider(
+            "Tỷ lệ ống góc một chiều", settings.CornerOneWayRatio, 0f, 0.5f);
+        settings.ExtraConnectionChance = EditorGUILayout.Slider(
+            "Tỷ lệ mở thêm lối", settings.ExtraConnectionChance, 0f, 0.5f);
+        if (GUILayout.Button("Áp dụng thiết lập độ khó")) settings.ApplyPreset();
     }
 
     private static void DrawPreviewNavigation(int previewIndex, int previewCount,
@@ -106,35 +133,35 @@ public sealed class MapAiControlPanel
     {
         if (previewCount < 2) return;
         EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Previous") && previewIndex > 0)
+        if (GUILayout.Button("Trước") && previewIndex > 0)
             command = MapAiEditorCommand.PreviousPreview;
-        EditorGUILayout.LabelField($"Sample {previewIndex + 1} / {previewCount}",
+        EditorGUILayout.LabelField($"Bản {previewIndex + 1} / {previewCount}",
             EditorStyles.centeredGreyMiniLabel);
-        if (GUILayout.Button("Next") && previewIndex < previewCount - 1)
+        if (GUILayout.Button("Sau") && previewIndex < previewCount - 1)
             command = MapAiEditorCommand.NextPreview;
         EditorGUILayout.EndHorizontal();
     }
 
     private void DrawLevelSave(bool hasPreview, ref MapAiEditorCommand command)
     {
-        showLevelSave = EditorGUILayout.Foldout(showLevelSave, "Save As Game Level", true);
+        showLevelSave = EditorGUILayout.Foldout(showLevelSave, "Lưu thành màn chơi", true);
         if (!showLevelSave) return;
 
         levelManager = (LevelManager)EditorGUILayout.ObjectField(
-            "Level Manager", levelManager, typeof(LevelManager), true);
-        levelNumber = Mathf.Max(1, EditorGUILayout.IntField("Level number", levelNumber));
+            "Quản lý màn chơi", levelManager, typeof(LevelManager), true);
+        levelNumber = Mathf.Max(1, EditorGUILayout.IntField("Số màn", levelNumber));
         using (new EditorGUI.DisabledScope(EditorApplication.isPlaying || hasPreview))
         {
-            if (GUILayout.Button("Create Level Data")) command = MapAiEditorCommand.CreateLevel;
+            if (GUILayout.Button("Tạo dữ liệu màn chơi")) command = MapAiEditorCommand.CreateLevel;
         }
         if (hasPreview)
-            EditorGUILayout.HelpBox("Apply the preview before saving it as a level.", MessageType.Info);
+            EditorGUILayout.HelpBox("Hãy áp dụng bản xem trước trước khi lưu thành màn chơi.", MessageType.Info);
     }
 
     private void DrawBrushes()
     {
         EditorGUILayout.Space(10f);
-        EditorGUILayout.LabelField("Manual Editing", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Chỉnh sửa thủ công", EditorStyles.boldLabel);
         for (int i = 0; i < BRUSH_NAMES.Length; i += 2)
         {
             EditorGUILayout.BeginHorizontal();

@@ -39,7 +39,7 @@ public class UIManager : Singleton<UIManager>
     void Awake()
     {
         RegisterSingleton(this);
-        if (CanvasParentTF == null) CanvasParentTF = transform;
+        BuildPrefabLookup();
     }
 
     void LateUpdate()
@@ -142,31 +142,16 @@ public class UIManager : Singleton<UIManager>
     //lay prefab tu Resources/UI 
     private T GetUIPrefab<T>() where T : UICanvas
     {
-        if (uiResources == null || uiResources.Length == 0)
+        return uiCanvasPrefab.TryGetValue(typeof(T), out UICanvas prefab) ? prefab as T : null;
+    }
+
+    private void BuildPrefabLookup()
+    {
+        uiCanvasPrefab.Clear();
+        for (int i = 0; i < uiResources.Length; i++)
         {
-            uiResources = Resources.LoadAll<UICanvas>("UI/");
+            uiCanvasPrefab.Add(uiResources[i].GetType(), uiResources[i]);
         }
-
-        if (uiResources == null) return null;
-        if (!uiCanvasPrefab.ContainsKey(typeof(T)))
-        {
-            //if (uiResources == null)
-            //{
-            //    uiResources = Resources.LoadAll<UICanvas>("UI/");
-            //}
-
-            for (int i = 0; i < uiResources.Length; i++)
-            {
-                if (uiResources[i] is T)
-                {
-                    uiCanvasPrefab[typeof(T)] = uiResources[i];
-                    break;
-                }
-            }
-        }
-
-        if (!uiCanvasPrefab.ContainsKey(typeof(T))) return null;
-        return uiCanvasPrefab[typeof(T)] as T;
     }
 
 

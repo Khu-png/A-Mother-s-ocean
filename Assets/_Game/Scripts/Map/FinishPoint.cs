@@ -6,23 +6,20 @@ public class FinishPoint : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Color closedColor;
     [SerializeField] private Color openColor;
-    private Sprite closedSprite;
-    private Sprite openSprite;
+    [SerializeField] private Sprite closedSprite;
+    [SerializeField] private Sprite openSprite;
 
     public bool IsOpen { get; private set; }
     public Vector2Int Cell => cell;
 
-    public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Sprite sprite, Color setupClosedColor, Color setupOpenColor)
+    public void Setup(Vector2Int setupCell, Vector3 localPosition, Color setupClosedColor, Color setupOpenColor)
     {
         cell = setupCell;
         closedColor = setupClosedColor;
         openColor = setupOpenColor;
-        closedSprite = MapTileAssetLibrary.Sprite("tile_finish_closed");
-        openSprite = MapTileAssetLibrary.Sprite("tile_finish_open");
         transform.localPosition = localPosition;
 
-        spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = closedSprite != null ? closedSprite : sprite;
+        spriteRenderer.sprite = closedSprite;
         spriteRenderer.sortingOrder = 2;
         SetOpen(false);
     }
@@ -35,13 +32,14 @@ public class FinishPoint : MonoBehaviour
     public void SetOpen(bool isOpen)
     {
         IsOpen = isOpen;
-        if (isOpen && openSprite != null) spriteRenderer.sprite = openSprite;
-        else if (!isOpen && closedSprite != null) spriteRenderer.sprite = closedSprite;
-        spriteRenderer.color = SpriteAssetLoaded() ? Color.white : IsOpen ? openColor : closedColor;
+        spriteRenderer.sprite = isOpen ? openSprite : closedSprite;
+        spriteRenderer.color = isOpen ? openColor : closedColor;
     }
 
-    private bool SpriteAssetLoaded()
+    public void ConfigureVisuals(SpriteRenderer setupRenderer, Sprite setupClosedSprite, Sprite setupOpenSprite)
     {
-        return IsOpen ? openSprite != null : closedSprite != null;
+        spriteRenderer = setupRenderer;
+        closedSprite = setupClosedSprite;
+        openSprite = setupOpenSprite;
     }
 }

@@ -57,7 +57,6 @@ public partial class GridMap
 
     private void NormalizeSettings()
     {
-        prefabs = prefabs ?? new MapPrefabSet();
         cellSize = Mathf.Max(0.1f, cellSize);
         lineWidth = Mathf.Max(0.01f, lineWidth);
         height = Mathf.Max(1, mapRows.Length);

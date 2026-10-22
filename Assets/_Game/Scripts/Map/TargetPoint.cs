@@ -26,7 +26,7 @@ public class TargetPoint : MonoBehaviour
         cachedTransform.localScale = baseScale * (1f + wave * 0.045f);
     }
 
-    public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Sprite sprite, Color color)
+    public void Setup(Vector2Int setupCell, Vector3 localPosition, Sprite sprite, Color color)
     {
         cell = setupCell;
         cachedTransform = transform;
@@ -34,13 +34,17 @@ public class TargetPoint : MonoBehaviour
         timeOffset = (cell.x * 0.73f + cell.y * 1.31f) % Mathf.PI;
         cachedTransform.localPosition = basePosition;
 
-        spriteRenderer = spriteRenderer != null ? spriteRenderer : gameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = sprite;
         spriteRenderer.color = color;
         spriteRenderer.sortingOrder = 3;
         baseScale = cachedTransform.localScale;
         cachedTransform.localScale = baseScale;
         ResetTarget();
+    }
+
+    public void ConfigureRenderer(SpriteRenderer setupRenderer)
+    {
+        spriteRenderer = setupRenderer;
     }
 
     public void SetLocalPosition(Vector3 localPosition)

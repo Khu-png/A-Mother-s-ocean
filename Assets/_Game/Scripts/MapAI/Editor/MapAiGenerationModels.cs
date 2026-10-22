@@ -164,7 +164,7 @@ public sealed class MapAiPreviewCollection
     {
         Clear();
         HashSet<string> uniqueMaps = new HashSet<string>();
-        string lastIssue = "No unique valid maps were generated.";
+        string lastIssue = "Không tạo được bản đồ hợp lệ khác nhau.";
         int maximumAttempts = requestedCount * MAX_ATTEMPTS_PER_SAMPLE;
         for (int attempt = 0; attempt < maximumAttempts; attempt++)
         {
@@ -183,8 +183,8 @@ public sealed class MapAiPreviewCollection
             if (samples.Count == requestedCount) break;
         }
 
-        if (samples.Count == 0) return $"No valid samples generated. {lastIssue}";
-        return $"Generated {samples.Count} of {requestedCount} unique valid samples.";
+        if (samples.Count == 0) return $"Không tạo được bản đồ mẫu hợp lệ. {lastIssue}";
+        return $"Đã tạo {samples.Count}/{requestedCount} bản đồ mẫu khác nhau, hợp lệ.";
     }
 
     public void SetSingle(string[] rows, string message)

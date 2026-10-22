@@ -99,16 +99,9 @@ public class OneWayPath : MonoBehaviour
     private void ApplyVisual(bool animate = false)
     {
         visualRotation = RotationForState();
-        Sprite sprite = tile.HasPrefabSprite ? tile.Sprite : MapTileAssetLibrary.Sprite(SpriteName());
-        tile.SetSprite(sprite);
         tile.SetVisualRotation(RotationDegrees(visualRotation), animate);
-        tile.SetColor(sprite != null ? Color.white : pathColor);
-        tile.SetLabel(sprite != null ? string.Empty : DirectionSymbol(), Color.white);
-    }
-
-    private string SpriteName()
-    {
-        return kind == OneWayPathKind.Straight ? "pipe_vertical" : "pipe_left_down";
+        tile.SetColor(pathColor);
+        tile.SetLabel(string.Empty, Color.white);
     }
 
     private OneWayPathRotation RotationForState()
@@ -145,13 +138,4 @@ public class OneWayPath : MonoBehaviour
         else state = OneWayPathState.LeftDown;
     }
 
-    private string DirectionSymbol()
-    {
-        if (state == OneWayPathState.Vertical) return "|";
-        if (state == OneWayPathState.Horizontal) return "-";
-        if (state == OneWayPathState.LeftDown) return "LD";
-        if (state == OneWayPathState.LeftUp) return "LU";
-        if (state == OneWayPathState.UpRight) return "UR";
-        return "RD";
-    }
 }

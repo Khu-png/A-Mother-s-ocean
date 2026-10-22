@@ -4,9 +4,10 @@ using UnityEngine;
 [InitializeOnLoad]
 public static class MapPrefabBuilder
 {
-    private const string Root = "Assets/_Game/Prefab";
-    private const string TileRoot = Root + "/Map/Tiles";
-    private const string PointRoot = Root + "/Map/Points";
+    private const string ROOT = "Assets/_Game/Prefab";
+    private const string TILE_ROOT = ROOT + "/Map/Tiles";
+    private const string POINT_ROOT = ROOT + "/Map/Points";
+    private const string ART_ROOT = "Assets/_Game/Resources/MapTiles/";
 
     static MapPrefabBuilder()
     {
@@ -19,8 +20,8 @@ public static class MapPrefabBuilder
         EnsureFolders();
         CreateEmpty();
         CreateBlock();
-        CreateOneWay("OneWayStraight", OneWayPathKind.Straight, OneWayPathState.Vertical);
-        CreateOneWay("OneWayCorner", OneWayPathKind.Corner, OneWayPathState.LeftDown);
+        CreateOneWay("OneWayStraight", "pipe_horizontal.png", OneWayPathKind.Straight, OneWayPathState.Vertical);
+        CreateOneWay("OneWayCorner", "pipe_left_down.png", OneWayPathKind.Corner, OneWayPathState.LeftDown);
         CreateRotate();
         CreateStart();
         CreateTarget();
@@ -31,11 +32,11 @@ public static class MapPrefabBuilder
 
     private static void EnsureFolders()
     {
-        CreateFolder(Root + "/Map");
-        CreateFolder(TileRoot);
-        CreateFolder(PointRoot);
-        CreateFolder(Root + "/UI");
-        CreateFolder(Root + "/Background");
+        CreateFolder(ROOT + "/Map");
+        CreateFolder(TILE_ROOT);
+        CreateFolder(POINT_ROOT);
+        CreateFolder(ROOT + "/UI");
+        CreateFolder(ROOT + "/Background");
     }
 
     private static void CreateFolder(string path)
@@ -50,30 +51,29 @@ public static class MapPrefabBuilder
 
     private static void CreateEmpty()
     {
-        string path = TileRoot + "/EmptyTile.prefab";
+        string path = TILE_ROOT + "/EmptyTile.prefab";
         if (Exists(path)) return;
-        GameObject view = NewView("EmptyTile");
-        MapTile tile = view.AddComponent<MapTile>();
-        tile.Setup(Vector2Int.zero, Vector3.zero, 1f, GridVisual.SquareSprite(), Color.white);
+        GameObject view = NewTileView("EmptyTile", "tile_empty.png", out MapTile tile);
+        tile.Setup(Vector2Int.zero, Vector3.zero, 1f, Color.white);
         Save(view, path);
     }
 
     private static void CreateBlock()
     {
-        string path = TileRoot + "/BlockTile.prefab";
+        string path = TILE_ROOT + "/BlockTile.prefab";
         if (Exists(path)) return;
-        GameObject view = NewTileRule("BlockTile", out MapTile tile);
+        GameObject view = NewTileView("BlockTile", "tile_block.png", out MapTile tile);
         BlockTile block = view.AddComponent<BlockTile>();
         block.BindTile(tile);
         block.Setup(tile, Color.white);
         Save(view, path);
     }
 
-    private static void CreateOneWay(string name, OneWayPathKind kind, OneWayPathState state)
+    private static void CreateOneWay(string name, string spriteName, OneWayPathKind kind, OneWayPathState state)
     {
-        string path = TileRoot + "/" + name + ".prefab";
+        string path = TILE_ROOT + "/" + name + ".prefab";
         if (Exists(path)) return;
-        GameObject view = NewTileRule(name, out MapTile tile);
+        GameObject view = NewTileView(name, spriteName, out MapTile tile);
         OneWayPath oneWay = view.AddComponent<OneWayPath>();
         oneWay.BindTile(tile);
         oneWay.Setup(tile, kind, state, Color.white);
@@ -82,9 +82,9 @@ public static class MapPrefabBuilder
 
     private static void CreateRotate()
     {
-        string path = TileRoot + "/RotateTile.prefab";
+        string path = TILE_ROOT + "/RotateTile.prefab";
         if (Exists(path)) return;
-        GameObject view = NewTileRule("RotateTile", out MapTile tile);
+        GameObject view = NewTileView("RotateTile", "tile_rotate.png", out MapTile tile);
         RotateButton button = view.AddComponent<RotateButton>();
         button.BindTile(tile);
         button.Setup(tile, Color.white);
@@ -93,43 +93,73 @@ public static class MapPrefabBuilder
 
     private static void CreateStart()
     {
-        string path = PointRoot + "/StartPoint.prefab";
+        string path = POINT_ROOT + "/StartPoint.prefab";
         if (Exists(path)) return;
-        StartPoint point = NewComponent<StartPoint>("Start Point");
-        point.Setup(Vector2Int.zero, Vector3.zero, 1f, GridVisual.SquareSprite(), Color.white);
-        Save(point.gameObject, path);
+        GameObject view = NewView("Start Point");
+        SpriteRenderer renderer = AddRenderer(view, "tile_start.png");
+        StartPoint point = view.AddComponent<StartPoint>();
+        point.ConfigureRenderer(renderer);
+        point.Setup(Vector2Int.zero, Vector3.zero, Color.white);
+        Save(view, path);
     }
 
     private static void CreateTarget()
     {
-        string path = PointRoot + "/TargetPoint.prefab";
+        string path = POINT_ROOT + "/TargetPoint.prefab";
         if (Exists(path)) return;
-        Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Game/Art/Generated/baby_shark_sprite.png");
-        TargetPoint point = NewComponent<TargetPoint>("Target Point");
-        point.Setup(Vector2Int.zero, Vector3.zero, 1f, sprite != null ? sprite : GridVisual.CircleSprite(), Color.white);
-        Save(point.gameObject, path);
+        GameObject view = NewView("Target Point");
+        Sprite sprite = LoadSprite("Assets/_Game/Resources/Art/Generated/baby_shark_sprite.png");
+        SpriteRenderer renderer = view.AddComponent<SpriteRenderer>();
+        renderer.sprite = sprite;
+        TargetPoint point = view.AddComponent<TargetPoint>();
+        point.ConfigureRenderer(renderer);
+        point.Setup(Vector2Int.zero, Vector3.zero, sprite, Color.white);
+        Save(view, path);
     }
 
     private static void CreateFinish()
     {
-        string path = PointRoot + "/FinishPoint.prefab";
+        string path = POINT_ROOT + "/FinishPoint.prefab";
         if (Exists(path)) return;
-        FinishPoint point = NewComponent<FinishPoint>("Finish Point");
-        point.Setup(Vector2Int.zero, Vector3.zero, 1f, GridVisual.SquareSprite(), Color.white, Color.white);
-        Save(point.gameObject, path);
+        GameObject view = NewView("Finish Point");
+        Sprite closedSprite = LoadSprite(ART_ROOT + "tile_finish_closed.png");
+        Sprite openSprite = LoadSprite(ART_ROOT + "tile_finish_open.png");
+        SpriteRenderer renderer = view.AddComponent<SpriteRenderer>();
+        renderer.sprite = closedSprite;
+        FinishPoint point = view.AddComponent<FinishPoint>();
+        point.ConfigureVisuals(renderer, closedSprite, openSprite);
+        point.Setup(Vector2Int.zero, Vector3.zero, Color.white, Color.white);
+        Save(view, path);
     }
 
-    private static GameObject NewTileRule(string name, out MapTile tile)
+    private static GameObject NewTileView(string name, string spriteName, out MapTile tile)
     {
         GameObject view = NewView(name);
+        SpriteRenderer renderer = AddRenderer(view, spriteName);
+        TextMesh label = NewLabel(view.transform);
         tile = view.AddComponent<MapTile>();
-        tile.Setup(Vector2Int.zero, Vector3.zero, 1f, GridVisual.SquareSprite(), Color.white);
+        tile.ConfigureVisuals(renderer, label);
+        tile.Setup(Vector2Int.zero, Vector3.zero, 1f, Color.white);
         return view;
     }
 
-    private static T NewComponent<T>(string name) where T : Component
+    private static SpriteRenderer AddRenderer(GameObject view, string spriteName)
     {
-        return NewView(name).AddComponent<T>();
+        SpriteRenderer renderer = view.AddComponent<SpriteRenderer>();
+        renderer.sprite = LoadSprite(ART_ROOT + spriteName);
+        return renderer;
+    }
+
+    private static TextMesh NewLabel(Transform root)
+    {
+        GameObject labelView = new GameObject("Label");
+        labelView.transform.SetParent(root, false);
+        return labelView.AddComponent<TextMesh>();
+    }
+
+    private static Sprite LoadSprite(string path)
+    {
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 
     private static GameObject NewView(string name)

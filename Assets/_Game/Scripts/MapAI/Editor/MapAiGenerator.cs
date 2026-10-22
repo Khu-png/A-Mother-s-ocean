@@ -25,10 +25,10 @@ public static class MapAiGenerator
             if (!MapAiTopologyGenerator.TryCreate(current, locks, settings,
                 random, out char[,] cells, out System.Collections.Generic.List<Vector2Int> path,
                 out lastIssue)) continue;
-            if (!MapAiTileDecorator.TryDecorate(cells, path, current, locks,
-                settings, random, out lastIssue)) continue;
             if (!ApplyPuzzleFocus(cells, path, current, locks,
                 settings.PuzzleFocus, out lastIssue)) continue;
+            if (!MapAiTileDecorator.TryDecorate(cells, path, current, locks,
+                settings, random, out lastIssue)) continue;
 
             string[] candidateRows = MapAiTopologyGenerator.ToRows(cells);
             MapAiAnalysisResult analysis = MapAiAnalyzer.Analyze(
@@ -49,7 +49,7 @@ public static class MapAiGenerator
         }
         if (foundCandidate)
             return new MapAiGenerationResult(true,
-                $"Seed {settings.Seed}, generator v{VERSION}; best score {bestScore}.",
+                $"Hạt giống {settings.Seed}, bộ tạo v{VERSION}; điểm tốt nhất {bestScore}.",
                 lastRows, bestAnalysis);
         return Failure(lastRows, lastIssue, settings);
     }
@@ -97,7 +97,6 @@ public static class MapAiGenerator
         System.Collections.Generic.List<Vector2Int> path, MapAiMapData current,
         bool[] locks, int rotatorIndex)
     {
-        bool placed = false;
         for (int i = rotatorIndex + 1; i < path.Count - 1; i++)
         {
             Vector2Int cell = path[i];
@@ -110,9 +109,9 @@ public static class MapAiGenerator
                 path[i - 1], cell, path[i + 1], true);
             if (routeCode == '\0') continue;
             cells[cell.x, cell.y] = InverseRotation(routeCode);
-            placed = true;
+            return true;
         }
-        return placed;
+        return false;
     }
 
     private static bool SetGlobalRotationPipe(char[,] cells,

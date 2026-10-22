@@ -11,7 +11,4 @@ public partial class GridMap
     {
         return column < mapRows[row].Length ? mapRows[row][column] : '.';
     }
-
-    private Sprite TargetSprite() { return targetSprite != null ? targetSprite : GridVisual.CircleSprite(); }
-
 }

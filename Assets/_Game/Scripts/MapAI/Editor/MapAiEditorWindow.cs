@@ -20,17 +20,16 @@ public sealed class MapAiEditorWindow : EditorWindow
     [SerializeField] private string status = string.Empty;
     private MapAiAnalysisResult analysis = new MapAiAnalysisResult();
     private MapAiAnalysisResult previewAnalysis = new MapAiAnalysisResult();
-    [MenuItem("Tools/A Mother's Ocean/Map AI Editor")]
+    [MenuItem("Tools/A Mother's Ocean/AI Map Designer")]
     public static void Open()
     {
-        GetWindow<MapAiEditorWindow>("Map AI Editor");
+        GetWindow<MapAiEditorWindow>("AI Map Designer");
     }
     void OnEnable()
     {
         document.Initialize();
         generation.Columns = document.Width;
         generation.Rows = document.Height;
-        generation.ApplyPreset();
         Undo.undoRedoPerformed += HandleUndoRedo;
         AnalyzeCurrent();
         if (hasPreview && previewCollection.Count > 0) SelectPreview();
@@ -71,15 +70,15 @@ public sealed class MapAiEditorWindow : EditorWindow
             typeof(LevelData), false, GUILayout.Width(180f));
         using (new EditorGUI.DisabledScope(levelData == null))
         {
-            if (GUILayout.Button("Open", EditorStyles.toolbarButton)) LoadLevel();
-            if (GUILayout.Button("Save", EditorStyles.toolbarButton)) SaveLevel();
+            if (GUILayout.Button("Mở", EditorStyles.toolbarButton)) LoadLevel();
+            if (GUILayout.Button("Lưu", EditorStyles.toolbarButton)) SaveLevel();
         }
-        if (GUILayout.Button("Save As", EditorStyles.toolbarButton)) SaveAsLevel();
-        if (GUILayout.Button("Undo", EditorStyles.toolbarButton)) Undo.PerformUndo();
-        if (GUILayout.Button("Redo", EditorStyles.toolbarButton)) Undo.PerformRedo();
-        if (GUILayout.Button("Analyze", EditorStyles.toolbarButton)) AnalyzeCurrent();
+        if (GUILayout.Button("Lưu thành", EditorStyles.toolbarButton)) SaveAsLevel();
+        if (GUILayout.Button("Hoàn tác", EditorStyles.toolbarButton)) Undo.PerformUndo();
+        if (GUILayout.Button("Làm lại", EditorStyles.toolbarButton)) Undo.PerformRedo();
+        if (GUILayout.Button("Phân tích", EditorStyles.toolbarButton)) AnalyzeCurrent();
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Play Scene", EditorStyles.toolbarButton)) EditorApplication.isPlaying = true;
+        if (GUILayout.Button("Chạy cảnh", EditorStyles.toolbarButton)) EditorApplication.isPlaying = true;
         EditorGUILayout.EndHorizontal();
     }
 
@@ -96,7 +95,7 @@ public sealed class MapAiEditorWindow : EditorWindow
 
     private void Resize()
     {
-        Undo.RecordObject(this, "Resize AI Map Grid");
+        Undo.RecordObject(this, "Đổi kích thước lưới bản đồ");
         document.Resize(generation.Columns, generation.Rows);
         DiscardPreview();
         AnalyzeCurrent();
@@ -106,7 +105,7 @@ public sealed class MapAiEditorWindow : EditorWindow
     {
         if (generation.Columns != document.Width || generation.Rows != document.Height)
         {
-            Undo.RecordObject(this, "Resize Grid For Generation");
+            Undo.RecordObject(this, "Đổi kích thước lưới để tạo bản đồ");
             document.Resize(generation.Columns, generation.Rows);
         }
         status = previewCollection.Generate(document.Snapshot(),
@@ -121,7 +120,7 @@ public sealed class MapAiEditorWindow : EditorWindow
     {
         if (!previewCollection.Move(direction)) return;
         SelectPreview();
-        status = $"Sample {previewCollection.SelectedIndex + 1} of {previewCollection.Count}. {previewCollection.Current.Message}";
+        status = $"Bản {previewCollection.SelectedIndex + 1}/{previewCollection.Count}. {previewCollection.Current.Message}";
     }
 
     private void SelectPreview()
@@ -135,7 +134,7 @@ public sealed class MapAiEditorWindow : EditorWindow
 
     private void ApplyPreview()
     {
-        Undo.RecordObject(this, "Apply Generated Map");
+        Undo.RecordObject(this, "Áp dụng bản đồ đã tạo");
         document.ApplyPreview(previewRows);
         DiscardPreview();
         AnalyzeCurrent();
@@ -155,7 +154,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         analysis = MapAiAnalyzer.Analyze(document.Snapshot(),
             generation.SearchBudget, generation.Difficulty);
         status = analysis.IsValid && analysis.CanComplete
-            ? "Map is playable." : "Map needs attention before saving.";
+            ? "Bản đồ có thể chơi được." : "Bản đồ cần được kiểm tra trước khi lưu.";
         Repaint();
     }
 
@@ -163,10 +162,10 @@ public sealed class MapAiEditorWindow : EditorWindow
     {
         if (!FitsSupportedSize(levelData.MapRows))
         {
-            status = $"Level exceeds the supported {MapBuilderLimits.MAX_COLUMNS}x{MapBuilderLimits.MAX_ROWS} limit.";
+            status = $"Màn chơi vượt quá giới hạn kích thước {MapBuilderLimits.MAX_COLUMNS}x{MapBuilderLimits.MAX_ROWS}.";
             return;
         }
-        Undo.RecordObject(this, "Open Level Data");
+        Undo.RecordObject(this, "Mở dữ liệu màn chơi");
         document.Replace(levelData.MapRows);
         generation.Columns = document.Width;
         generation.Rows = document.Height;
@@ -176,24 +175,24 @@ public sealed class MapAiEditorWindow : EditorWindow
 
     private void SaveLevel()
     {
-        Undo.RecordObject(levelData, "Save Map AI Layout");
+        Undo.RecordObject(levelData, "Lưu bố cục bản đồ");
         levelData.SetMapRows(document.ToRows());
         EditorUtility.SetDirty(levelData);
         AssetDatabase.SaveAssets();
-        status = $"Saved {AssetDatabase.GetAssetPath(levelData)}";
+        status = $"Đã lưu {AssetDatabase.GetAssetPath(levelData)}";
     }
 
     private void SaveAsLevel()
     {
-        string path = EditorUtility.SaveFilePanelInProject("Save Level Data",
-            "Level_AI", "asset", "Choose a project path for the level.");
+        string path = EditorUtility.SaveFilePanelInProject("Lưu dữ liệu màn chơi",
+            "Level_AI", "asset", "Chọn vị trí lưu dữ liệu màn chơi trong dự án.");
         if (path == string.Empty) return;
         LevelData asset = CreateInstance<LevelData>();
         asset.SetMapRows(document.ToRows());
         AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
         levelData = asset;
-        status = $"Created {path}";
+        status = $"Đã tạo {path}";
     }
 
     private void RequestAiProposal()
@@ -205,12 +204,12 @@ public sealed class MapAiEditorWindow : EditorWindow
             analysisPanel.AiRequest, snapshot);
         if (!MapAiToolApi.MatchesVersion(proposal, current))
         {
-            status = "AI proposal targets an older map version and was rejected.";
+            status = "Đề xuất AI dựa trên phiên bản bản đồ cũ nên đã bị từ chối.";
             return;
         }
         if (!MatchesDocumentSize(proposal.Rows))
         {
-            status = "AI proposal dimensions do not match the current document.";
+            status = "Kích thước đề xuất của AI không khớp với bản đồ hiện tại.";
             return;
         }
         previewRows = proposal.Rows;

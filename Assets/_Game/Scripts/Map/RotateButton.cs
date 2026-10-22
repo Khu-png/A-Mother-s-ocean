@@ -34,10 +34,8 @@ public class RotateButton : MonoBehaviour
         buttonColor = color;
         cachedTransform = transform;
         baseScale = cachedTransform.localScale;
-        Sprite sprite = MapTileAssetLibrary.Sprite("tile_rotate");
-        tile.SetSprite(sprite);
-        tile.SetColor(sprite != null ? Color.white : buttonColor);
-        tile.SetLabel(sprite != null ? string.Empty : "@", Color.white);
+        tile.SetColor(buttonColor);
+        tile.SetLabel(string.Empty, Color.white);
     }
 
     public void Pulse()
