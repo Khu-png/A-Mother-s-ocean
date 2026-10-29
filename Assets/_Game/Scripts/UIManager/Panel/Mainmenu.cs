@@ -75,9 +75,7 @@ public sealed class Mainmenu : UICanvas
     public void OnClickResetData()
     {
         SoundManager.Ins.PlayButtonSound();
-        PlayerPrefs.DeleteKey(LevelManager.CurrentLevelKey);
-        PlayerPrefs.DeleteKey(MenuPlayerProgress.CoinsKey);
-        PlayerPrefs.Save();
+        LevelManager.Ins.ResetProgress();
         Refresh();
     }
 

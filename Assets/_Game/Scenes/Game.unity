@@ -213,6 +213,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7406087c7b429ef4291f0a447bdff9eb, type: 2}
   - {fileID: 11400000, guid: fe0c0ba4c460e5f4693ca8c944b0c2de, type: 2}
   - {fileID: 11400000, guid: 039c47e26f970ff418ee5997b7bb35af, type: 2}
+  - {fileID: 11400000, guid: 6ceeacfbe15887843bf81b2c39390167, type: 2}
   levelMap: {fileID: 1037034053}
   cameraController: {fileID: 519420033}
 --- !u!1 &519420028

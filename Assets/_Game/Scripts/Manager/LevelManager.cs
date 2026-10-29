@@ -11,7 +11,11 @@ public class LevelManager : Singleton<LevelManager>
     private GridMap currentLevel;
     public int CurrentLevelNumber => currentLevelIndex + 1;
     public bool HasPlayerMoved { get; private set; }
+    public int CollectedTargetCount { get; private set; }
+    public int TotalTargetCount { get; private set; }
     public event System.Action PlayerMoved;
+    public event System.Action<int, int> TargetProgressChanged;
+    public event System.Action MissingTargetsBlocked;
 
     void Awake()
     {
@@ -26,6 +30,18 @@ public class LevelManager : Singleton<LevelManager>
         if (HasPlayerMoved) return;
         HasPlayerMoved = true;
         PlayerMoved?.Invoke();
+    }
+
+    public void NotifyTargetProgress(int collected, int total)
+    {
+        CollectedTargetCount = collected;
+        TotalTargetCount = total;
+        TargetProgressChanged?.Invoke(collected, total);
+    }
+
+    public void NotifyMissingTargetsBlocked()
+    {
+        MissingTargetsBlocked?.Invoke();
     }
 
     public void FitGameplayBackground(SpriteRenderer background)
@@ -79,11 +95,26 @@ public class LevelManager : Singleton<LevelManager>
             throw new UnityException("không có level tiếp theo");
         }
 
-        if (levels[currentLevelIndex].GrantsGiftChest)
+        LevelData completedLevel = levels[currentLevelIndex];
+        MenuPlayerProgress.GrantCompletionCoins(currentLevelIndex + 1,
+            completedLevel.CompletionCoinReward);
+        if (completedLevel.GrantsGiftChest)
             MenuPlayerProgress.GrantChestForLevel(currentLevelIndex + 1);
         PlayerPrefs.SetInt(CurrentLevelKey, nextLevel + 1);
         PlayerPrefs.Save();
         GameManager.Ins.OnFinish();
+    }
+
+    public void PlayWinTransition(System.Action completed)
+    {
+        currentLevel.PlayWinTransition(completed);
+    }
+
+    public void ResetProgress()
+    {
+        PlayerPrefs.DeleteKey(CurrentLevelKey);
+        MenuPlayerProgress.ResetLevelCoins(levels.Length);
+        currentLevelIndex = 0;
     }
 
     public void OnReplay()

@@ -56,6 +56,12 @@ public class PathTrail
         MARKS.Clear();
     }
 
+    public void ApplyWinFade(float progress)
+    {
+        foreach (PathMarkFeedback mark in MARKS.Values)
+            mark.ApplyWinFade(progress);
+    }
+
     private PathMarkFeedback CreateMark()
     {
         GameObject view = new GameObject("PathMark");

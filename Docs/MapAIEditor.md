@@ -43,18 +43,24 @@ map does not paint.
   backtracking operations.
 - A misleading candidate approaches F geometrically while its real path distance requires
   returning toward a junction. It remains a design candidate, not a guarantee of player error.
+- Near-win dead ends are non-repeating routes that collect at least one target, leave exactly
+  one uncollected, and run out of legal moves. The overlay highlights the longest detected route.
+  This is a structural signal, not proof that players will mistake it for a winning route.
 - Line of sight is not verified because the current map data has no obstacle geometry beyond
   grid connectivity.
 
 When a budget is reached, the tool labels route results as partial and does not claim that all
-paths were found. Suggested time is editable design guidance derived from the completion route
-and difficulty preset; it is not written into gameplay data automatically.
+paths were found. Suggested time is editable design guidance derived from the completion route,
+detected near-win dead ends, and difficulty preset; it is not written into gameplay data
+automatically.
 
 ## Generation
 
-Generator version 3 creates and evaluates multiple candidates, selecting the candidate closest
-to the chosen difficulty's decision-point target. Puzzle focus guides target placement and the
-rotation mechanics. `RotationTiming` places a rotator on the solution route and requires pipe
+Generator version 4 creates and evaluates multiple candidates, selecting the candidate closest
+to the chosen difficulty's complexity target. Scoring favors decision points and routes that get
+stuck after collecting all but one target; generic dead-end count is not used as a difficulty
+bonus. Puzzle focus guides target placement and the rotation mechanics. `RotationTiming` places
+a rotator on the solution route and requires pipe
 orientation to change for the route to remain traversable. `GlobalRotation` also places an
 off-route pipe at a junction so the same rotation changes another route. The solver tracks
 rotation phase, collected targets, and non-repeating paths. The same version, seed, settings, and
@@ -63,9 +69,10 @@ reason instead of accepting an invalid map.
 
 The supported range currently follows the project's existing `MapBuilderLimits`: 1-10 columns
 and 1-10 rows. Very small dimensions can be rejected because they cannot contain two reachable
-endpoints. Automated checks cover 5x5, 8x8, 10x10, and 7x4. A local managed benchmark completed
-20 generation-and-analysis runs at 10x10 in about 4 ms on the development machine; validate
-editor and device performance with Unity Profiler before increasing the project limit.
+endpoints. Automated checks cover 5x5, 8x8, 10x10, and 7x4. A previous-version managed benchmark
+completed 20 generation-and-analysis runs at 10x10 in about 4 ms on the development machine.
+Version 4 continues bounded route search to find near-win failures, so remeasure with Unity
+Profiler before increasing the project limit.
 
 ## AI Status
 

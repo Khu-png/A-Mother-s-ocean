@@ -4,8 +4,34 @@ public static class MapAiFocusGenerationSelfTest
 {
     public static void Run()
     {
+        TestNearWinDeadEnd();
         TestFocus(MapAiPuzzleFocus.RotationTiming, 17011);
         TestFocus(MapAiPuzzleFocus.GlobalRotation, 17012);
+    }
+
+    private static void TestNearWinDeadEnd()
+    {
+        string[] rows =
+        {
+            "..SX.",
+            ".F..X",
+            "T....",
+            ".T...",
+            "..X.."
+        };
+        MapAiSearchBudget budget = new MapAiSearchBudget { MaximumPaths = 1 };
+        MapAiAnalysisResult result = MapAiAnalyzer.Analyze(
+            new MapAiMapData(rows), budget, MapAiDifficulty.Easy);
+        Require(result.CanComplete, "Map with a valid route was rejected.");
+        Require(result.SearchLimited, "Additional completion paths were not reported.");
+        Require(result.NearWinDeadEndCount > 0,
+            "A route collecting all but one target and getting stuck was not detected.");
+        Require(result.LongestNearWinDeadEndPath.Count > 0,
+            "The longest near-win dead-end route was not retained.");
+        UnityEngine.Vector2Int lastCell = result.LongestNearWinDeadEndPath[
+            result.LongestNearWinDeadEndPath.Count - 1];
+        Require(lastCell != result.Finish,
+            "A successful route was incorrectly marked as a near-win dead end.");
     }
 
     private static void TestFocus(MapAiPuzzleFocus focus, int seed)

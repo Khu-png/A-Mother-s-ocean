@@ -48,6 +48,7 @@ public partial class GridMap : MonoBehaviour
 
     void Update()
     {
+        if (isClearingBoard) return;
         RefreshSafeArenaLayout();
         ReadMoveInput();
     }
@@ -75,10 +76,9 @@ public partial class GridMap : MonoBehaviour
 
     private void BuildTile(Transform root, Vector2Int cell, char code)
     {
-        BlockTile block;
-        OneWayPath path;
-        RotateButton button;
-        MapTile tile = prefabs.CreateTile(root, cell, code, CellToLocalPosition(cell), cellSize, out block, out path, out button);
+        MapTile tile = prefabs.CreateTile(root, cell, code,
+            CellToLocalPosition(cell), cellSize, out BlockTile block,
+            out OneWayPath path, out RotateButton button);
         tiles.Add(cell, tile);
         if (block != null) blocks.Add(cell, block);
         if (path != null) oneWayPaths.Add(cell, path);
@@ -118,119 +118,4 @@ public partial class GridMap : MonoBehaviour
         currentRoute.Clear();
         currentRoute.Add(playerCell);
     }
-
-    private void ReadMoveInput()
-    {
-        bool canMove = !LoadingManager.Ins.IsLoading && GameManager.IsState(GameState.Gameplay) && player != null && !player.IsMoving && !AreTilesRotating();
-        Vector2Int direction = inputReader.ReadDirection(canMove);
-        if (direction != Vector2Int.zero) TryMove(direction);
-    }
-
-    private bool AreTilesRotating()
-    {
-        foreach (OneWayPath path in oneWayPaths.Values)
-        {
-            if (path.Tile.IsRotating) return true;
-        }
-        return false;
-    }
-
-    private void TryMove(Vector2Int direction)
-    {
-        Vector2Int nextCell = playerCell + direction;
-        if (!CanMove(playerCell, nextCell, direction)) return;
-        bool isBacktracking = IsBacktrackingToPreviousCell(nextCell);
-        bool rotatesTiles = rotateButtons.ContainsKey(isBacktracking ? playerCell : nextCell);
-
-        if (isBacktracking)
-        {
-            RestoreTargetAt(playerCell);
-            if (rotateButtons.ContainsKey(playerCell)) RevertOneWayTiles();
-            pathTrail.Remove(playerCell);
-            currentRoute.RemoveAt(currentRoute.Count - 1);
-        }
-        else if (pathTrail.HasMark(nextCell)) return;
-        else currentRoute.Add(nextCell);
-
-        playerCell = nextCell;
-        MarkCurrentCell();
-        player.MoveTo(playerCell, CellToLocalPosition(playerCell));
-        SoundManager.Ins.PlaySound(GameConstants.MOVE_SOUND);
-        LevelManager.Ins.NotifyPlayerMoved();
-        if (!isBacktracking && rotateButtons.ContainsKey(playerCell)) ActivateRotateButton();
-        if (rotatesTiles) SoundManager.Ins.PlaySound(GameConstants.ROTATE_SOUND);
-        RefreshFinish();
-    }
-
-    private bool CanMove(Vector2Int fromCell, Vector2Int toCell, Vector2Int direction)
-    {
-        if (!tiles.ContainsKey(toCell) || blocks.ContainsKey(toCell)) return false;
-        if (IsBacktrackingToPreviousCell(toCell)) return true;
-        return AllowsDirection(fromCell, direction) && AllowsDirection(toCell, -direction);
-    }
-
-    private bool AllowsDirection(Vector2Int cell, Vector2Int direction)
-    {
-        return !oneWayPaths.ContainsKey(cell) || oneWayPaths[cell].Allows(direction);
-    }
-
-    private void RotateOneWayTiles()
-    {
-        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleState();
-    }
-
-    private void ActivateRotateButton()
-    {
-        RotateOneWayTiles();
-        rotateButtons[playerCell].Pulse();
-    }
-
-    private void ResetOneWayPaths()
-    {
-        foreach (OneWayPath path in oneWayPaths.Values) path.ResetState();
-    }
-
-    private void MarkCurrentCell()
-    {
-        pathTrail.Mark(playerCell, CellToLocalPosition(playerCell));
-        if (targets.ContainsKey(playerCell)) targets[playerCell].Collect();
-    }
-
-    private void ResetTargets()
-    {
-        foreach (TargetPoint target in targets.Values) target.ResetTarget();
-    }
-
-    private void RestoreTargetAt(Vector2Int cell)
-    {
-        if (targets.ContainsKey(cell)) targets[cell].ResetTarget();
-    }
-
-    private void RevertOneWayTiles()
-    {
-        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleBack();
-    }
-
-    private void RefreshFinish()
-    {
-        if (finishPoint == null) return;
-        finishPoint.SetOpen(AreAllTargetsCollected());
-        if (finishPoint.IsOpen && playerCell == finishCell) LevelManager.Ins.OnWin();
-    }
-
-    private bool AreAllTargetsCollected()
-    {
-        foreach (TargetPoint target in targets.Values)
-        {
-            if (!target.IsCollected) return false;
-        }
-
-        return true;
-    }
-
-    private bool IsBacktrackingToPreviousCell(Vector2Int nextCell)
-    {
-        return currentRoute.Count >= 2 && currentRoute[currentRoute.Count - 2] == nextCell;
-    }
-
 }

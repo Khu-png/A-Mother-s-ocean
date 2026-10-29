@@ -4,6 +4,7 @@ public class StartPoint : MonoBehaviour
 {
     [SerializeField] private Vector2Int cell;
     [SerializeField] private SpriteRenderer spriteRenderer;
+    private Color winFadeColor;
 
     public Vector2Int Cell => cell;
 
@@ -24,5 +25,17 @@ public class StartPoint : MonoBehaviour
     public void SetLocalPosition(Vector3 localPosition)
     {
         transform.localPosition = localPosition;
+    }
+
+    public void BeginWinFade()
+    {
+        winFadeColor = spriteRenderer.color;
+    }
+
+    public void ApplyWinFade(float progress)
+    {
+        Color color = winFadeColor;
+        color.a *= 1f - Mathf.SmoothStep(0f, 1f, progress);
+        spriteRenderer.color = color;
     }
 }

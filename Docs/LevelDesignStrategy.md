@@ -66,6 +66,10 @@ Không dùng một chỉ số duy nhất để kết luận độ khó. Mỗi le
 | Lời giải | Có thể có nhiều | Nên ít | Nên có một lời giải chính |
 
 Độ dài đường đi chỉ là tải thao tác. Nó không được dùng một mình để tăng độ khó.
+Một nhánh cụt chỉ là "gần thắng" khi lộ trình hợp lệ đã lấy ít nhất một Target,
+còn thiếu đúng một Target, rồi hết nước đi; đếm ngõ cụt hình học không đủ để
+đánh giá độ khó. Lối giải đúng dài hơn nhánh mồi nhử là một tín hiệu tốt hơn,
+nhưng vẫn cần playtest để xác nhận người chơi thực sự bị đánh lừa.
 
 ## 5. Nhịp dạy một cơ chế
 
@@ -247,4 +251,3 @@ Solver không thay designer quyết định level có vui hay không. Solver có
 - Lời giải cần đi qua bao nhiêu Rotate Button?
 
 Designer tạo ra ý nghĩa của câu đố. Solver kiểm tra cấu trúc của câu đố. Playtest xác nhận trải nghiệm của người chơi.
-

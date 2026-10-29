@@ -9,7 +9,8 @@ public enum MapAiOverlayMode
     DeadEnds,
     MisleadingCandidates,
     SelectedRoute,
-    SelectedBranch
+    SelectedBranch,
+    NearWinDeadEnds
 }
 
 [Serializable]
@@ -18,7 +19,8 @@ public sealed class MapAiAnalysisPanel
     private static readonly string[] OVERLAY_NAMES =
     {
         "Bình thường", "Đường hoàn thành", "Ngõ cụt",
-        "Nhánh đánh lạc hướng", "Tuyến đang chọn", "Nhánh đang chọn"
+        "Nhánh đánh lạc hướng", "Tuyến đang chọn", "Nhánh đang chọn",
+        "Bế tắc sau khi gần đủ target"
     };
 
     [SerializeField] private Vector2 scroll;
@@ -57,7 +59,10 @@ public sealed class MapAiAnalysisPanel
         EditorGUILayout.LabelField("Số lời giải hoàn chỉnh", result.Paths.Count.ToString());
         EditorGUILayout.LabelField("Điểm lựa chọn", result.DecisionPoints.ToString());
         EditorGUILayout.LabelField("Số nhánh cụt", result.DeadEnds.Count.ToString());
-        EditorGUILayout.LabelField("Nhánh đánh lạc hướng", result.MisleadingCount.ToString());
+        EditorGUILayout.LabelField("Mồi nhử gần F (ước lượng hình học)",
+            result.MisleadingCount.ToString());
+        EditorGUILayout.LabelField("Lối bế tắc sau khi lấy gần hết target",
+            result.NearWinDeadEndCount.ToString());
         EditorGUILayout.LabelField("Thời gian gợi ý", $"{result.SuggestedSeconds} giây");
         EditorGUILayout.HelpBox(result.SearchLimited
             ? "Đã chạm giới hạn tìm đường. Kết quả chỉ là một phần."
@@ -75,7 +80,7 @@ public sealed class MapAiAnalysisPanel
         EditorGUILayout.Space(8f);
         EditorGUILayout.LabelField("Tô sáng bản đồ", EditorStyles.boldLabel);
         overlayMode = (MapAiOverlayMode)EditorGUILayout.IntPopup("Chế độ hiển thị",
-            (int)overlayMode, OVERLAY_NAMES, new[] { 0, 1, 2, 3, 4, 5 });
+            (int)overlayMode, OVERLAY_NAMES, new[] { 0, 1, 2, 3, 4, 5, 6 });
         DrawLegend();
     }
 
@@ -145,7 +150,7 @@ public sealed class MapAiAnalysisPanel
             }
         }
         EditorGUILayout.HelpBox(
-            "Phân tích nhánh dùng trạng thái ống ban đầu; bộ tìm đường có tính đến xoay và quay lui. Công cụ chưa kiểm tra tầm nhìn.",
+            "Phân tích nhánh dùng trạng thái ống ban đầu; bộ tìm đường có tính đến xoay và quay lui. Lối bế tắc gần thắng đã lấy ít nhất một target, còn đúng một target rồi hết nước đi.",
             MessageType.Info);
     }
 

@@ -88,7 +88,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         else if (command == MapAiEditorCommand.Generate) GeneratePreview();
         else if (command == MapAiEditorCommand.ApplyPreview) ApplyPreview();
         else if (command == MapAiEditorCommand.DiscardPreview) DiscardPreview();
-        else if (command == MapAiEditorCommand.CreateLevel) status = MapLevelRegistration.Create(controls.LevelManager, controls.LevelNumber, document.ToRows(), out levelData);
+        else if (command == MapAiEditorCommand.CreateLevel) status = MapLevelRegistration.Create(controls.LevelManager, controls.LevelNumber, document.ToRows(), (LevelDifficulty)generation.Difficulty, out levelData);
         else if (command == MapAiEditorCommand.PreviousPreview) SelectAdjacentPreview(-1);
         else if (command == MapAiEditorCommand.NextPreview) SelectAdjacentPreview(1);
     }
@@ -167,6 +167,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         }
         Undo.RecordObject(this, "Mở dữ liệu màn chơi");
         document.Replace(levelData.MapRows);
+        generation.Difficulty = (MapAiDifficulty)levelData.Difficulty;
         generation.Columns = document.Width;
         generation.Rows = document.Height;
         DiscardPreview();
@@ -177,6 +178,7 @@ public sealed class MapAiEditorWindow : EditorWindow
     {
         Undo.RecordObject(levelData, "Lưu bố cục bản đồ");
         levelData.SetMapRows(document.ToRows());
+        levelData.SetDifficulty((LevelDifficulty)generation.Difficulty);
         EditorUtility.SetDirty(levelData);
         AssetDatabase.SaveAssets();
         status = $"Đã lưu {AssetDatabase.GetAssetPath(levelData)}";
@@ -189,6 +191,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         if (path == string.Empty) return;
         LevelData asset = CreateInstance<LevelData>();
         asset.SetMapRows(document.ToRows());
+        asset.SetDifficulty((LevelDifficulty)generation.Difficulty);
         AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
         levelData = asset;

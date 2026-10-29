@@ -35,18 +35,20 @@ public static class MapAiPathSearch
         result.SearchExpansions++;
         if (current == result.Finish && collectedTargets.Count == targetCount)
         {
-            result.Paths.Add(new List<Vector2Int>(path));
-            if (result.Paths.Count < budget.MaximumPaths) return true;
-            result.SearchLimited = true;
-            return false;
+            if (result.Paths.Count < budget.MaximumPaths)
+                result.Paths.Add(new List<Vector2Int>(path));
+            else result.SearchLimited = true;
+            return true;
         }
 
+        bool hasAvailableMove = false;
         for (int i = 0; i < MapAiMovementGraph.DirectionCount; i++)
         {
             Vector2Int next = current + MapAiMovementGraph.Direction(i);
             if (!map.Contains(next) || visited[next.x, next.y]
                 || !MapAiMovementGraph.CanMove(map, current, next, rotationPhase)) continue;
             if (next == result.Finish && collectedTargets.Count < targetCount) continue;
+            hasAvailableMove = true;
             visited[next.x, next.y] = true;
             path.Add(next);
             bool collectedTarget = map.GetCell(next) == 'T'
@@ -60,7 +62,19 @@ public static class MapAiPathSearch
             visited[next.x, next.y] = false;
             if (!shouldContinue) return false;
         }
+        if (!hasAvailableMove && collectedTargets.Count > 0
+            && collectedTargets.Count == targetCount - 1)
+            RecordNearWinDeadEnd(result, path);
         return true;
+    }
+
+    private static void RecordNearWinDeadEnd(MapAiAnalysisResult result,
+        List<Vector2Int> path)
+    {
+        result.NearWinDeadEndCount++;
+        if (path.Count <= result.LongestNearWinDeadEndPath.Count) return;
+        result.LongestNearWinDeadEndPath.Clear();
+        result.LongestNearWinDeadEndPath.AddRange(path);
     }
 
     private static void MeasureDecisionPoints(MapAiMapData map,

@@ -134,6 +134,8 @@ public sealed class MapAiGridOverlay
         MapAiGridOverlay overlay = new MapAiGridOverlay();
         if (analysisPanel.OverlayMode == MapAiOverlayMode.CompletionPath)
             overlay.Shortest.UnionWith(result.CompletionPath);
+        if (analysisPanel.OverlayMode == MapAiOverlayMode.NearWinDeadEnds)
+            overlay.Misleading.UnionWith(result.LongestNearWinDeadEndPath);
         for (int i = 0; i < result.DeadEnds.Count; i++)
         {
             MapAiBranch branch = result.DeadEnds[i];

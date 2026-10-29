@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class MapAiGenerator
 {
-    public const int VERSION = 3;
+    public const int VERSION = 4;
     private const int MAX_ATTEMPTS = 8;
 
     public static MapAiGenerationResult Generate(MapAiMapData current,
@@ -165,8 +165,7 @@ public static class MapAiGenerator
         MapAiDifficulty difficulty)
     {
         int complexity = analysis.DecisionPoints * 4
-            + analysis.MisleadingCount * 5
-            + Mathf.Min(analysis.DeadEnds.Count, 8) * 2
+            + Mathf.Min(analysis.NearWinDeadEndCount, 4) * 8
             + Mathf.Min(analysis.CompletionPath.Count / 3, 6);
         int ideal = difficulty == MapAiDifficulty.Easy ? 5
             : difficulty == MapAiDifficulty.Hard ? 18 : 30;

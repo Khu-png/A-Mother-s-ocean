@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: TileRotate
-  m_Shader: {fileID: 4800000, guid: 5a4f59d7d7314e68a02cc68f3b9b12a1, type: 3}
+  m_Shader: {fileID: 4800000, guid: 05871a9562664dba846d08fb1e80bcc3, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -24,7 +24,8 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _Opacity: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 0.32, b: 0.08, a: 1}
   m_BuildTextureStacks: []

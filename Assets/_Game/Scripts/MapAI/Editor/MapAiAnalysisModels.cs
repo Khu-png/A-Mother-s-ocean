@@ -32,6 +32,7 @@ public sealed class MapAiAnalysisResult
     public readonly List<string> Issues = new List<string>();
     public readonly List<Vector2Int> ShortestPath = new List<Vector2Int>();
     public readonly List<Vector2Int> CompletionPath = new List<Vector2Int>();
+    public readonly List<Vector2Int> LongestNearWinDeadEndPath = new List<Vector2Int>();
     public readonly List<List<Vector2Int>> Paths = new List<List<Vector2Int>>();
     public readonly List<MapAiBranch> DeadEnds = new List<MapAiBranch>();
     public readonly Dictionary<Vector2Int, int> DistanceToFinish = new Dictionary<Vector2Int, int>();
@@ -44,6 +45,7 @@ public sealed class MapAiAnalysisResult
     public bool SearchLimited { get; set; }
     public int SearchExpansions { get; set; }
     public int DecisionPoints { get; set; }
+    public int NearWinDeadEndCount { get; set; }
     public int SuggestedSeconds { get; set; }
     public Vector2Int Start { get; set; }
     public Vector2Int Finish { get; set; }

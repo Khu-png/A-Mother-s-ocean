@@ -17,6 +17,7 @@ public partial class GridMap
 
     public void ClearRuntimeMap()
     {
+        StopWinTransition();
         if (runtimeRoot != null)
         {
             runtimeRoot.gameObject.SetActive(false);

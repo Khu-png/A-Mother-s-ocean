@@ -87,6 +87,11 @@ public class GameManager : Singleton<GameManager>
     {
         if (IsState(GameState.Win)) return;
         ChangeState(GameState.Win);
+        LevelManager.Ins.PlayWinTransition(ShowWinResult);
+    }
+
+    private void ShowWinResult()
+    {
         SoundManager.Ins.PlaySound(GameConstants.WIN_SOUND);
         UIManager.Ins.OpenUI<Win>();
     }

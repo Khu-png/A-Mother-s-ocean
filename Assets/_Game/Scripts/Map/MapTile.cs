@@ -6,6 +6,7 @@ public class MapTile : MonoBehaviour
     [SerializeField] private Vector2Int cell;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private TextMesh label;
+    [SerializeField] private TileWinVisual winVisual;
     [SerializeField, Min(0f)] private float rotationDuration = 0.22f;
     private Coroutine rotationRoutine;
     private Transform cachedTransform;
@@ -13,6 +14,22 @@ public class MapTile : MonoBehaviour
 
     public Vector2Int Cell => cell;
     public bool IsRotating => rotationRoutine != null;
+
+    public void BeginWinDetailFade()
+    {
+        StopRotation();
+        winVisual.BeginDetailFade(cachedTransform.localRotation);
+    }
+
+    public void ApplyWinDetailFade(float progress)
+    {
+        winVisual.ApplyDetailFade(progress);
+    }
+
+    public void ApplyWinBaseClear(float progress)
+    {
+        winVisual.ApplyBaseClear(progress);
+    }
 
     void Awake()
     {
@@ -30,6 +47,7 @@ public class MapTile : MonoBehaviour
         cachedTransform = transform;
         cachedTransform.localPosition = localPosition;
         cachedTransform.localEulerAngles = Vector3.zero;
+        winVisual.ConfigureBase(cellSize, cachedTransform.localScale);
 
         spriteRenderer.sortingOrder = -1;
         spriteRenderer.color = color;

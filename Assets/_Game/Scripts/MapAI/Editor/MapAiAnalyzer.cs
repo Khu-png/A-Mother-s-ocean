@@ -92,8 +92,7 @@ public static class MapAiAnalyzer
         int steps = Mathf.Max(0, result.CompletionPath.Count - 1);
         float multiplier = difficulty == MapAiDifficulty.Easy ? 2.2f
             : difficulty == MapAiDifficulty.Hard ? 1.6f : 1.25f;
-        float branchAllowance = difficulty == MapAiDifficulty.Easy
-            ? result.DeadEnds.Count * 2f : result.MisleadingCount * 1.5f;
+        float branchAllowance = Mathf.Min(result.NearWinDeadEndCount, 6) * 1.5f;
         return Mathf.CeilToInt(steps * multiplier + branchAllowance);
     }
 

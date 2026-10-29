@@ -6,6 +6,7 @@ public class PathMarkFeedback : MonoBehaviour
     private Color baseColor;
     private Vector3 baseScale;
     private float timer;
+    private float winOpacity = 1f;
     private Transform cachedTransform;
 
     void Awake()
@@ -20,7 +21,7 @@ public class PathMarkFeedback : MonoBehaviour
         cachedTransform.localScale = Vector3.Lerp(baseScale * 0.25f, baseScale, ease);
         if (spriteRenderer == null) return;
         Color color = baseColor;
-        color.a = baseColor.a * ease;
+        color.a = baseColor.a * ease * winOpacity;
         spriteRenderer.color = color;
     }
 
@@ -29,6 +30,7 @@ public class PathMarkFeedback : MonoBehaviour
         spriteRenderer = renderer;
         baseColor = color;
         baseScale = scale;
+        winOpacity = 1f;
         cachedTransform = transform;
         cachedTransform.localScale = baseScale * 0.25f;
     }
@@ -41,5 +43,10 @@ public class PathMarkFeedback : MonoBehaviour
         Color color = baseColor;
         color.a = 0f;
         spriteRenderer.color = color;
+    }
+
+    public void ApplyWinFade(float progress)
+    {
+        winOpacity = 1f - Mathf.SmoothStep(0f, 1f, progress);
     }
 }

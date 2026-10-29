@@ -42,4 +42,10 @@ public class RotateButton : MonoBehaviour
     {
         pulseTimer = 1f;
     }
+
+    public void StopPulse()
+    {
+        pulseTimer = 0f;
+        cachedTransform.localScale = baseScale;
+    }
 }
