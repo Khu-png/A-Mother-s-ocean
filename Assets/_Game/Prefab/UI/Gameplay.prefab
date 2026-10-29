@@ -1372,6 +1372,12 @@ MonoBehaviour:
   - {fileID: 8275857973849134470}
   popups: []
   levelText: {fileID: 7432814482892116052}
+  winHiddenElements:
+  - {fileID: 920000000}
+  - {fileID: 900000000}
+  - {fileID: 1112612243588652792}
+  - {fileID: 5085231775809931365}
+  - {fileID: 7144116919457338516}
   oceanBackground: {fileID: 910000002}
   tutorial: {fileID: 2206763992293264322}
   targetCounterTransform: {fileID: 920000001}

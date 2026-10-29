@@ -8,7 +8,6 @@ public static class MenuPlayerProgress
     private const string OWNED_SKIN_PREFIX = "OwnedSkin_";
     private const string POWER_UP_PREFIX = "PowerUp_";
     private const string CLAIMED_CHEST_PREFIX = "ClaimedGiftLevel_";
-    private const string CLAIMED_COIN_PREFIX = "ClaimedCoinLevel_";
 
     public static int Coins => Mathf.Max(0, PlayerPrefs.GetInt(CoinsKey, 0));
     public static int Chests => Mathf.Max(0, PlayerPrefs.GetInt(CHESTS_KEY, 0));
@@ -84,21 +83,9 @@ public static class MenuPlayerProgress
         PlayerPrefs.Save();
     }
 
-    public static bool GrantCompletionCoins(int levelNumber, int amount)
+    public static void GrantCompletionCoins(int amount)
     {
-        string claimKey = CLAIMED_COIN_PREFIX + levelNumber;
-        if (PlayerPrefs.GetInt(claimKey, 0) == 1) return false;
-        PlayerPrefs.SetInt(claimKey, 1);
         PlayerPrefs.SetInt(CoinsKey, Coins + amount);
-        PlayerPrefs.Save();
-        return true;
-    }
-
-    public static void ResetLevelCoins(int levelCount)
-    {
-        PlayerPrefs.DeleteKey(CoinsKey);
-        for (int levelNumber = 1; levelNumber <= levelCount; levelNumber++)
-            PlayerPrefs.DeleteKey(CLAIMED_COIN_PREFIX + levelNumber);
         PlayerPrefs.Save();
     }
 

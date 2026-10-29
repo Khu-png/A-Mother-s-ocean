@@ -92,6 +92,7 @@ public class GameManager : Singleton<GameManager>
 
     private void ShowWinResult()
     {
+        UIManager.Ins.GetUI<Gameplay>().HideWinHud();
         SoundManager.Ins.PlaySound(GameConstants.WIN_SOUND);
         UIManager.Ins.OpenUI<Win>();
     }

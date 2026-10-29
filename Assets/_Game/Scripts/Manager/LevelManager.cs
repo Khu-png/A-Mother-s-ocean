@@ -88,21 +88,25 @@ public class LevelManager : Singleton<LevelManager>
 
     public void OnWin()
     {
-        int nextLevel = currentLevelIndex + 1;
-        if (!HasLevelData(nextLevel))
-        {
-            GameDiagnostics.LogError("không có level tiếp theo");
-            throw new UnityException("không có level tiếp theo");
-        }
-
-        LevelData completedLevel = levels[currentLevelIndex];
-        MenuPlayerProgress.GrantCompletionCoins(currentLevelIndex + 1,
-            completedLevel.CompletionCoinReward);
-        if (completedLevel.GrantsGiftChest)
-            MenuPlayerProgress.GrantChestForLevel(currentLevelIndex + 1);
-        PlayerPrefs.SetInt(CurrentLevelKey, nextLevel + 1);
-        PlayerPrefs.Save();
         GameManager.Ins.OnFinish();
+    }
+
+    public int PendingWinCoins => levels[currentLevelIndex].CompletionCoinReward;
+
+    public void ClaimWinReward()
+    {
+        LevelData completedLevel = levels[currentLevelIndex];
+        MenuPlayerProgress.GrantCompletionCoins(completedLevel.CompletionCoinReward);
+        if (completedLevel.GrantsGiftChest) MenuPlayerProgress.GrantChestForLevel(CurrentLevelNumber);
+        int nextIndex = currentLevelIndex + 1;
+        if (HasLevelData(nextIndex)) PlayerPrefs.SetInt(CurrentLevelKey, nextIndex + 1);
+        PlayerPrefs.Save();
+    }
+
+    public void ContinueAfterWin()
+    {
+        if (HasLevelData(currentLevelIndex + 1)) LoadingManager.Ins.LoadGameplay(currentLevelIndex + 1);
+        else LoadingManager.Ins.LoadMainMenu();
     }
 
     public void PlayWinTransition(System.Action completed)
@@ -112,8 +116,8 @@ public class LevelManager : Singleton<LevelManager>
 
     public void ResetProgress()
     {
-        PlayerPrefs.DeleteKey(CurrentLevelKey);
-        MenuPlayerProgress.ResetLevelCoins(levels.Length);
+        PlayerPrefs.SetInt(CurrentLevelKey, 1);
+        PlayerPrefs.Save();
         currentLevelIndex = 0;
     }
 

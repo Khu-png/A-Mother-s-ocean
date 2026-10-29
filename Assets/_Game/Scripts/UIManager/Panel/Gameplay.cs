@@ -7,6 +7,7 @@ public class Gameplay : UICanvas
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private SpriteRenderer oceanBackground;
     [SerializeField] private GameObject tutorial;
+    [SerializeField] private GameObject[] winHiddenElements;
     [Header("Target Counter")]
     [SerializeField] private RectTransform targetCounterTransform;
     [SerializeField] private TextMeshProUGUI targetCounterText;
@@ -59,11 +60,18 @@ public class Gameplay : UICanvas
     public override void Open()
     {
         base.Open();
+        foreach (GameObject element in winHiddenElements) element.SetActive(true);
         RefreshTutorial();
         if (tutorial == null)
             GameDiagnostics.LogWarning("Gameplay: hãy gán object Tutorial vào field Tutorial trong prefab.", this);
         if (swipeIcon == null)
             GameDiagnostics.LogWarning("Gameplay: hãy gán Image bàn tay vào field Swipe Icon trong prefab.", this);
+    }
+
+    public void HideWinHud()
+    {
+        foreach (GameObject element in winHiddenElements) element.SetActive(false);
+        tutorial.SetActive(false);
     }
 
     private void RefreshTutorial()

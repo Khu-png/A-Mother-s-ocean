@@ -8,6 +8,9 @@ TextureImporter:
   - first:
       213: 7300000000000000002
     second: next-level-button
+  - first:
+      213: 7300000000000000003
+    second: victory-hug
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -146,6 +149,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: victory-hug
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 286
+        width: 960
+        height: 915
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1d32bd2d5034a608d04ac0b0a0a5759
+      internalID: 7300000000000000003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -160,6 +185,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      victory-hug: 7300000000000000003
       victory-icon: 7300000000000000001
       next-level-button: 7300000000000000002
   mipmapLimitGroupName: 
