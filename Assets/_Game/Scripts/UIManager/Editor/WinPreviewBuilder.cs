@@ -1,16 +1,19 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using AssetKits.ParticleImage;
 using UnityEditor;
 using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.UI;
+using ParticlePlayMode = AssetKits.ParticleImage.Enumerations.PlayMode;
 
 public static class WinPreviewBuilder
 {
     private const string REQUEST = "Temp/BuildWinPreview.request";
     private const string REPORT = "Temp/BuildWinPreview.result";
     private const string PREFAB = "Assets/_Game/Prefab/UI/Win.prefab";
+    private const string CONFETTI_PREFAB = "Assets/AssetKits/ParticleImage/Demo/Prefabs/ConfettiBurst.prefab";
 
     [InitializeOnLoadMethod]
     static void QueueRequestedBuild()
@@ -67,14 +70,26 @@ public static class WinPreviewBuilder
         RectTransform content = WinPreviewElements.Rect("Content", root, Vector2.one * 0.5f, Vector2.zero);
         content.anchorMin = Vector2.zero;
         content.anchorMax = Vector2.one;
+        content.gameObject.SetActive(false);
         Animator animator = content.gameObject.AddComponent<Animator>();
         animator.runtimeAnimatorController = WinPreviewAnimations.Build();
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
         animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-        Image hug = WinPreviewElements.Image("Hug", content, new Vector2(.5f, .5f),
+        RectTransform hug = WinPreviewElements.Rect("Hug", content, new Vector2(.5f, .5f),
+            new Vector2(855, 815));
+        WinPreviewElements.Glow("MotherGlow", hug, new Vector2(.45f, .5f),
+            new Vector2(1260, 1160), new Color32(38, 196, 255, 255));
+        WinPreviewElements.Glow("BabyGlow", hug, new Vector2(.71f, .31f),
+            new Vector2(960, 900), new Color32(73, 226, 255, 255));
+        Image hugArtwork = WinPreviewElements.Image("SharkArtwork", hug, Vector2.one * .5f,
             new Vector2(855, 815), Color.white);
-        hug.sprite = WinPreviewElements.HugSprite();
-        hug.preserveAspect = true;
+        hugArtwork.sprite = WinPreviewElements.HugSprite();
+        hugArtwork.preserveAspect = true;
+        ParticleImage[] confettiEffects =
+        {
+            CreateConfettiEffect(content, "ConfettiBurstLeft", .06f),
+            CreateConfettiEffect(content, "ConfettiBurstRight", .94f)
+        };
         CanvasGroup reward = WinPreviewElements.Group("Reward", content);
         WinPreviewElements.Text("Title", reward.transform, new Vector2(.5f, .797f),
             new Vector2(1000, 170), "YOU WIN", 129);
@@ -118,7 +133,38 @@ public static class WinPreviewBuilder
         Assign(data, "rewardText", rewardText);
         Assign(data, "claimText", label);
         Assign(data, "walletText", wallet);
+        SerializedProperty confettiData = data.FindProperty("confettiEffects");
+        confettiData.arraySize = confettiEffects.Length;
+        for (int i = 0; i < confettiEffects.Length; i++)
+            confettiData.GetArrayElementAtIndex(i).objectReferenceValue = confettiEffects[i];
         data.ApplyModifiedPropertiesWithoutUndo();
+        content.gameObject.SetActive(true);
+    }
+
+    static ParticleImage CreateConfettiEffect(Transform owner, string name, float horizontalAnchor)
+    {
+        foreach (UnityEngine.Object asset in AssetDatabase.LoadAllAssetsAtPath(CONFETTI_PREFAB))
+        {
+            if (!(asset is ParticleImage effect)) continue;
+            SerializedObject data = new SerializedObject(effect);
+            if (data.FindProperty("_main").objectReferenceValue != effect) continue;
+            ParticleImage instance = UnityEngine.Object.Instantiate(effect, owner);
+            instance.gameObject.name = name;
+            instance.rectTransform.anchorMin = new Vector2(horizontalAnchor, .5f);
+            instance.rectTransform.anchorMax = new Vector2(horizontalAnchor, .5f);
+            instance.rectTransform.anchoredPosition = Vector2.zero;
+            instance.rectTransform.sizeDelta = Vector2.one * 100f;
+            instance.raycastTarget = false;
+            instance.loop = false;
+            instance.PlayMode = ParticlePlayMode.None;
+            foreach (ParticleImage child in instance.children)
+            {
+                child.raycastTarget = false;
+                child.loop = false;
+            }
+            return instance;
+        }
+        throw new InvalidOperationException("ConfettiBurst has no main ParticleImage.");
     }
 
     static void Assign(SerializedObject data, string property, UnityEngine.Object value)

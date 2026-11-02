@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#062f4b">
+  <title>A Mother's Ocean — Unity gameplay prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="device" aria-label="A Mother's Ocean web prototype">
+    <section class="screen home-screen active" id="homeScreen" aria-label="Main menu">
+      <img class="screen-background" src="../Assets/_Game/Resources/Art/MenuUI/Clean/ocean_menu_background.png" alt="">
+      <div class="bubble bubble-one"></div>
+      <div class="bubble bubble-two"></div>
+
+      <header class="home-header">
+        <div class="wallet-pill" aria-label="120 coins">
+          <span class="coin-crop"><img src="../Assets/_Game/Resources/Art/MenuUI/Clean/coin_clean.png" alt=""></span>
+          <span class="wallet-value" id="homeCoins">120</span>
+          <button class="plus-button" aria-label="More coins">+</button>
+        </div>
+        <button class="settings-button" aria-label="Settings">
+          <img src="../Assets/_Game/Resources/Art/MenuUI/Clean/settings_coral.png" alt="">
+        </button>
+      </header>
+
+      <div class="home-level">
+        <img class="level-badge" src="../Assets/_Game/Resources/Art/MenuUI/Clean/shark_level_badge.png" alt="">
+        <div class="level-caption">
+          <span>LEVEL</span>
+          <strong id="homeLevel">04</strong>
+        </div>
+      </div>
+
+      <button class="play-button" id="playButton" aria-label="Play level 4">
+        <img src="../Assets/_Game/Resources/Art/MenuUI/Clean/play_pearl.png" alt="Play">
+      </button>
+
+      <nav class="bottom-nav" aria-label="Main menu">
+        <button class="nav-button" aria-label="Gifts">
+          <img src="../Assets/_Game/Resources/Art/MenuUI/Clean/nav_gift_clean.png" alt="">
+        </button>
+        <button class="nav-button" aria-label="Shop">
+          <img src="../Assets/_Game/Resources/Art/MenuUI/Clean/nav_shop_clean.png" alt="">
+        </button>
+        <button class="nav-button selected" aria-label="Home">
+          <img src="../Assets/_Game/Resources/Art/MenuUI/Clean/nav_home_clean.png" alt="">
+        </button>
+        <button class="nav-button" aria-label="Skins">
+          <img src="../Assets/_Game/Resources/Art/MenuUI/Clean/nav_skin_clean.png" alt="">
+        </button>
+        <button class="nav-button" aria-label="Aquarium">
+          <img src="../Assets/_Game/Resources/Art/MenuUI/Clean/nav_tank_clean.png" alt="">
+        </button>
+      </nav>
+    </section>
+
+    <section class="screen gameplay-screen" id="gameplayScreen" aria-label="Level 4 gameplay" aria-hidden="true">
+      <img class="screen-background gameplay-background" src="../Assets/_Game/Resources/Art/Generated/ocean_background_9x16_rounded.png" alt="">
+      <div class="gameplay-shade"></div>
+
+      <header class="game-header">
+        <button class="round-control" id="pauseButton" aria-label="Pause">
+          <img src="../Assets/_Game/Resources/Art/GameplayUI/pause-normal.png" alt="">
+        </button>
+        <div class="game-title">
+          <span>LEVEL <strong id="gameLevel">04</strong></span>
+          <span class="timer" id="timer">02:00</span>
+        </div>
+        <button class="round-control" id="restartButton" aria-label="Restart">
+          <img src="../Assets/_Game/Resources/Art/GameplayUI/reset-normal.png" alt="">
+        </button>
+      </header>
+
+      <div class="target-counter" aria-live="polite">
+        <img src="../Assets/_Game/Resources/Art/Generated/baby_shark_sprite.png" alt="">
+        <span>Baby sharks</span>
+        <strong id="targetCount">0/2</strong>
+      </div>
+
+      <div class="board-frame">
+        <div class="board" id="board" role="grid" aria-label="Five by five puzzle board"></div>
+      </div>
+      <p class="move-hint">SWIPE TO MOVE <span>·</span> ARROW KEYS</p>
+
+      <div class="game-overlay" id="pauseOverlay" aria-hidden="true">
+        <div class="dialog-card">
+          <p class="dialog-kicker">TAKE A BREATHER</p>
+          <h2>PAUSED</h2>
+          <button class="action-button" id="resumeButton">CONTINUE</button>
+          <button class="text-button" id="pauseRestartButton">RESTART LEVEL</button>
+          <button class="text-button" id="homeButton">MAIN MENU</button>
+        </div>
+      </div>
+
+      <div class="game-overlay" id="loseOverlay" aria-hidden="true">
+        <div class="dialog-card">
+          <p class="dialog-kicker">THE OCEAN CAN WAIT</p>
+          <h2>TIME'S UP!</h2>
+          <p class="dialog-copy">Try again and bring the little sharks home.</p>
+          <button class="action-button" id="tryAgainButton">TRY AGAIN</button>
+          <button class="text-button" id="loseHomeButton">MAIN MENU</button>
+        </div>
+      </div>
+
+      <div class="game-overlay win-overlay" id="winOverlay" aria-hidden="true">
+        <canvas class="confetti-canvas" id="confetti"></canvas>
+        <div class="win-content">
+          <p class="win-title">YOU WIN!</p>
+          <div class="shark-glow" aria-hidden="true"></div>
+          <div class="hug-art" aria-hidden="true">
+            <img src="../Assets/_Game/Resources/Art/Generated/victory-screen.png" alt="">
+          </div>
+          <div class="reward-row">
+            <span class="reward-coin">
+              <span class="coin-crop"><img src="../Assets/_Game/Resources/Art/MenuUI/Clean/coin_clean.png" alt=""></span>
+            </span>
+            <strong>+20</strong>
+          </div>
+          <button class="action-button claim-button" id="claimButton">CLAIM 20</button>
+          <div class="wallet-total">
+            <span class="coin-crop"><img src="../Assets/_Game/Resources/Art/MenuUI/Clean/coin_clean.png" alt=""></span>
+            <strong id="winCoins">120</strong>
+          </div>
+        </div>
+        <div class="coin-flight-layer" id="coinFlights" aria-hidden="true"></div>
+      </div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 using System.Collections;
+using AssetKits.ParticleImage;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ public class Win : UICanvas
     [SerializeField] private TMP_Text rewardText;
     [SerializeField] private TMP_Text claimText;
     [SerializeField] private TMP_Text walletText;
+    [SerializeField] private ParticleImage[] confettiEffects;
     private static readonly int INTRO_STATE = Animator.StringToHash("Intro");
     private static readonly int CLAIM_STATE = Animator.StringToHash("Claim");
     private bool readyToClaim;
@@ -29,6 +31,7 @@ public class Win : UICanvas
         if (sequence != null) StopCoroutine(sequence);
         claimed = false;
         readyToClaim = false;
+        foreach (ParticleImage confettiEffect in confettiEffects) confettiEffect.Stop(true);
         claimButton.interactable = false;
         int reward = LevelManager.Ins.PendingWinCoins;
         rewardText.text = $"+{reward}";
@@ -44,6 +47,7 @@ public class Win : UICanvas
         sequenceAnimator.Update(0f);
         do { yield return null; }
         while (sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
+        foreach (ParticleImage confettiEffect in confettiEffects) confettiEffect.Play();
         readyToClaim = true;
         claimButton.interactable = true;
         sequence = null;
@@ -63,6 +67,7 @@ public class Win : UICanvas
 
     private IEnumerator ShowClaim(int startingCoins, int finalCoins)
     {
+        int reward = finalCoins - startingCoins;
         sequenceAnimator.Play(CLAIM_STATE, 0, 0f);
         sequenceAnimator.Update(0f);
         do
@@ -70,10 +75,13 @@ public class Win : UICanvas
             float progress = sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float coinProgress = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress / 0.7f));
             walletText.text = Mathf.RoundToInt(Mathf.Lerp(startingCoins, finalCoins, coinProgress)).ToString();
+            int remainingReward = Mathf.RoundToInt(Mathf.Lerp(reward, 0, coinProgress));
+            rewardText.text = $"+{remainingReward}";
             yield return null;
         }
         while (sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
         walletText.text = finalCoins.ToString();
+        rewardText.text = "+0";
         sequence = null;
         LevelManager.Ins.ContinueAfterWin();
     }

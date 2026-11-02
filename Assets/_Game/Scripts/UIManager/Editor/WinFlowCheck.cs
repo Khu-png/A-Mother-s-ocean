@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using AssetKits.ParticleImage;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using ParticlePlayMode = AssetKits.ParticleImage.Enumerations.PlayMode;
 
 public static class WinFlowCheck
 {
@@ -21,6 +23,23 @@ public static class WinFlowCheck
         SerializedObject data = new SerializedObject(win);
         foreach (string field in new[] { "sequenceAnimator", "claimButton", "rewardText", "claimText", "walletText" })
             Require(data.FindProperty(field).objectReferenceValue != null, "Missing " + field);
+        SerializedProperty confettiEffects = data.FindProperty("confettiEffects");
+        Require(confettiEffects.arraySize == 2, "Expected confetti emitters on both sides.");
+        float[] sideAnchors = { .06f, .94f };
+        for (int i = 0; i < confettiEffects.arraySize; i++)
+        {
+            ParticleImage confettiEffect = (ParticleImage)confettiEffects.GetArrayElementAtIndex(i).objectReferenceValue;
+            Require(Mathf.Approximately(confettiEffect.rectTransform.anchorMin.x, sideAnchors[i]),
+                "Confetti emitter is not positioned on its side.");
+            Require(confettiEffect.PlayMode == ParticlePlayMode.None, "Confetti starts without the reward.");
+            Require(!confettiEffect.loop, "Confetti repeats after the initial burst.");
+            foreach (ParticleImage child in confettiEffect.children)
+            {
+                Require(child.PlayMode == ParticlePlayMode.None, "Confetti child starts without the reward.");
+                Require(!child.loop, "Confetti child repeats after the initial burst.");
+                Require(!child.raycastTarget, "Confetti child blocks UI input.");
+            }
+        }
         AssetDatabase.TryGetGUIDAndLocalFileIdentifier(win, out string guid, out long id);
         Require(id == 7799615184282313327, "Win prefab reference changed.");
         foreach (string name in new[] { "Intro", "Claim" })

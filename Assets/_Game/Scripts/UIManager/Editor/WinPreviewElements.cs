@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public static class WinPreviewElements
 {
     private const string FONT_PATH = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
+    private const string GLOW_SPRITE_PATH = "Assets/AssetKits/ParticleImage/Demo/Sprites/Glow.png";
 
     public static void CreateTextMaterial()
     {
@@ -83,8 +84,11 @@ public static class WinPreviewElements
         text.font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_PATH);
         text.text = value;
         text.fontSize = fontSize;
+        text.fontSizeMin = 18;
+        text.fontSizeMax = 72;
         text.fontStyle = FontStyles.Bold;
         text.fontWeight = FontWeight.Bold;
+        text.textWrappingMode = TextWrappingModes.Normal;
         text.alignment = TextAlignmentOptions.Center;
         text.raycastTarget = false;
         text.fontSharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(
@@ -94,10 +98,19 @@ public static class WinPreviewElements
 
     public static Image Coin(string name, Transform owner, Vector2 center, float diameter)
     {
-        Image coin = Image(name, owner, center, Vector2.one * diameter, new Color32(255, 197, 46, 255));
-        coin.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
-        Text("Symbol", coin.rectTransform, Vector2.one * 0.5f, Vector2.one * diameter, "$", diameter * 0.65f);
+        Image coin = Image(name, owner, center, Vector2.one * diameter, Color.white);
+        coin.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+            "Assets/_Game/Resources/Art/MenuUI/Clean/coin_menu_icon.png");
+        coin.preserveAspect = true;
         return coin;
+    }
+
+    public static Image Glow(string name, Transform owner, Vector2 center, Vector2 size, Color color)
+    {
+        Image glow = Image(name, owner, center, size, color);
+        glow.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(GLOW_SPRITE_PATH);
+        glow.preserveAspect = true;
+        return glow;
     }
 
     public static CanvasGroup Group(string name, Transform owner)
