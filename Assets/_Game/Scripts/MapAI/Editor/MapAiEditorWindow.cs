@@ -35,12 +35,10 @@ public sealed class MapAiEditorWindow : EditorWindow
         if (hasPreview && previewCollection.Count > 0) SelectPreview();
         else hasPreview = false;
     }
-
     void OnDisable()
     {
         Undo.undoRedoPerformed -= HandleUndoRedo;
     }
-
     void OnGUI()
     {
         DrawToolbar();
@@ -62,7 +60,6 @@ public sealed class MapAiEditorWindow : EditorWindow
             controls.BrushCode, controls.LockMode, overlay, this)) AnalyzeCurrent();
         if (analysisPanel.Draw(right, displayedAnalysis)) RequestAiProposal();
     }
-
     private void DrawToolbar()
     {
         EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
@@ -81,14 +78,15 @@ public sealed class MapAiEditorWindow : EditorWindow
         if (GUILayout.Button("Chạy cảnh", EditorStyles.toolbarButton)) EditorApplication.isPlaying = true;
         EditorGUILayout.EndHorizontal();
     }
-
     private void Execute(MapAiEditorCommand command)
     {
         if (command == MapAiEditorCommand.Resize) Resize();
         else if (command == MapAiEditorCommand.Generate) GeneratePreview();
         else if (command == MapAiEditorCommand.ApplyPreview) ApplyPreview();
         else if (command == MapAiEditorCommand.DiscardPreview) DiscardPreview();
-        else if (command == MapAiEditorCommand.CreateLevel) status = MapLevelRegistration.Create(controls.LevelManager, controls.LevelNumber, document.ToRows(), (LevelDifficulty)generation.Difficulty, out levelData);
+        else if (command == MapAiEditorCommand.CreateLevel) status = MapLevelRegistration.Create(
+            controls.LevelManager, controls.LevelNumber, document.ToRows(),
+            (LevelDifficulty)generation.Difficulty, controls.TimeLimitSeconds, out levelData);
         else if (command == MapAiEditorCommand.PreviousPreview) SelectAdjacentPreview(-1);
         else if (command == MapAiEditorCommand.NextPreview) SelectAdjacentPreview(1);
     }
@@ -168,6 +166,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         Undo.RecordObject(this, "Mở dữ liệu màn chơi");
         document.Replace(levelData.MapRows);
         generation.Difficulty = (MapAiDifficulty)levelData.Difficulty;
+        controls.TimeLimitSeconds = levelData.TimeLimitSeconds;
         generation.Columns = document.Width;
         generation.Rows = document.Height;
         DiscardPreview();
@@ -179,6 +178,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         Undo.RecordObject(levelData, "Lưu bố cục bản đồ");
         levelData.SetMapRows(document.ToRows());
         levelData.SetDifficulty((LevelDifficulty)generation.Difficulty);
+        levelData.SetTimeLimit(controls.TimeLimitSeconds);
         EditorUtility.SetDirty(levelData);
         AssetDatabase.SaveAssets();
         status = $"Đã lưu {AssetDatabase.GetAssetPath(levelData)}";
@@ -192,6 +192,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         LevelData asset = CreateInstance<LevelData>();
         asset.SetMapRows(document.ToRows());
         asset.SetDifficulty((LevelDifficulty)generation.Difficulty);
+        asset.SetTimeLimit(controls.TimeLimitSeconds);
         AssetDatabase.CreateAsset(asset, path);
         AssetDatabase.SaveAssets();
         levelData = asset;

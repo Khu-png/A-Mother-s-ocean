@@ -3,9 +3,11 @@ using UnityEngine;
 
 public enum MenuPowerUpId
 {
-    Undo,
-    Hint,
-    Shuffle
+    Undo = 0,
+    Hint = 1,
+    Shuffle = 2,
+    Freeze = 3,
+    Hammer = 4
 }
 
 [Serializable]
@@ -53,12 +55,14 @@ public sealed class MenuCatalog : ScriptableObject
     [SerializeField] private bool giftRewardsEnabled;
     [SerializeField] private MenuSkinOffer[] skins;
     [SerializeField] private MenuPowerUpOffer[] powerUps;
+    [SerializeField, Min(0)] private int heartPrice = 250;
     [SerializeField] private MenuGiftReward[] giftRewards;
 
     public bool PurchasesEnabled => purchasesEnabled;
     public bool GiftRewardsEnabled => giftRewardsEnabled;
     public MenuSkinOffer[] Skins => skins;
     public MenuPowerUpOffer[] PowerUps => powerUps;
+    public int HeartPrice => heartPrice;
     public MenuGiftReward[] GiftRewards => giftRewards;
     public string DefaultSkinId => skins[0].Id;
     public MenuSkinOffer GetSkin(string skinId)

@@ -19,3 +19,4 @@ MonoBehaviour:
   - .XBX..
   - ....TX
   grantsGiftChest: 0
+  timeLimitSeconds: 120

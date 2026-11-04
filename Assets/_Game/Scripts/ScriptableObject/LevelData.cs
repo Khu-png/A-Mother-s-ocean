@@ -24,10 +24,12 @@ public class LevelData : ScriptableObject
 	};
 	[SerializeField] private LevelDifficulty difficulty;
 	[SerializeField] private bool grantsGiftChest;
+	[SerializeField, Min(1)] private int timeLimitSeconds = 120;
 
 	public string[] MapRows => mapRows;
 	public LevelDifficulty Difficulty => difficulty;
 	public bool GrantsGiftChest => grantsGiftChest;
+	public int TimeLimitSeconds => timeLimitSeconds;
 	public int CompletionCoinReward => difficulty == LevelDifficulty.Easy
 		? EASY_REWARD
 		: difficulty == LevelDifficulty.Hard ? HARD_REWARD : SUPER_HARD_REWARD;
@@ -40,5 +42,10 @@ public class LevelData : ScriptableObject
 	public void SetDifficulty(LevelDifficulty value)
 	{
 		difficulty = value;
+	}
+
+	public void SetTimeLimit(int seconds)
+	{
+		timeLimitSeconds = Mathf.Max(1, seconds);
 	}
 }

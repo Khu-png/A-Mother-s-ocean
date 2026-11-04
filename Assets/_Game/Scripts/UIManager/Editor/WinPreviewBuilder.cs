@@ -61,7 +61,7 @@ public static class WinPreviewBuilder
 
     static void BuildContents(RectTransform root, Win win)
     {
-        WinPreviewElements.CreateTextMaterial();
+        WinPreviewElements.CreateTextMaterials();
         Image shade = WinPreviewElements.Image("Shade", root, Vector2.one * 0.5f, Vector2.zero,
             new Color(0f, 0.098f, 0.188f, 0.45f));
         shade.rectTransform.anchorMin = Vector2.zero;
@@ -91,11 +91,13 @@ public static class WinPreviewBuilder
             CreateConfettiEffect(content, "ConfettiBurstRight", .94f)
         };
         CanvasGroup reward = WinPreviewElements.Group("Reward", content);
-        WinPreviewElements.Text("Title", reward.transform, new Vector2(.5f, .797f),
+        WinPreviewElements.Title("Title", reward.transform, new Vector2(.5f, .797f),
             new Vector2(1000, 170), "YOU WIN", 129);
-        WinPreviewElements.Coin("RewardCoin", reward.transform, new Vector2(.369f, .284f), 102);
-        var rewardText = WinPreviewElements.Text("Amount", reward.transform, new Vector2(.57f, .284f),
-            new Vector2(390, 140), "+100", 102);
+        RectTransform rewardAmount = WinPreviewElements.Rect("RewardAmount", reward.transform,
+            new Vector2(.5f, .284f), new Vector2(560, 240));
+        WinPreviewElements.Coin("RewardCoin", rewardAmount, new Vector2(.28f, .5f), 180);
+        var rewardText = WinPreviewElements.Text("Amount", rewardAmount, new Vector2(.65f, .5f),
+            new Vector2(320, 150), "+100", 86);
         Image buttonFrame = WinPreviewElements.Image("ClaimButton", reward.transform, new Vector2(.5f, .153f),
             new Vector2(810, 192), new Color32(255, 244, 194, 255));
         Sprite rounded = WinPreviewElements.CreateRoundedSprite();
@@ -113,9 +115,8 @@ public static class WinPreviewBuilder
         UnityEventTools.AddPersistentListener(button.onClick, win.OnClickNext);
         var label = WinPreviewElements.Text("Label", buttonFrame.rectTransform, Vector2.one * .5f,
             new Vector2(750, 150), "CLAIM 100", 81);
-        WinPreviewElements.Coin("WalletCoin", content, new Vector2(.755f, .953f), 72);
-        var wallet = WinPreviewElements.Text("Wallet", content, new Vector2(.875f, .953f),
-            new Vector2(225, 100), "250", 66);
+        var wallet = WinPreviewElements.CoinBar("WalletCoinBar", content,
+            new Vector2(.84f, .953f), new Vector2(300, 128), "250", 54);
         for (int i = 0; i < 7; i++)
         {
             Image coin = WinPreviewElements.Coin("FlyingCoin" + i, content, new Vector2(.5f, .284f), 54);

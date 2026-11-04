@@ -36,12 +36,14 @@ public sealed class MapAiControlPanel
     [SerializeField] private bool showLevelSave;
     [SerializeField] private LevelManager levelManager;
     [SerializeField] private int levelNumber = 1;
+    [SerializeField] private int timeLimitSeconds = 120;
     [SerializeField, Range(2, 10)] private int sampleCount = 5;
 
     public char? BrushCode => selectedBrush < 0 ? (char?)null : BRUSH_CODES[selectedBrush];
     public bool LockMode => lockMode;
     public LevelManager LevelManager => levelManager;
     public int LevelNumber => levelNumber;
+    public int TimeLimitSeconds { get => timeLimitSeconds; set => timeLimitSeconds = value; }
     public int SampleCount => sampleCount;
 
     public MapAiEditorCommand Draw(Rect area, MapAiGenerationSettings settings,
@@ -150,6 +152,7 @@ public sealed class MapAiControlPanel
         levelManager = (LevelManager)EditorGUILayout.ObjectField(
             "Quản lý màn chơi", levelManager, typeof(LevelManager), true);
         levelNumber = Mathf.Max(1, EditorGUILayout.IntField("Số màn", levelNumber));
+        timeLimitSeconds = Mathf.Max(1, EditorGUILayout.IntField("Thời gian (giây)", timeLimitSeconds));
         using (new EditorGUI.DisabledScope(EditorApplication.isPlaying || hasPreview))
         {
             if (GUILayout.Button("Tạo dữ liệu màn chơi")) command = MapAiEditorCommand.CreateLevel;

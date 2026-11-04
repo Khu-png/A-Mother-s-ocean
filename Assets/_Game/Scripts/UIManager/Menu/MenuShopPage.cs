@@ -22,6 +22,15 @@ public sealed class MenuPowerUpOfferView
         buttonLabel.text = purchasesEnabled ? "Buy" : "Unavailable";
     }
 
+    public void DisplayLife(int lifePrice, bool purchasesEnabled, int coins, int lives)
+    {
+        quantity.text = "+1";
+        price.text = lifePrice.ToString();
+        bool livesFull = lives >= MenuPlayerProgress.MaxLives;
+        buyButton.interactable = purchasesEnabled && !livesFull && coins >= lifePrice;
+        buttonLabel.text = !purchasesEnabled ? "Unavailable" : livesFull ? "Full" : "Buy";
+    }
+
     public void SetProcessing()
     {
         buyButton.interactable = false;
@@ -51,11 +60,12 @@ public sealed class MenuShopPage : MonoBehaviour
         catalog = menuCatalog;
         purchaseCompleted = onPurchaseCompleted;
         featuredBuyButton.onClick.AddListener(BuyFeaturedSkin);
-        for (int i = 0; i < powerUpViews.Length; i++)
+        for (int i = 0; i < catalog.PowerUps.Length; i++)
         {
             int offerIndex = i;
             powerUpViews[i].BuyButton.onClick.AddListener(() => BuyPowerUp(offerIndex));
         }
+        powerUpViews[catalog.PowerUps.Length].BuyButton.onClick.AddListener(BuyLife);
         previousSkinButton.onClick.AddListener(SelectPreviousSkin);
         nextSkinButton.onClick.AddListener(SelectNextSkin);
         Refresh();
@@ -71,14 +81,18 @@ public sealed class MenuShopPage : MonoBehaviour
         bool owned = MenuPlayerProgress.IsSkinOwned(skin.Id);
         featuredBuyButton.interactable = catalog.PurchasesEnabled && !owned && MenuPlayerProgress.Coins >= skin.Price;
         featuredButtonLabel.text = ButtonText(owned);
-        for (int i = 0; i < powerUpViews.Length; i++)
-            powerUpViews[i].Display(catalog.PowerUps[i], catalog.PurchasesEnabled, MenuPlayerProgress.Coins);
+        for (int i = 0; i < catalog.PowerUps.Length; i++)
+            powerUpViews[i].Display(catalog.PowerUps[i],
+                catalog.PurchasesEnabled, MenuPlayerProgress.Coins);
+        powerUpViews[catalog.PowerUps.Length].DisplayLife(catalog.HeartPrice,
+            catalog.PurchasesEnabled, MenuPlayerProgress.Coins, MenuPlayerProgress.Lives);
         insufficientCoinsState.SetActive(catalog.PurchasesEnabled && !CanAffordAnything());
     }
 
     void OnDestroy()
     {
         featuredBuyButton.onClick.RemoveListener(BuyFeaturedSkin);
+        powerUpViews[catalog.PowerUps.Length].BuyButton.onClick.RemoveListener(BuyLife);
         previousSkinButton.onClick.RemoveListener(SelectPreviousSkin);
         nextSkinButton.onClick.RemoveListener(SelectNextSkin);
     }
@@ -115,6 +129,13 @@ public sealed class MenuShopPage : MonoBehaviour
         StartCoroutine(ProcessPowerUpPurchase(offerIndex));
     }
 
+    private void BuyLife()
+    {
+        if (processing) return;
+        SoundManager.Ins.PlayButtonSound();
+        StartCoroutine(ProcessLifePurchase());
+    }
+
     private IEnumerator ProcessSkinPurchase()
     {
         BeginProcessing(featuredButtonLabel, featuredBuyButton);
@@ -130,6 +151,16 @@ public sealed class MenuShopPage : MonoBehaviour
         view.SetProcessing();
         yield return new WaitForSecondsRealtime(processingDuration);
         MenuPlayerProgress.TryBuyPowerUp(catalog.PowerUps[offerIndex]);
+        EndProcessing();
+    }
+
+    private IEnumerator ProcessLifePurchase()
+    {
+        MenuPowerUpOfferView lifeView = powerUpViews[catalog.PowerUps.Length];
+        processing = true;
+        lifeView.SetProcessing();
+        yield return new WaitForSecondsRealtime(processingDuration);
+        MenuPlayerProgress.TryBuyLife(catalog.HeartPrice);
         EndProcessing();
     }
 
@@ -153,6 +184,8 @@ public sealed class MenuShopPage : MonoBehaviour
         {
             if (MenuPlayerProgress.Coins >= catalog.PowerUps[i].Price) return true;
         }
+        if (MenuPlayerProgress.Lives < MenuPlayerProgress.MaxLives
+            && MenuPlayerProgress.Coins >= catalog.HeartPrice) return true;
         return MenuPlayerProgress.Coins >= catalog.Skins[featuredSkinIndex].Price;
     }
 

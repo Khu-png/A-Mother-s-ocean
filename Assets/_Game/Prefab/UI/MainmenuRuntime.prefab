@@ -2701,6 +2701,7 @@ MonoBehaviour:
   skinPage: {fileID: 607676019120428691}
   currentLevelText: {fileID: 3370234320648488177}
   coinAmountText: {fileID: 139521324565524947}
+  energyAmountText: {fileID: 9100000000000000104}
   playButton: {fileID: 1630648561006513441}
   settingsButton: {fileID: 1467475783310291800}
   backgroundMode: 1

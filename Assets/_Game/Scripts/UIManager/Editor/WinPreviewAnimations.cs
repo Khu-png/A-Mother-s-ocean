@@ -61,7 +61,7 @@ public static class WinPreviewAnimations
         Curve(clip, path, typeof(CanvasGroup), "m_Alpha", 0, 0, start, 0, start + .02f, 1, end - .02f, 1, end, 0, 1.9f, 0);
         foreach (string anchor in new[] { "m_AnchorMin", "m_AnchorMax" })
         {
-            Curve(clip, path, typeof(RectTransform), anchor + ".x", 0, .369f, start, .369f, end, .755f, 1.9f, .755f);
+            Curve(clip, path, typeof(RectTransform), anchor + ".x", 0, .386f, start, .386f, end, .755f, 1.9f, .755f);
             Curve(clip, path, typeof(RectTransform), anchor + ".y", 0, .284f, start, .284f, end, .953f, 1.9f, .953f);
         }
         Curve(clip, path, typeof(RectTransform), "m_AnchoredPosition.x", 0, 0, start, 0, start + .35f, 90, end, 0, 1.9f, 0);

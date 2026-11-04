@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum GameState { MainMenu, Gameplay, Pause, Win }
+public enum GameState { MainMenu, Gameplay, Pause, Win, Lose }
 
 public class GameManager : Singleton<GameManager>
 {
@@ -88,6 +88,14 @@ public class GameManager : Singleton<GameManager>
         if (IsState(GameState.Win)) return;
         ChangeState(GameState.Win);
         LevelManager.Ins.PlayWinTransition(ShowWinResult);
+    }
+
+    public void OnLose()
+    {
+        if (!IsState(GameState.Gameplay)) return;
+        ChangeState(GameState.Lose);
+        UIManager.Ins.GetUI<Gameplay>().HideWinHud();
+        UIManager.Ins.OpenUI<Lose>();
     }
 
     private void ShowWinResult()

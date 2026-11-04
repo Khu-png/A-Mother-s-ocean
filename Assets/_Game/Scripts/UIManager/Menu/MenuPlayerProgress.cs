@@ -3,15 +3,18 @@ using UnityEngine;
 public static class MenuPlayerProgress
 {
     public const string CoinsKey = "Coins";
+    public const int MaxLives = 5;
     private const string CHESTS_KEY = "GiftChests";
     private const string EQUIPPED_SKIN_KEY = "EquippedSkin";
     private const string OWNED_SKIN_PREFIX = "OwnedSkin_";
     private const string POWER_UP_PREFIX = "PowerUp_";
     private const string CLAIMED_CHEST_PREFIX = "ClaimedGiftLevel_";
+    private const string LIVES_KEY = "Lives";
 
     public static int Coins => Mathf.Max(0, PlayerPrefs.GetInt(CoinsKey, 0));
     public static int Chests => Mathf.Max(0, PlayerPrefs.GetInt(CHESTS_KEY, 0));
     public static string EquippedSkin => PlayerPrefs.GetString(EQUIPPED_SKIN_KEY);
+    public static int Lives => Mathf.Clamp(PlayerPrefs.GetInt(LIVES_KEY, MaxLives), 0, MaxLives);
 
     public static void Initialize(string defaultSkinId)
     {
@@ -19,6 +22,7 @@ public static class MenuPlayerProgress
             PlayerPrefs.SetInt(OwnedSkinKey(defaultSkinId), 1);
         if (!PlayerPrefs.HasKey(EQUIPPED_SKIN_KEY))
             PlayerPrefs.SetString(EQUIPPED_SKIN_KEY, defaultSkinId);
+        if (!PlayerPrefs.HasKey(LIVES_KEY)) PlayerPrefs.SetInt(LIVES_KEY, MaxLives);
         PlayerPrefs.Save();
     }
 
@@ -41,6 +45,15 @@ public static class MenuPlayerProgress
         if (Coins < offer.Price) return false;
         SpendCoins(offer.Price);
         AddPowerUp(offer.Id, offer.Amount);
+        PlayerPrefs.Save();
+        return true;
+    }
+
+    public static bool TryBuyLife(int price)
+    {
+        if (Lives >= MaxLives || Coins < price) return false;
+        SpendCoins(price);
+        PlayerPrefs.SetInt(LIVES_KEY, Lives + 1);
         PlayerPrefs.Save();
         return true;
     }
@@ -87,6 +100,14 @@ public static class MenuPlayerProgress
     {
         PlayerPrefs.SetInt(CoinsKey, Coins + amount);
         PlayerPrefs.Save();
+    }
+
+    public static bool TrySpendLife()
+    {
+        if (Lives == 0) return false;
+        PlayerPrefs.SetInt(LIVES_KEY, Lives - 1);
+        PlayerPrefs.Save();
+        return true;
     }
 
     private static void SpendCoins(int amount)

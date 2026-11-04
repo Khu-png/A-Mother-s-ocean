@@ -5,9 +5,13 @@ using UnityEngine.UI;
 public class Gameplay : UICanvas
 {
     [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private SpriteRenderer oceanBackground;
     [SerializeField] private GameObject tutorial;
     [SerializeField] private GameObject[] winHiddenElements;
+    [SerializeField] private GameObject restartWarning;
+    [SerializeField] private TMP_Text restartWarningMessage;
+    [SerializeField] private TMP_Text restartConfirmLabel;
     [Header("Target Counter")]
     [SerializeField] private RectTransform targetCounterTransform;
     [SerializeField] private TextMeshProUGUI targetCounterText;
@@ -44,6 +48,7 @@ public class Gameplay : UICanvas
         levelManager.PlayerMoved += HideTutorial;
         levelManager.TargetProgressChanged += RefreshTargetCounter;
         levelManager.MissingTargetsBlocked += FlashTargetCounter;
+        levelManager.TimeChanged += RefreshTimer;
         InitializeTargetCounter();
         RefreshTutorial();
     }
@@ -53,6 +58,7 @@ public class Gameplay : UICanvas
         if (levelManager != null) levelManager.PlayerMoved -= HideTutorial;
         if (levelManager != null) levelManager.TargetProgressChanged -= RefreshTargetCounter;
         if (levelManager != null) levelManager.MissingTargetsBlocked -= FlashTargetCounter;
+        if (levelManager != null) levelManager.TimeChanged -= RefreshTimer;
         ResetSwipeIcon();
         ResetTargetCounter();
     }
@@ -82,6 +88,7 @@ public class Gameplay : UICanvas
         if (tutorial != null)
             tutorial.SetActive(levelManager.CurrentLevelNumber == 1 && !levelManager.HasPlayerMoved);
         RefreshTargetCounter(levelManager.CollectedTargetCount, levelManager.TotalTargetCount);
+        RefreshTimer(levelManager.RemainingTime);
     }
 
     private void HideTutorial()
@@ -166,6 +173,12 @@ public class Gameplay : UICanvas
         targetCounterText.color = targetCounterBaseColor;
     }
 
+    private void RefreshTimer(float seconds)
+    {
+        int totalSeconds = Mathf.CeilToInt(seconds);
+        timerText.text = $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
+    }
+
     public void OnClickPause()
     {
         SoundManager.Ins.PlayButtonSound();
@@ -174,12 +187,42 @@ public class Gameplay : UICanvas
 
     public override void BackKey()
     {
+        if (restartWarning.activeSelf)
+        {
+            OnClickCancelRestart();
+            return;
+        }
         OnClickPause();
     }
 
     public void OnClickRestart()
     {
         SoundManager.Ins.PlayButtonSound();
+        bool hasLife = MenuPlayerProgress.Lives > 0;
+        restartWarningMessage.text = hasLife
+            ? "THIS WILL COST 1 HEART"
+            : "NO HEARTS LEFT";
+        restartConfirmLabel.text = hasLife ? "RESTART" : "MAIN MENU";
+        GameManager.ChangeState(GameState.Pause);
+        restartWarning.SetActive(true);
+    }
+
+    public void OnClickConfirmRestart()
+    {
+        SoundManager.Ins.PlayButtonSound();
+        restartWarning.SetActive(false);
+        if (MenuPlayerProgress.Lives == 0 || !MenuPlayerProgress.TrySpendLife())
+        {
+            GameManager.Ins.OnInit();
+            return;
+        }
         LevelManager.Ins.OnRestart();
+    }
+
+    public void OnClickCancelRestart()
+    {
+        SoundManager.Ins.PlayButtonSound();
+        restartWarning.SetActive(false);
+        GameManager.ChangeState(GameState.Gameplay);
     }
 }

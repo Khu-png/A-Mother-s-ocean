@@ -41,7 +41,8 @@ public static class MapLevelRegistration
     }
 
     public static string Create(LevelManager manager, int requestedLevelNumber,
-        string[] rows, LevelDifficulty difficulty, out LevelData asset)
+        string[] rows, LevelDifficulty difficulty, int timeLimitSeconds,
+        out LevelData asset)
     {
         int levelNumber = Mathf.Max(1, requestedLevelNumber);
         string path = $"Assets/_Game/ScriptableObject/Map/Level_{levelNumber}.asset";
@@ -51,6 +52,7 @@ public static class MapLevelRegistration
         asset = ScriptableObject.CreateInstance<LevelData>();
         asset.SetMapRows(rows);
         asset.SetDifficulty(difficulty);
+        asset.SetTimeLimit(timeLimitSeconds);
         AssetDatabase.CreateAsset(asset, path);
         Assign(manager, levelNumber, asset);
         AssetDatabase.SaveAssets();

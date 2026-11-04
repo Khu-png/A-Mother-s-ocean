@@ -46,15 +46,13 @@ MonoBehaviour:
     portrait: {fileID: 7400000000000000006, guid: ed3e2f6ec68942f5a8414ed9ff57cb3a, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
   powerUps:
-  - id: 0
+  - id: 3
     amount: 1
     price: 150
-  - id: 1
+  - id: 4
     amount: 1
     price: 200
-  - id: 2
-    amount: 1
-    price: 250
+  heartPrice: 250
   giftRewards:
   - id: 0
     amount: 1

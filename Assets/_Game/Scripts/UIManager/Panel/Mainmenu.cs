@@ -19,6 +19,7 @@ public sealed class Mainmenu : UICanvas
     [SerializeField] private MenuSkinPage skinPage;
     [SerializeField] private TMP_Text currentLevelText;
     [SerializeField] private TMP_Text coinAmountText;
+    [SerializeField] private TMP_Text energyAmountText;
     [SerializeField] private Button playButton;
     [SerializeField] private Button settingsButton;
 
@@ -106,6 +107,7 @@ public sealed class Mainmenu : UICanvas
     private void Refresh()
     {
         currentLevelText.text = $"LEVEL\n{LevelManager.SavedLevelNumber}";
+        energyAmountText.text = MenuPlayerProgress.Lives.ToString();
         RefreshCoins();
         giftPage.Refresh();
         shopPage.Refresh();
@@ -121,6 +123,7 @@ public sealed class Mainmenu : UICanvas
     private void RefreshAfterPurchase()
     {
         RefreshCoins();
+        energyAmountText.text = MenuPlayerProgress.Lives.ToString();
         skinPage.Refresh();
     }
 }

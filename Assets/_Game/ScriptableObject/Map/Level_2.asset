@@ -20,3 +20,4 @@ MonoBehaviour:
   - .X.X.
   - OX.X.
   - E.CXF
+  timeLimitSeconds: 150

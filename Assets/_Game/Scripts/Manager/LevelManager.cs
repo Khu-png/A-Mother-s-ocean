@@ -9,13 +9,17 @@ public class LevelManager : Singleton<LevelManager>
     [SerializeField] private CameraController cameraController;
     private int currentLevelIndex;
     private GridMap currentLevel;
+    private float remainingTime;
+    private int displayedSecond;
     public int CurrentLevelNumber => currentLevelIndex + 1;
     public bool HasPlayerMoved { get; private set; }
     public int CollectedTargetCount { get; private set; }
     public int TotalTargetCount { get; private set; }
+    public float RemainingTime => remainingTime;
     public event System.Action PlayerMoved;
     public event System.Action<int, int> TargetProgressChanged;
     public event System.Action MissingTargetsBlocked;
+    public event System.Action<float> TimeChanged;
 
     void Awake()
     {
@@ -23,6 +27,19 @@ public class LevelManager : Singleton<LevelManager>
         currentLevelIndex = levels != null && levels.Length > 0
             ? Mathf.Clamp(SavedLevelNumber - 1, 0, levels.Length - 1)
             : 0;
+    }
+
+    void Update()
+    {
+        if (!HasPlayerMoved || !GameManager.IsState(GameState.Gameplay)) return;
+        remainingTime = Mathf.Max(0f, remainingTime - Time.deltaTime);
+        int currentSecond = Mathf.CeilToInt(remainingTime);
+        if (currentSecond != displayedSecond)
+        {
+            displayedSecond = currentSecond;
+            TimeChanged?.Invoke(remainingTime);
+        }
+        if (remainingTime <= 0f) GameManager.Ins.OnLose();
     }
 
     public void NotifyPlayerMoved()
@@ -79,11 +96,14 @@ public class LevelManager : Singleton<LevelManager>
     {
         if (!HasLevelData(levelIndex)) throw new UnityException("Không có dữ liệu level hợp lệ.");
         if (levelMap == null) throw new UnityException("Scene Grid Map chưa được gán.");
+        currentLevelIndex = levelIndex;
         currentLevel = levelMap;
         currentLevel.SetCameraController(cameraController);
         currentLevel.Initialize(levels[levelIndex]);
-        currentLevelIndex = levelIndex;
         HasPlayerMoved = false;
+        remainingTime = levels[levelIndex].TimeLimitSeconds;
+        displayedSecond = Mathf.CeilToInt(remainingTime);
+        TimeChanged?.Invoke(remainingTime);
     }
 
     public void OnWin()
