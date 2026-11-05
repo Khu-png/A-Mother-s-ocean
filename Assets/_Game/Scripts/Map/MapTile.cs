@@ -11,9 +11,11 @@ public class MapTile : MonoBehaviour
     private Coroutine rotationRoutine;
     private Transform cachedTransform;
     private Transform labelTransform;
+    private float configuredCellSize;
 
     public Vector2Int Cell => cell;
     public bool IsRotating => rotationRoutine != null;
+    public Vector3 WorldPosition => cachedTransform.position;
 
     public void BeginWinDetailFade()
     {
@@ -44,6 +46,7 @@ public class MapTile : MonoBehaviour
     public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Color color)
     {
         cell = setupCell;
+        configuredCellSize = cellSize;
         cachedTransform = transform;
         cachedTransform.localPosition = localPosition;
         cachedTransform.localEulerAngles = Vector3.zero;
@@ -69,6 +72,16 @@ public class MapTile : MonoBehaviour
     public void SetColor(Color color)
     {
         spriteRenderer.color = color;
+    }
+
+    public void ApplyObstacleBreak(Sprite pathSprite, Material depthMaterial,
+        Vector3 pathScale)
+    {
+        cachedTransform.localScale = pathScale;
+        spriteRenderer.sprite = pathSprite;
+        spriteRenderer.color = Color.white;
+        winVisual.ApplyObstacleBreak(depthMaterial);
+        winVisual.ConfigureBase(configuredCellSize, pathScale);
     }
 
     public void ConfigureVisuals(SpriteRenderer setupRenderer, TextMesh setupLabel)

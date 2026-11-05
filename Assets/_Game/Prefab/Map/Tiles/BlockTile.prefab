@@ -319,6 +319,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BlockTile
   tile: {fileID: 5188494305574155028}
   blockColor: {r: 1, g: 1, b: 1, a: 1}
+  pathSprite: {fileID: 8907590147031214466, guid: e5e1264734cff534eb091d44334b2fe3, type: 3}
+  pathDepthMaterial: {fileID: 2100000, guid: 111ba81a41b04b73a4a19a98c0956d01, type: 2}
+  pathScale: {x: 1.2, y: 1.2, z: 1.2}
 --- !u!1 &8801000000000000001
 GameObject:
   m_ObjectHideFlags: 0

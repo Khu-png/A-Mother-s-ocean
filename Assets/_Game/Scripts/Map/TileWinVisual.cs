@@ -31,6 +31,13 @@ public sealed class TileWinVisual : MonoBehaviour
         baseLiftDistance = cellSize * liftDistance / tileScale.z;
     }
 
+    public void ApplyObstacleBreak(Material pathDepthMaterial)
+    {
+        depth.sharedMaterial = pathDepthMaterial;
+        depth.transform.localPosition = new Vector3(0f, 0f, 0.12f);
+        depth.transform.localScale = new Vector3(0.78f, 0.78f, 0.18f);
+    }
+
     public void BeginDetailFade(Quaternion tileRotation)
     {
         faceColor = face.color;

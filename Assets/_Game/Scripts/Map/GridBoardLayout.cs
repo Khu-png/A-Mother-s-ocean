@@ -29,6 +29,18 @@ public readonly struct GridBoardLayout
             Bottom + CellSize * 0.5f + cell.y * Pitch, 0f);
     }
 
+    public bool TryGetCell(Vector2 localPosition, out Vector2Int cell)
+    {
+        int column = Mathf.RoundToInt((localPosition.x - Left - CellSize * 0.5f) / Pitch);
+        int row = Mathf.RoundToInt((localPosition.y - Bottom - CellSize * 0.5f) / Pitch);
+        cell = new Vector2Int(column, row);
+        if (column < 0 || column >= Columns || row < 0 || row >= Rows) return false;
+        Vector2 center = CellCenter(cell);
+        float halfSize = CellSize * 0.5f;
+        return Mathf.Abs(localPosition.x - center.x) <= halfSize
+            && Mathf.Abs(localPosition.y - center.y) <= halfSize;
+    }
+
     public float VerticalBoundary(int index)
     {
         if (index <= 0) return Left;

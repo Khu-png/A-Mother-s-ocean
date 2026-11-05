@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelManager : Singleton<LevelManager>
@@ -10,16 +11,23 @@ public class LevelManager : Singleton<LevelManager>
     private int currentLevelIndex;
     private GridMap currentLevel;
     private float remainingTime;
+    private float freezeRemaining;
+    private float freezeDuration;
     private int displayedSecond;
     public int CurrentLevelNumber => currentLevelIndex + 1;
     public bool HasPlayerMoved { get; private set; }
     public int CollectedTargetCount { get; private set; }
     public int TotalTargetCount { get; private set; }
     public float RemainingTime => remainingTime;
+    public float FreezeRemaining => freezeRemaining;
+    public bool IsTimeFrozen => freezeRemaining > 0f;
     public event System.Action PlayerMoved;
     public event System.Action<int, int> TargetProgressChanged;
     public event System.Action MissingTargetsBlocked;
     public event System.Action<float> TimeChanged;
+    public event System.Action<float, float> FreezeChanged;
+    public event System.Action FreezeEnded;
+    public event System.Action<BlockTile, Vector2> HammerTargetSelected;
 
     void Awake()
     {
@@ -31,8 +39,10 @@ public class LevelManager : Singleton<LevelManager>
 
     void Update()
     {
-        if (!HasPlayerMoved || !GameManager.IsState(GameState.Gameplay)) return;
-        remainingTime = Mathf.Max(0f, remainingTime - Time.deltaTime);
+        if (!GameManager.IsState(GameState.Gameplay)) return;
+        float levelDelta = ApplyFreeze(Time.deltaTime);
+        if (!HasPlayerMoved) return;
+        remainingTime = Mathf.Max(0f, remainingTime - levelDelta);
         int currentSecond = Mathf.CeilToInt(remainingTime);
         if (currentSecond != displayedSecond)
         {
@@ -47,6 +57,41 @@ public class LevelManager : Singleton<LevelManager>
         if (HasPlayerMoved) return;
         HasPlayerMoved = true;
         PlayerMoved?.Invoke();
+    }
+
+    public bool CanActivateFreeze()
+    {
+        return GameManager.IsState(GameState.Gameplay)
+            && remainingTime > 0f && !IsTimeFrozen
+            && !currentLevel.IsPowerUpBusy;
+    }
+
+    public void ActivateFreeze(float duration)
+    {
+        freezeDuration = duration;
+        freezeRemaining = duration;
+        FreezeChanged?.Invoke(freezeRemaining, freezeDuration);
+    }
+
+    public bool BeginHammerSelection()
+    {
+        if (IsTimeFrozen || !GameManager.IsState(GameState.Gameplay)) return false;
+        return currentLevel.BeginHammerSelection(NotifyHammerTargetSelected);
+    }
+
+    public void FillHammerTargetScreenPositions(List<Vector2> positions)
+    {
+        currentLevel.FillHammerTargetScreenPositions(positions);
+    }
+
+    public void ResolveHammerTarget(BlockTile target)
+    {
+        currentLevel.BreakBlock(target);
+    }
+
+    public void CancelHammerSelection()
+    {
+        if (currentLevel != null) currentLevel.CancelHammerSelection();
     }
 
     public void NotifyTargetProgress(int collected, int total)
@@ -101,6 +146,8 @@ public class LevelManager : Singleton<LevelManager>
         currentLevel.SetCameraController(cameraController);
         currentLevel.Initialize(levels[levelIndex]);
         HasPlayerMoved = false;
+        freezeRemaining = 0f;
+        freezeDuration = 0f;
         remainingTime = levels[levelIndex].TimeLimitSeconds;
         displayedSecond = Mathf.CeilToInt(remainingTime);
         TimeChanged?.Invoke(remainingTime);
@@ -167,5 +214,20 @@ public class LevelManager : Singleton<LevelManager>
     private bool HasLevelData(int index)
     {
         return levels != null && index >= 0 && index < levels.Length && levels[index] != null;
+    }
+
+    private float ApplyFreeze(float delta)
+    {
+        if (freezeRemaining <= 0f) return delta;
+        float frozenDelta = Mathf.Min(freezeRemaining, delta);
+        freezeRemaining -= frozenDelta;
+        FreezeChanged?.Invoke(freezeRemaining, freezeDuration);
+        if (freezeRemaining <= 0f) FreezeEnded?.Invoke();
+        return delta - frozenDelta;
+    }
+
+    private void NotifyHammerTargetSelected(BlockTile target, Vector2 screenPosition)
+    {
+        HammerTargetSelected?.Invoke(target, screenPosition);
     }
 }

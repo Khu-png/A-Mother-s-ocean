@@ -50,7 +50,9 @@ public partial class GridMap : MonoBehaviour
     {
         if (isClearingBoard) return;
         RefreshSafeArenaLayout();
-        ReadMoveInput();
+        if (hammerSelecting) ReadHammerInput();
+        else if (hammerImpactPending) return;
+        else ReadMoveInput();
     }
 
     public void ResetPlayerToStart()

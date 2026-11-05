@@ -8,6 +8,8 @@ public static class GameConstants
     public const string ROTATE_SOUND = "Rotate";
     public const string COLLECT_SOUND = "Collect";
     public const string WIN_SOUND = "Win";
+    public const string FREEZE_SOUND = "Freeze";
+    public const string HAMMER_SOUND = "Hammer";
     public const string OPEN_ANIMATION = "Open";
     public const string CLOSE_ANIMATION = "Close";
 }

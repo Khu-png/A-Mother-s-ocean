@@ -198,6 +198,11 @@ public class Gameplay : UICanvas
     public void OnClickRestart()
     {
         SoundManager.Ins.PlayButtonSound();
+        if (!levelManager.HasPlayerMoved)
+        {
+            levelManager.OnRestart();
+            return;
+        }
         bool hasLife = MenuPlayerProgress.Lives > 0;
         restartWarningMessage.text = hasLife
             ? "THIS WILL COST 1 HEART"

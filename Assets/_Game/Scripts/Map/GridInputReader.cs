@@ -35,6 +35,41 @@ public class GridInputReader
         touchId = 0;
     }
 
+    public bool TryReadTap(bool canTap, out Vector2 screenPosition)
+    {
+        screenPosition = Vector2.zero;
+        if (!canTap || !Application.isFocused)
+        {
+            Reset();
+            return false;
+        }
+
+        Touchscreen screen = Touchscreen.current;
+        if (screen != null)
+        {
+            UnityEngine.InputSystem.Controls.TouchControl touch = screen.primaryTouch;
+            if (touch.press.wasPressedThisFrame) BeginSwipe(touch.position.ReadValue());
+            if (touch.press.wasReleasedThisFrame)
+                return CompleteTap(touch.position.ReadValue(), out screenPosition);
+        }
+        Mouse mouse = Mouse.current;
+        if (mouse == null) return false;
+        if (mouse.leftButton.wasPressedThisFrame) BeginSwipe(mouse.position.ReadValue());
+        return mouse.leftButton.wasReleasedThisFrame
+            && CompleteTap(mouse.position.ReadValue(), out screenPosition);
+    }
+
+    private bool CompleteTap(Vector2 position, out Vector2 screenPosition)
+    {
+        bool validStart = trackingSwipe;
+        Vector2 delta = position - swipeStart;
+        Reset();
+        screenPosition = position;
+        float maximumTravel = Mathf.Clamp(Mathf.Min(Screen.width, Screen.height) * 0.025f, 16f, 48f);
+        return validStart && !IsOverUI(position)
+            && delta.sqrMagnitude <= maximumTravel * maximumTravel;
+    }
+
     private Vector2Int ReadSwipe()
     {
         Touchscreen screen = Touchscreen.current;

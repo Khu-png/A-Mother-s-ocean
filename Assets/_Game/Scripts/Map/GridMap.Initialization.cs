@@ -17,6 +17,7 @@ public partial class GridMap
 
     public void ClearRuntimeMap()
     {
+        CancelHammerSelection();
         StopWinTransition();
         if (runtimeRoot != null)
         {

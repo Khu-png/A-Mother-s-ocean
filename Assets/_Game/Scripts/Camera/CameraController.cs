@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class CameraController : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class CameraController : MonoBehaviour
     private SpriteRenderer cachedBackground;
     private Transform backgroundTransform;
     private int inspectorLayoutVersion;
+    private Coroutine impulseRoutine;
+    private Vector3 impulseWorldOrigin;
+    private bool impactImpulseActive;
 
     public int LayoutRevision
     {
@@ -22,7 +26,9 @@ public class CameraController : MonoBehaviour
                 if (targetCamera == null) return revision;
                 revision = revision * 31 + targetCamera.orthographicSize.GetHashCode();
                 revision = revision * 31 + targetCamera.aspect.GetHashCode();
-                revision = revision * 31 + CameraTransform().position.GetHashCode();
+                Vector3 layoutPosition = impactImpulseActive
+                    ? impulseWorldOrigin : CameraTransform().position;
+                revision = revision * 31 + layoutPosition.GetHashCode();
                 return revision * 31 + CameraTransform().rotation.GetHashCode();
             }
         }
@@ -77,6 +83,41 @@ public class CameraController : MonoBehaviour
         float worldPerPixel = worldCellSize / samplePixels;
         return new SafeArenaWorldLayout(worldCenter, worldCellSize,
             screenLayout.Spacing * worldPerPixel);
+    }
+
+    public Vector3 ScreenToWorld(Vector2 screenPoint, float boardZ)
+    {
+        return ScreenToBoard(screenPoint, boardZ);
+    }
+
+    public Vector2 WorldToScreen(Vector3 worldPosition)
+    {
+        return targetCamera.WorldToScreenPoint(worldPosition);
+    }
+
+    public void PlayImpactImpulse(float duration, float strength)
+    {
+        if (impulseRoutine != null) StopCoroutine(impulseRoutine);
+        impulseRoutine = StartCoroutine(ImpactImpulse(duration, strength));
+    }
+
+    private IEnumerator ImpactImpulse(float duration, float strength)
+    {
+        Vector3 origin = cameraTransform.localPosition;
+        impulseWorldOrigin = cameraTransform.position;
+        impactImpulseActive = true;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float fade = 1f - Mathf.Clamp01(elapsed / duration);
+            Vector2 offset = Random.insideUnitCircle * (strength * fade);
+            cameraTransform.localPosition = origin + new Vector3(offset.x, offset.y, 0f);
+            yield return null;
+        }
+        cameraTransform.localPosition = origin;
+        impactImpulseActive = false;
+        impulseRoutine = null;
     }
 
     private Transform CameraTransform()

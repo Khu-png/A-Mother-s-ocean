@@ -835,6 +835,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 26e41ee75bd4815459e280ec5537feb9, type: 3}
   - id: Rotate
     clip: {fileID: 8300000, guid: 1fc97d8b3808e3649a96e6569c93766b, type: 3}
+  - id: Freeze
+    clip: {fileID: 8300000, guid: ddb1ab4a09613cb4b96bf77172ca3f6d, type: 3}
+  - id: Hammer
+    clip: {fileID: 8300000, guid: 68fbc0b820c6797408d5555b1e16146a, type: 3}
 --- !u!82 &879553658
 AudioSource:
   m_ObjectHideFlags: 0
