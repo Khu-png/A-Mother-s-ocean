@@ -51,6 +51,7 @@ public sealed class MenuShopPage : MonoBehaviour
     [SerializeField, Min(0f)] private float processingDuration = 0.25f;
     [SerializeField] private Button previousSkinButton;
     [SerializeField] private Button nextSkinButton;
+    [SerializeField] private MenuSkinTransition skinTransition;
     private MenuCatalog catalog;
     private Action purchaseCompleted;
     private bool processing;
@@ -99,25 +100,25 @@ public sealed class MenuShopPage : MonoBehaviour
 
     private void SelectPreviousSkin()
     {
-        SelectSkin((featuredSkinIndex - 1 + catalog.Skins.Length) % catalog.Skins.Length);
+        SelectSkin((featuredSkinIndex - 1 + catalog.Skins.Length)
+            % catalog.Skins.Length, -1);
     }
 
     private void SelectNextSkin()
     {
-        SelectSkin((featuredSkinIndex + 1) % catalog.Skins.Length);
+        SelectSkin((featuredSkinIndex + 1) % catalog.Skins.Length, 1);
     }
 
-    private void SelectSkin(int index)
+    private void SelectSkin(int index, int direction)
     {
-        if (processing) return;
+        if (processing || skinTransition.IsPlaying) return;
         SoundManager.Ins.PlayButtonSound();
-        featuredSkinIndex = index;
-        Refresh();
+        skinTransition.Play(direction, () => ApplySelectedSkin(index));
     }
 
     private void BuyFeaturedSkin()
     {
-        if (processing) return;
+        if (processing || skinTransition.IsPlaying) return;
         SoundManager.Ins.PlayButtonSound();
         StartCoroutine(ProcessSkinPurchase());
     }
@@ -175,6 +176,12 @@ public sealed class MenuShopPage : MonoBehaviour
     {
         processing = false;
         purchaseCompleted();
+        Refresh();
+    }
+
+    private void ApplySelectedSkin(int index)
+    {
+        featuredSkinIndex = index;
         Refresh();
     }
 

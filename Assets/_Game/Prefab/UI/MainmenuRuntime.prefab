@@ -2442,6 +2442,8 @@ GameObject:
   - component: {fileID: 4318821126507551102}
   - component: {fileID: 7290413265086326623}
   - component: {fileID: 4948179601550537315}
+  - component: {fileID: 995100001}
+  - component: {fileID: 995100002}
   - component: {fileID: 607676019120428691}
   - component: {fileID: 3836836583040876965}
   - component: {fileID: 5098442573387603460}
@@ -2606,6 +2608,39 @@ MonoBehaviour:
   processingDuration: 0.25
   previousSkinButton: {fileID: 8400000000000000000}
   nextSkinButton: {fileID: 8400000000000000001}
+  skinTransition: {fileID: 995100001}
+--- !u!114 &995100001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2743529651372228514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a0a73ecf5f24e89a8fd5cdfab0df201, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::MenuSkinTransition
+  preview: {fileID: 3560622592703146925}
+  phaseDuration: 0.2
+  travelDistance: 240
+  travelScale: 0.84
+--- !u!114 &995100002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2743529651372228514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a0a73ecf5f24e89a8fd5cdfab0df201, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::MenuSkinTransition
+  preview: {fileID: 3686340109006587610}
+  phaseDuration: 0.2
+  travelDistance: 240
+  travelScale: 0.84
 --- !u!114 &607676019120428691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2624,6 +2659,7 @@ MonoBehaviour:
   previousButton: {fileID: 690887996435666510}
   nextButton: {fileID: 1443875329746523459}
   equipButton: {fileID: 4047985958081231565}
+  skinTransition: {fileID: 995100002}
   slots:
   - button: {fileID: 1701970435064636525}
     portrait: {fileID: 3224789136055030717}
@@ -2703,7 +2739,6 @@ MonoBehaviour:
   coinAmountText: {fileID: 139521324565524947}
   energyAmountText: {fileID: 9100000000000000104}
   playButton: {fileID: 1630648561006513441}
-  settingsButton: {fileID: 1467475783310291800}
   backgroundMode: 1
   backgroundVideo: {fileID: 9100000000000000005}
   videoImage: {fileID: 9100000000000000004}

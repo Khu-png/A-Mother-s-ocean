@@ -22,6 +22,16 @@ public class Pause : OptionsPanel
     public void OnClickMainMenu()
     {
         SoundManager.Ins.PlayButtonSound();
-        CloseAnimated(GameManager.Ins.OnInit);
+        if (!LevelManager.Ins.HasPlayerMoved)
+        {
+            CloseAnimated(GameManager.Ins.OnInit);
+            return;
+        }
+        CloseAnimated(ShowMainMenuWarning);
+    }
+
+    private static void ShowMainMenuWarning()
+    {
+        UIManager.Ins.GetUI<Gameplay>().ShowMainMenuWarning();
     }
 }

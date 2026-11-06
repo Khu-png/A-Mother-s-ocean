@@ -12,6 +12,10 @@ public static class GameplayRestartWarningBuilder
     private const string REQUEST = "Temp/BuildGameplayRestartWarning.request";
     private const string REPORT = "Temp/BuildGameplayRestartWarning.result";
     private const string PREFAB = "Assets/_Game/Prefab/UI/Gameplay.prefab";
+    private const string PANEL_SPRITE =
+        "Assets/_Game/Resources/Art/SettingsUI/settings_panel_body.png";
+    private const string HEADER_SPRITE =
+        "Assets/_Game/Resources/Art/SettingsUI/settings_header.png";
 
     [InitializeOnLoadMethod]
     private static void QueueRequestedBuild()
@@ -48,7 +52,7 @@ public static class GameplayRestartWarningBuilder
         try
         {
             SerializedObject data = new SerializedObject(gameplay);
-            SerializedProperty warningProperty = data.FindProperty("restartWarning");
+            SerializedProperty warningProperty = data.FindProperty("lifeWarning");
             if (warningProperty.objectReferenceValue == null)
                 CreateWarning(gameplay, data);
             data.ApplyModifiedPropertiesWithoutUndo();
@@ -70,22 +74,43 @@ public static class GameplayRestartWarningBuilder
             Vector2.one * .5f, Vector2.zero, new Color(0f, .04f, .08f, .72f));
         Stretch(blocker.rectTransform);
         blocker.raycastTarget = true;
-        RectTransform dialog = CreateDialog(blocker.rectTransform, rounded);
+        CanvasGroup group = blocker.gameObject.AddComponent<CanvasGroup>();
+        RectTransform dialog = CreateDialog(blocker.rectTransform, rounded,
+            out TMP_Text title);
         TMP_Text message = WinPreviewElements.Text("Message", dialog,
             new Vector2(.5f, .54f), new Vector2(700, 120),
             "THIS WILL COST 1 HEART", 54);
+        message.color = new Color(.04f, .24f, .36f, 1f);
         CreateButtons(dialog, gameplay, rounded, out TMP_Text confirmLabel);
-        Assign(data, "restartWarning", blocker.gameObject);
-        Assign(data, "restartWarningMessage", message);
-        Assign(data, "restartConfirmLabel", confirmLabel);
+        RestartWarningMotion motion = blocker.gameObject.AddComponent<RestartWarningMotion>();
+        SerializedObject motionData = new SerializedObject(motion);
+        Assign(motionData, "group", group);
+        Assign(motionData, "dialog", dialog);
+        motionData.ApplyModifiedPropertiesWithoutUndo();
+        GameplayLifeWarning warning = blocker.gameObject.AddComponent<GameplayLifeWarning>();
+        SerializedObject warningData = new SerializedObject(warning);
+        Assign(warningData, "motion", motion);
+        Assign(warningData, "title", title);
+        Assign(warningData, "message", message);
+        Assign(warningData, "confirmLabel", confirmLabel);
+        warningData.ApplyModifiedPropertiesWithoutUndo();
+        Assign(data, "lifeWarning", warning);
         blocker.gameObject.SetActive(false);
     }
 
-    private static RectTransform CreateDialog(RectTransform parent, Sprite rounded)
+    private static RectTransform CreateDialog(RectTransform parent, Sprite rounded,
+        out TMP_Text title)
     {
+        Sprite panelSprite = AssetDatabase.LoadAssetAtPath<Sprite>(PANEL_SPRITE);
+        Sprite headerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(HEADER_SPRITE);
         Image dialog = Panel("Dialog", parent, Vector2.one * .5f,
-            new Vector2(780, 600), new Color32(17, 61, 87, 255), rounded);
-        WinPreviewElements.Text("Warning Title", dialog.rectTransform,
+            new Vector2(780, 600), Color.white, panelSprite);
+        dialog.type = Image.Type.Simple;
+        Image header = Panel("Header", dialog.rectTransform,
+            new Vector2(.5f, .82f), new Vector2(720, 180), Color.white, headerSprite);
+        header.type = Image.Type.Simple;
+        header.raycastTarget = false;
+        title = WinPreviewElements.Text("Warning Title", dialog.rectTransform,
             new Vector2(.5f, .79f), new Vector2(700, 120), "RESTART LEVEL?", 78);
         return dialog.rectTransform;
     }

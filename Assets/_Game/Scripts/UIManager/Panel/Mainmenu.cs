@@ -21,7 +21,6 @@ public sealed class Mainmenu : UICanvas
     [SerializeField] private TMP_Text coinAmountText;
     [SerializeField] private TMP_Text energyAmountText;
     [SerializeField] private Button playButton;
-    [SerializeField] private Button settingsButton;
 
     [Header("Optional Video Background")]
     [SerializeField] private BackgroundMode backgroundMode;
@@ -49,7 +48,6 @@ public sealed class Mainmenu : UICanvas
     void OnDestroy()
     {
         playButton.onClick.RemoveListener(OnClickPlay);
-        settingsButton.onClick.RemoveListener(OnClickSettings);
     }
 
     public void ShowBackgroundFallback()
@@ -101,7 +99,6 @@ public sealed class Mainmenu : UICanvas
         shopPage.Initialize(catalog, RefreshAfterPurchase);
         skinPage.Initialize(catalog);
         playButton.onClick.AddListener(OnClickPlay);
-        settingsButton.onClick.AddListener(OnClickSettings);
     }
 
     private void Refresh()

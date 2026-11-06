@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +10,8 @@ public sealed class GameplayPowerUps : MonoBehaviour
     private const float HAMMER_DIM_ALPHA = 0.82f;
     [SerializeField] private Button freezeButton;
     [SerializeField] private Button hammerButton;
+    [SerializeField] private TMP_Text freezeCountText;
+    [SerializeField] private TMP_Text hammerCountText;
     [SerializeField] private RectTransform uiRoot;
     [SerializeField] private RectTransform freezeIconHome;
     [SerializeField] private RectTransform freezeIcon;
@@ -130,12 +133,14 @@ public sealed class GameplayPowerUps : MonoBehaviour
         hammerSelecting = false;
         hammerSelectionOverlay.Hide();
         MenuPlayerProgress.TryUsePowerUp(MenuPowerUpId.Hammer);
+        RefreshCounts();
         hammerRoutine = StartCoroutine(PlayHammer(target, screenPosition));
     }
 
     private IEnumerator PlayHammer(BlockTile target, Vector2 screenPosition)
     {
         Vector2 destination = PowerUpIconMotion.LocalPoint(uiRoot, screenPosition);
+        SoundManager.Ins.PlaySound(GameConstants.HAMMER_SOUND);
         yield return PowerUpIconMotion.HammerStrike(hammerIcon, uiRoot, destination);
         hammerImpactGraphic.Play(destination);
         LevelManager.Ins.ResolveHammerTarget(target);
@@ -177,12 +182,18 @@ public sealed class GameplayPowerUps : MonoBehaviour
 
     private void RefreshButtons()
     {
+        RefreshCounts();
         bool free = GameManager.IsState(GameState.Gameplay)
             && freezeIntroRoutine == null && hammerRoutine == null && !hammerSelecting;
         freezeButton.interactable = free && !LevelManager.Ins.IsTimeFrozen
             && CanUse(MenuPowerUpId.Freeze);
-        hammerButton.interactable = free && !LevelManager.Ins.IsTimeFrozen
-            && CanUse(MenuPowerUpId.Hammer);
+        hammerButton.interactable = free && CanUse(MenuPowerUpId.Hammer);
+    }
+
+    private void RefreshCounts()
+    {
+        freezeCountText.text = MenuPlayerProgress.PowerUpCount(MenuPowerUpId.Freeze).ToString();
+        hammerCountText.text = MenuPlayerProgress.PowerUpCount(MenuPowerUpId.Hammer).ToString();
     }
 
     private static bool CanUse(MenuPowerUpId id)

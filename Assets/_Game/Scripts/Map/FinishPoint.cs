@@ -12,6 +12,9 @@ public class FinishPoint : MonoBehaviour
 
     public bool IsOpen { get; private set; }
     public Vector2Int Cell => cell;
+    public Vector3 WorldPosition => transform.position;
+    public Sprite DisplaySprite => spriteRenderer.sprite;
+    public Color DisplayColor => spriteRenderer.color;
 
     public void Setup(Vector2Int setupCell, Vector3 localPosition, Color setupClosedColor, Color setupOpenColor)
     {

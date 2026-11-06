@@ -22,6 +22,7 @@ public class LevelManager : Singleton<LevelManager>
     public float FreezeRemaining => freezeRemaining;
     public bool IsTimeFrozen => freezeRemaining > 0f;
     public event System.Action PlayerMoved;
+    public event System.Action PlayerStepCompleted;
     public event System.Action<int, int> TargetProgressChanged;
     public event System.Action MissingTargetsBlocked;
     public event System.Action<float> TimeChanged;
@@ -59,6 +60,11 @@ public class LevelManager : Singleton<LevelManager>
         PlayerMoved?.Invoke();
     }
 
+    public void NotifyPlayerStepCompleted()
+    {
+        PlayerStepCompleted?.Invoke();
+    }
+
     public bool CanActivateFreeze()
     {
         return GameManager.IsState(GameState.Gameplay)
@@ -75,7 +81,7 @@ public class LevelManager : Singleton<LevelManager>
 
     public bool BeginHammerSelection()
     {
-        if (IsTimeFrozen || !GameManager.IsState(GameState.Gameplay)) return false;
+        if (!GameManager.IsState(GameState.Gameplay)) return false;
         return currentLevel.BeginHammerSelection(NotifyHammerTargetSelected);
     }
 
@@ -109,6 +115,11 @@ public class LevelManager : Singleton<LevelManager>
     public void FitGameplayBackground(SpriteRenderer background)
     {
         if (cameraController != null) cameraController.FitBackground(background);
+    }
+
+    public TutorialFocusData GetTutorialFocus(TutorialFocusKind kind)
+    {
+        return currentLevel.GetTutorialFocus(kind);
     }
 
     public void OnInit()

@@ -46,7 +46,6 @@ public partial class GridMap
         hammerImpactPending = false;
         target.PlayBreak();
         cameraController.PlayImpactImpulse(0.24f, 0.08f);
-        SoundManager.Ins.PlaySound(GameConstants.HAMMER_SOUND);
     }
 
     private void ReadHammerInput()

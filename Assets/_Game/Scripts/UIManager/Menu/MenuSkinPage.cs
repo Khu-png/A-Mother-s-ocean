@@ -43,6 +43,7 @@ public sealed class MenuSkinPage : MonoBehaviour
     [SerializeField] private Button previousButton;
     [SerializeField] private Button nextButton;
     [SerializeField] private Button equipButton;
+    [SerializeField] private MenuSkinTransition skinTransition;
     [SerializeField] private MenuSkinSlotView[] slots;
     private MenuCatalog catalog;
     private readonly List<int> OWNED_SKINS = new List<int>();
@@ -96,23 +97,36 @@ public sealed class MenuSkinPage : MonoBehaviour
 
     private void SelectPrevious()
     {
-        Select((selectedIndex - 1 + OWNED_SKINS.Count) % OWNED_SKINS.Count);
+        Select((selectedIndex - 1 + OWNED_SKINS.Count) % OWNED_SKINS.Count, -1);
     }
 
     private void SelectNext()
     {
-        Select((selectedIndex + 1) % OWNED_SKINS.Count);
+        Select((selectedIndex + 1) % OWNED_SKINS.Count, 1);
     }
 
     private void Select(int index)
     {
+        int direction = index > selectedIndex ? 1 : -1;
+        Select(index, direction);
+    }
+
+    private void Select(int index, int direction)
+    {
+        if (index == selectedIndex || skinTransition.IsPlaying) return;
         SoundManager.Ins.PlayButtonSound();
+        skinTransition.Play(direction, () => ApplySelection(index));
+    }
+
+    private void ApplySelection(int index)
+    {
         selectedIndex = index;
         Refresh();
     }
 
     private void EquipSelected()
     {
+        if (skinTransition.IsPlaying) return;
         SoundManager.Ins.PlayButtonSound();
         MenuPlayerProgress.EquipSkin(catalog.Skins[OWNED_SKINS[selectedIndex]].Id);
         Refresh();

@@ -47,8 +47,9 @@ public partial class GridMap
         }
 
         playerCell = nextCell;
-        MarkCurrentCell();
         player.MoveTo(playerCell, CellToLocalPosition(playerCell));
+        LevelManager.Ins.NotifyPlayerStepCompleted();
+        MarkCurrentCell();
         SoundManager.Ins.PlaySound(GameConstants.MOVE_SOUND);
         LevelManager.Ins.NotifyPlayerMoved();
         if (!isBacktracking && rotateButtons.ContainsKey(playerCell))

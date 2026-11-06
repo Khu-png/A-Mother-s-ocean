@@ -293,6 +293,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8369872377779894475}
+  - component: {fileID: 995300001}
+  - component: {fileID: 995300002}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -322,6 +324,40 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 760, y: 1020}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!95 &995300001
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3507210578019186013}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 38e2798598c549048bd6f0ed93bfbcfd, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 2
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage:
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!225 &995300002
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3507210578019186013}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &6407840652691303934
 GameObject:
   m_ObjectHideFlags: 0
@@ -513,8 +549,8 @@ MonoBehaviour:
   IsHandlingRabbitEars: 0
   IsWidescreenProcessing: 0
   m_RectTransform: {fileID: 8442681327666958208}
-  m_Animator: {fileID: 0}
-  panelGroup: {fileID: 0}
+  m_Animator: {fileID: 995300001}
+  panelGroup: {fileID: 995300002}
   safeAreaElements: []
   popups: []
   replayButton: {fileID: 7824738928311424434}

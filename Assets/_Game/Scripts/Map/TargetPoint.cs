@@ -13,6 +13,9 @@ public class TargetPoint : MonoBehaviour
     private Transform cachedTransform;
     public bool IsCollected { get; private set; }
     public Vector2Int Cell => cell;
+    public Vector3 WorldPosition => cachedTransform.position;
+    public Sprite DisplaySprite => spriteRenderer.sprite;
+    public Color DisplayColor => spriteRenderer.color;
 
     void Awake()
     {

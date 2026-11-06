@@ -50,6 +50,9 @@ public class Player : MonoBehaviour
     public bool IsMoving { get; private set; }
     public bool IsBusy => IsMoving || isBlocked;
     public Vector2Int CurrentCell { get; private set; }
+    public Vector3 WorldPosition => cachedTransform.position;
+    public Sprite DisplaySprite => spriteRenderer.sprite;
+    public Color DisplayColor => spriteRenderer.color;
 
     void Awake()
     {

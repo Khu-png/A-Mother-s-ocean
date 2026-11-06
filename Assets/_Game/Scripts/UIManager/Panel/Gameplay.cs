@@ -1,35 +1,24 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
+using UnityEngine.Serialization;
 
 public class Gameplay : UICanvas
 {
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private SpriteRenderer oceanBackground;
-    [SerializeField] private GameObject tutorial;
+    [FormerlySerializedAs("tutorial")]
+    [SerializeField] private GameObject tutorialRoot;
+    [SerializeField] private GameplayTutorial tutorialController;
     [SerializeField] private GameObject[] winHiddenElements;
-    [SerializeField] private GameObject restartWarning;
-    [SerializeField] private TMP_Text restartWarningMessage;
-    [SerializeField] private TMP_Text restartConfirmLabel;
+    [SerializeField] private GameplayLifeWarning lifeWarning;
     [Header("Target Counter")]
     [SerializeField] private RectTransform targetCounterTransform;
     [SerializeField] private TextMeshProUGUI targetCounterText;
     [SerializeField] private Color targetCounterFlashColor = new Color(1f, 0.78f, 0.2f, 1f);
     [SerializeField, Min(0.01f)] private float targetCounterFlashDuration = 0.28f;
     [SerializeField] private float targetCounterFlashScale = 0.16f;
-    [Header("Swipe Tutorial")]
-    [SerializeField] private Image swipeIcon;
-    [SerializeField, Min(0f)] private float swipeDistance = 70f;
-    [SerializeField, Min(0.01f)] private float swipeDuration = 0.65f;
-    [SerializeField, Min(0.01f)] private float fadeDuration = 0.35f;
-    [SerializeField, Min(0f)] private float repeatDelay = 0.25f;
     private LevelManager levelManager;
-    private Vector2 swipeStartPosition;
-    private Color swipeStartColor;
-    private float swipeTimer;
-    private bool swipeInitialized;
-    private RectTransform swipeTransform;
     private Vector3 targetCounterBaseScale;
     private Color targetCounterBaseColor;
     private float targetCounterFlashTimer;
@@ -38,28 +27,23 @@ public class Gameplay : UICanvas
     {
         if (oceanBackground != null && LevelManager.Ins != null)
             LevelManager.Ins.FitGameplayBackground(oceanBackground);
-        AnimateSwipeIcon();
         AnimateTargetCounter();
     }
 
     void OnEnable()
     {
         levelManager = LevelManager.Ins;
-        levelManager.PlayerMoved += HideTutorial;
         levelManager.TargetProgressChanged += RefreshTargetCounter;
         levelManager.MissingTargetsBlocked += FlashTargetCounter;
         levelManager.TimeChanged += RefreshTimer;
         InitializeTargetCounter();
-        RefreshTutorial();
     }
 
     void OnDisable()
     {
-        if (levelManager != null) levelManager.PlayerMoved -= HideTutorial;
         if (levelManager != null) levelManager.TargetProgressChanged -= RefreshTargetCounter;
         if (levelManager != null) levelManager.MissingTargetsBlocked -= FlashTargetCounter;
         if (levelManager != null) levelManager.TimeChanged -= RefreshTimer;
-        ResetSwipeIcon();
         ResetTargetCounter();
     }
 
@@ -68,71 +52,21 @@ public class Gameplay : UICanvas
         base.Open();
         foreach (GameObject element in winHiddenElements) element.SetActive(true);
         RefreshTutorial();
-        if (tutorial == null)
-            GameDiagnostics.LogWarning("Gameplay: hãy gán object Tutorial vào field Tutorial trong prefab.", this);
-        if (swipeIcon == null)
-            GameDiagnostics.LogWarning("Gameplay: hãy gán Image bàn tay vào field Swipe Icon trong prefab.", this);
     }
 
     public void HideWinHud()
     {
         foreach (GameObject element in winHiddenElements) element.SetActive(false);
-        tutorial.SetActive(false);
+        tutorialController.Hide();
     }
 
     private void RefreshTutorial()
     {
         if (levelText != null)
             levelText.text = $"Level {levelManager.CurrentLevelNumber:00}";
-        InitializeSwipeIcon();
-        if (tutorial != null)
-            tutorial.SetActive(levelManager.CurrentLevelNumber == 1 && !levelManager.HasPlayerMoved);
+        tutorialController.Refresh();
         RefreshTargetCounter(levelManager.CollectedTargetCount, levelManager.TotalTargetCount);
         RefreshTimer(levelManager.RemainingTime);
-    }
-
-    private void HideTutorial()
-    {
-        if (tutorial != null) tutorial.SetActive(false);
-        ResetSwipeIcon();
-    }
-
-    private void InitializeSwipeIcon()
-    {
-        if (swipeIcon == null) return;
-        if (!swipeInitialized)
-        {
-            swipeTransform = swipeIcon.rectTransform;
-            swipeStartPosition = swipeTransform.anchoredPosition;
-            swipeStartColor = swipeIcon.color;
-            swipeInitialized = true;
-        }
-        swipeIcon.raycastTarget = false;
-        ResetSwipeIcon();
-    }
-
-    private void AnimateSwipeIcon()
-    {
-        if (!swipeInitialized || swipeIcon == null || tutorial == null) return;
-        if (!tutorial.activeInHierarchy || !GameManager.IsState(GameState.Gameplay)) return;
-
-        float moveTime = Mathf.Max(0.01f, swipeDuration);
-        float fadeTime = Mathf.Max(0.01f, fadeDuration);
-        float cycleTime = moveTime + fadeTime + Mathf.Max(0f, repeatDelay);
-        swipeTimer = (swipeTimer + Time.deltaTime) % cycleTime;
-        float movement = Mathf.SmoothStep(0f, 1f, swipeTimer / moveTime);
-        swipeTransform.anchoredPosition = swipeStartPosition + Vector2.right * swipeDistance * movement;
-        Color color = swipeStartColor;
-        color.a *= 1f - Mathf.Clamp01((swipeTimer - moveTime) / fadeTime);
-        swipeIcon.color = color;
-    }
-
-    private void ResetSwipeIcon()
-    {
-        swipeTimer = 0f;
-        if (!swipeInitialized || swipeIcon == null) return;
-        swipeTransform.anchoredPosition = swipeStartPosition;
-        swipeIcon.color = swipeStartColor;
     }
 
     private void InitializeTargetCounter()
@@ -187,7 +121,7 @@ public class Gameplay : UICanvas
 
     public override void BackKey()
     {
-        if (restartWarning.activeSelf)
+        if (lifeWarning.IsVisible)
         {
             OnClickCancelRestart();
             return;
@@ -203,31 +137,27 @@ public class Gameplay : UICanvas
             levelManager.OnRestart();
             return;
         }
-        bool hasLife = MenuPlayerProgress.Lives > 0;
-        restartWarningMessage.text = hasLife
-            ? "THIS WILL COST 1 HEART"
-            : "NO HEARTS LEFT";
-        restartConfirmLabel.text = hasLife ? "RESTART" : "MAIN MENU";
         GameManager.ChangeState(GameState.Pause);
-        restartWarning.SetActive(true);
+        tutorialController.Hide();
+        lifeWarning.ShowRestart();
+    }
+
+    public void ShowMainMenuWarning()
+    {
+        tutorialController.Hide();
+        lifeWarning.ShowMainMenu();
     }
 
     public void OnClickConfirmRestart()
     {
         SoundManager.Ins.PlayButtonSound();
-        restartWarning.SetActive(false);
-        if (MenuPlayerProgress.Lives == 0 || !MenuPlayerProgress.TrySpendLife())
-        {
-            GameManager.Ins.OnInit();
-            return;
-        }
-        LevelManager.Ins.OnRestart();
+        lifeWarning.Confirm();
     }
 
     public void OnClickCancelRestart()
     {
         SoundManager.Ins.PlayButtonSound();
-        restartWarning.SetActive(false);
-        GameManager.ChangeState(GameState.Gameplay);
+        lifeWarning.Cancel();
+        tutorialController.Refresh();
     }
 }
