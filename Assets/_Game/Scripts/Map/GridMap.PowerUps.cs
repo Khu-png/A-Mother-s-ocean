@@ -10,6 +10,7 @@ public partial class GridMap
 
     public bool IsHammerSelecting => hammerSelecting;
     public bool IsPowerUpBusy => hammerSelecting || hammerImpactPending;
+    public bool HasBlocks => blocks.Count > 0;
 
     public void FillHammerTargetScreenPositions(List<Vector2> positions)
     {

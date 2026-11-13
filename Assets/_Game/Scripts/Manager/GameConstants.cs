@@ -10,6 +10,7 @@ public static class GameConstants
     public const string WIN_SOUND = "Win";
     public const string FREEZE_SOUND = "Freeze";
     public const string HAMMER_SOUND = "Hammer";
+    public const string COIN_SOUND = "Coin";
     public const string OPEN_ANIMATION = "Open";
     public const string CLOSE_ANIMATION = "Close";
 }

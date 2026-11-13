@@ -19,6 +19,7 @@ public partial class GridMap
     {
         CancelHammerSelection();
         StopWinTransition();
+        introMotion.Stop();
         if (runtimeRoot != null)
         {
             runtimeRoot.gameObject.SetActive(false);
@@ -37,8 +38,10 @@ public partial class GridMap
         startPoint = null;
         finishPoint = null;
         pathTrail = null;
+        bubbles = null;
         gridVisualRoot = null;
         boardLayout = default;
+        layoutRootScale = 1f;
         appliedLayoutRevision = int.MinValue;
     }
 
@@ -50,6 +53,7 @@ public partial class GridMap
         runtimeRoot.SetParent(transform, false);
         PrepareSafeArenaLayout();
         pathTrail = new PathTrail(runtimeRoot, cellSize, pathColor, width * height);
+        BuildFeedback();
         BuildMapTiles();
         BuildPlayer();
         MarkCurrentCell();

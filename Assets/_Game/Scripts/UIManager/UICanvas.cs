@@ -67,9 +67,10 @@ public class UICanvas : MonoBehaviour
         if (safeAreaAnchorMin == null || safeAreaAnchorMin.Length != safeAreaElements.Length)
             CacheSafeAreaAnchors();
 
-        Rect safeArea = Screen.safeArea;
-        Vector2 safeMin = new Vector2(safeArea.xMin / Screen.width, safeArea.yMin / Screen.height);
-        Vector2 safeMax = new Vector2(safeArea.xMax / Screen.width, safeArea.yMax / Screen.height);
+        // UI lives inside the portrait frame, so the safe area is expressed relative to it.
+        Rect safeArea = PortraitScreen.SafeArea;
+        Vector2 safeMin = PortraitScreen.ToFrameNormalized(safeArea.min);
+        Vector2 safeMax = PortraitScreen.ToFrameNormalized(safeArea.max);
         Vector2 safeSize = safeMax - safeMin;
         for (int i = 0; i < safeAreaElements.Length; i++)
         {

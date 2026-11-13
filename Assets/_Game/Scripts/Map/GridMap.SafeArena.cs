@@ -6,6 +6,7 @@ public partial class GridMap
     private Transform gridVisualRoot;
     private GridBoardLayout boardLayout;
     private int appliedLayoutRevision = int.MinValue;
+    private float layoutRootScale = 1f;
 
     private void PrepareSafeArenaLayout()
     {
@@ -39,7 +40,8 @@ public partial class GridMap
         float localSpacing = layout.Spacing / rootScale;
         boardLayout = new GridBoardLayout(width, height, cellSize, localSpacing);
         runtimeRoot.position = layout.Center;
-        runtimeRoot.localScale = Vector3.one * rootScale;
+        layoutRootScale = rootScale;
+        ApplyRootScale();
     }
 
     private void RelayoutRuntimeObjects()

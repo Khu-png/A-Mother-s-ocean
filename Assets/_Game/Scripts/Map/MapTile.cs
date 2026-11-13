@@ -9,9 +9,12 @@ public class MapTile : MonoBehaviour
     [SerializeField] private TileWinVisual winVisual;
     [SerializeField, Min(0f)] private float rotationDuration = 0.22f;
     private Coroutine rotationRoutine;
+    private Coroutine flashRoutine;
+    private Color flashBaseColor;
     private Transform cachedTransform;
     private Transform labelTransform;
     private float configuredCellSize;
+    private Vector3 entranceBaseScale;
 
     public Vector2Int Cell => cell;
     public bool IsRotating => rotationRoutine != null;
@@ -41,6 +44,7 @@ public class MapTile : MonoBehaviour
     void OnDisable()
     {
         StopRotation();
+        StopFlash();
     }
 
     public void Setup(Vector2Int setupCell, Vector3 localPosition, float cellSize, Color color)
@@ -69,8 +73,19 @@ public class MapTile : MonoBehaviour
         cachedTransform.localPosition = localPosition;
     }
 
+    public void BeginEntrance()
+    {
+        entranceBaseScale = cachedTransform.localScale;
+    }
+
+    public void ApplyEntranceScale(float factor)
+    {
+        cachedTransform.localScale = entranceBaseScale * factor;
+    }
+
     public void SetColor(Color color)
     {
+        StopFlash();
         spriteRenderer.color = color;
     }
 
@@ -90,7 +105,7 @@ public class MapTile : MonoBehaviour
         label = setupLabel;
     }
 
-    public void SetVisualRotation(float zDegrees, bool animate = false)
+    public void SetVisualRotation(float zDegrees, bool animate = false, float delay = 0f)
     {
         StopRotation();
         if (!animate || !isActiveAndEnabled || rotationDuration <= 0f)
@@ -99,11 +114,43 @@ public class MapTile : MonoBehaviour
             return;
         }
 
-        rotationRoutine = StartCoroutine(RotateVisual(zDegrees));
+        rotationRoutine = StartCoroutine(RotateVisual(zDegrees, delay));
     }
 
-    private IEnumerator RotateVisual(float targetAngle)
+    // Briefly tints the tile toward flashColor and back; restarting keeps the original color.
+    public void Flash(Color flashColor, float duration)
     {
+        StopFlash();
+        flashBaseColor = spriteRenderer.color;
+        flashRoutine = StartCoroutine(FlashColor(flashColor, duration));
+    }
+
+    private IEnumerator FlashColor(Color flashColor, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float pulse = Mathf.Sin(Mathf.Clamp01(elapsed / duration) * Mathf.PI);
+            spriteRenderer.color = Color.Lerp(flashBaseColor, flashColor, pulse);
+            yield return null;
+        }
+        spriteRenderer.color = flashBaseColor;
+        flashRoutine = null;
+    }
+
+    private void StopFlash()
+    {
+        if (flashRoutine == null) return;
+        StopCoroutine(flashRoutine);
+        spriteRenderer.color = flashBaseColor;
+        flashRoutine = null;
+    }
+
+    private IEnumerator RotateVisual(float targetAngle, float delay)
+    {
+        // A delay lets several pipes rotate as a ripple spreading from the button.
+        if (delay > 0f) yield return new WaitForSeconds(delay);
         float startAngle = cachedTransform.localEulerAngles.z;
         float elapsed = 0f;
         while (elapsed < rotationDuration)

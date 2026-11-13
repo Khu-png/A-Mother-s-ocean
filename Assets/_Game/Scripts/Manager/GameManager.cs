@@ -95,6 +95,11 @@ public class GameManager : Singleton<GameManager>
         if (!IsState(GameState.Gameplay)) return;
         ChangeState(GameState.Lose);
         UIManager.Ins.GetUI<Gameplay>().HideWinHud();
+        LevelManager.Ins.CurrentLevel.PlayLoseTransition(ShowLoseResult);
+    }
+
+    private void ShowLoseResult()
+    {
         UIManager.Ins.OpenUI<Lose>();
     }
 

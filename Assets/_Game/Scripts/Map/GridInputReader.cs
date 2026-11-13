@@ -95,8 +95,8 @@ public class GridInputReader
                 touchId = touch.touchId.ReadValue();
                 BeginSwipe(touch.position.ReadValue());
             }
-            if (touch.press.wasReleasedThisFrame)
-                return EndSwipe(touch.position.ReadValue());
+            if (touch.press.isPressed) return ReadActiveSwipe(touch.position.ReadValue());
+            if (touch.press.wasReleasedThisFrame) Reset();
             if (fingers > 0 || touchId != 0) return Vector2Int.zero;
         }
         return ReadMouseSwipe();
@@ -107,8 +107,19 @@ public class GridInputReader
         Mouse mouse = Mouse.current;
         if (mouse == null) return Vector2Int.zero;
         if (mouse.leftButton.wasPressedThisFrame) BeginSwipe(mouse.position.ReadValue());
-        if (mouse.leftButton.wasReleasedThisFrame) return EndSwipe(mouse.position.ReadValue());
+        if (mouse.leftButton.isPressed) return ReadActiveSwipe(mouse.position.ReadValue());
+        if (mouse.leftButton.wasReleasedThisFrame) Reset();
         return Vector2Int.zero;
+    }
+
+    // Fires as soon as the finger travels far enough, without waiting for release.
+    // One swipe moves exactly one cell: tracking stops until the finger is lifted.
+    private Vector2Int ReadActiveSwipe(Vector2 position)
+    {
+        if (!trackingSwipe) return Vector2Int.zero;
+        Vector2Int direction = SwipeDirection(position - swipeStart);
+        if (direction != Vector2Int.zero) trackingSwipe = false;
+        return direction;
     }
 
     private void BeginSwipe(Vector2 position)
@@ -117,12 +128,8 @@ public class GridInputReader
         trackingSwipe = !IsOverUI(position);
     }
 
-    private Vector2Int EndSwipe(Vector2 position)
+    private static Vector2Int SwipeDirection(Vector2 delta)
     {
-        bool wasTracking = trackingSwipe;
-        Vector2 delta = position - swipeStart;
-        Reset();
-        if (!wasTracking || IsOverUI(position)) return Vector2Int.zero;
         float threshold = Mathf.Clamp(Mathf.Min(Screen.width, Screen.height) * 0.04f, 20f, 80f);
         if (delta.sqrMagnitude < threshold * threshold) return Vector2Int.zero;
         if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))

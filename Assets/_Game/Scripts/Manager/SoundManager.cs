@@ -22,6 +22,7 @@ public class SoundManager : Singleton<SoundManager>
 
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource soundSource;
+    [SerializeField] private AudioSource pitchedSoundSource;
     private readonly Dictionary<string, AudioClip> musicLookup = new Dictionary<string, AudioClip>();
     private readonly Dictionary<string, AudioClip> soundLookup = new Dictionary<string, AudioClip>();
 
@@ -80,6 +81,14 @@ public class SoundManager : Singleton<SoundManager>
         soundSource.PlayOneShot(clip);
     }
 
+    // Uses its own source so a pitch change does not alter other overlapping one-shots.
+    public void PlaySound(string id, float pitch, float volume)
+    {
+        if (!isLoaded || !isSoundEnabled || !soundLookup.TryGetValue(id, out AudioClip clip)) return;
+        pitchedSoundSource.pitch = pitch;
+        pitchedSoundSource.PlayOneShot(clip, volume);
+    }
+
     public void PlayButtonSound(string id = GameConstants.BUTTON_SOUND)
     {
         if (!isLoaded || !isSoundEnabled) return;
@@ -109,6 +118,7 @@ public class SoundManager : Singleton<SoundManager>
         PlayerPrefs.SetInt(SOUND_KEY, enabled ? 1 : 0);
         PlayerPrefs.Save();
         if (!enabled && soundSource != null) soundSource.Stop();
+        if (!enabled) pitchedSoundSource.Stop();
     }
 
     public void ToggleMusic()

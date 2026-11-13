@@ -33,6 +33,7 @@ public class Player : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float liftedShadowOpacity = 0.55f;
 
     private Transform cachedTransform;
+    private MaterialPropertyBlock idleBlock;
     private Vector3 moveStart;
     private Vector3 moveTarget;
     private Vector3 baseVisualScale;
@@ -98,10 +99,14 @@ public class Player : MonoBehaviour
         moveTarget = localPosition;
         moveTimer = 0f;
         IsMoving = true;
+        isBlocked = false;
     }
 
     public void PlayBlocked(Vector2Int direction)
     {
+        // Finish the current step instantly so the bump starts from a cell centre.
+        cachedTransform.localPosition = moveTarget;
+        IsMoving = false;
         FaceDirection(direction);
         tiltDirection = TiltDirection(direction);
         blockedDirection = ((Vector2)direction).normalized;
@@ -118,6 +123,8 @@ public class Player : MonoBehaviour
         isBlocked = false;
         ResetDepthVisual();
     }
+
+    public void SetRootScale(float factor) => cachedTransform.localScale = Vector3.one * factor;
 
     public void ApplyWinFade(float progress)
     {
@@ -211,6 +218,8 @@ public class Player : MonoBehaviour
         MenuSkinOffer skin = skinCatalog.GetSkin(MenuPlayerProgress.EquippedSkin);
         spriteRenderer.sprite = skin.Portrait;
         spriteRenderer.color = skin.Tint;
+        idleBlock = new MaterialPropertyBlock();
+        SpriteIdleWave.Bind(spriteRenderer, idleBlock, 0f);
     }
 
     private float FitSpriteScale(float cellSize, float fill)

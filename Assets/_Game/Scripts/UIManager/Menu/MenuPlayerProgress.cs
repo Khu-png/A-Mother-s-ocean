@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public static class MenuPlayerProgress
@@ -10,11 +11,13 @@ public static class MenuPlayerProgress
     private const string POWER_UP_PREFIX = "PowerUp_";
     private const string CLAIMED_CHEST_PREFIX = "ClaimedGiftLevel_";
     private const string LIVES_KEY = "Lives";
+    private const string NEW_SKIN_KEY = "HasNewSkin";
 
     public static int Coins => Mathf.Max(0, PlayerPrefs.GetInt(CoinsKey, 0));
     public static int Chests => Mathf.Max(0, PlayerPrefs.GetInt(CHESTS_KEY, 0));
     public static string EquippedSkin => PlayerPrefs.GetString(EQUIPPED_SKIN_KEY);
     public static int Lives => Mathf.Clamp(PlayerPrefs.GetInt(LIVES_KEY, MaxLives), 0, MaxLives);
+    public static bool HasNewSkin => PlayerPrefs.GetInt(NEW_SKIN_KEY, 0) == 1;
 
     public static void Initialize(string defaultSkinId)
     {
@@ -36,8 +39,15 @@ public static class MenuPlayerProgress
         if (IsSkinOwned(offer.Id) || Coins < offer.Price) return false;
         SpendCoins(offer.Price);
         PlayerPrefs.SetInt(OwnedSkinKey(offer.Id), 1);
+        PlayerPrefs.SetInt(NEW_SKIN_KEY, 1);
         PlayerPrefs.Save();
         return true;
+    }
+
+    public static void MarkSkinsSeen()
+    {
+        PlayerPrefs.SetInt(NEW_SKIN_KEY, 0);
+        PlayerPrefs.Save();
     }
 
     public static bool TryBuyPowerUp(MenuPowerUpOffer offer)
@@ -119,6 +129,17 @@ public static class MenuPlayerProgress
     {
         string key = POWER_UP_PREFIX + id;
         PlayerPrefs.SetInt(key, PlayerPrefs.GetInt(key, 0) + amount);
+    }
+
+    // Back to a fresh inventory: only the default skin owned and equipped, no power-ups.
+    public static void ResetInventory(MenuCatalog catalog)
+    {
+        foreach (MenuSkinOffer skin in catalog.Skins) PlayerPrefs.DeleteKey(OwnedSkinKey(skin.Id));
+        foreach (MenuPowerUpId id in Enum.GetValues(typeof(MenuPowerUpId)))
+            PlayerPrefs.DeleteKey(POWER_UP_PREFIX + id);
+        PlayerPrefs.DeleteKey(EQUIPPED_SKIN_KEY);
+        PlayerPrefs.DeleteKey(NEW_SKIN_KEY);
+        Initialize(catalog.DefaultSkinId);
     }
 
     private static string OwnedSkinKey(string skinId) => OWNED_SKIN_PREFIX + skinId;

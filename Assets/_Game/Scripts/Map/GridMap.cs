@@ -50,6 +50,14 @@ public partial class GridMap : MonoBehaviour
     {
         if (isClearingBoard) return;
         RefreshSafeArenaLayout();
+        TickMotherPulse();
+        TickTileAmbience();
+        if (introMotion.IsPlaying)
+        {
+            // Movement waits until every piece has landed.
+            AdvanceIntro();
+            return;
+        }
         if (hammerSelecting) ReadHammerInput();
         else if (hammerImpactPending) return;
         else ReadMoveInput();

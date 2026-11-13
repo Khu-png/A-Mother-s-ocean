@@ -11,23 +11,26 @@ public sealed class MenuPowerUpOfferView
     [SerializeField] private TMP_Text price;
     [SerializeField] private TMP_Text buttonLabel;
     [SerializeField] private Button buyButton;
+    [SerializeField] private Image icon;
 
     public Button BuyButton => buyButton;
+    public Sprite IconSprite => icon.sprite;
 
-    public void Display(MenuPowerUpOffer offer, bool purchasesEnabled, int coins)
+    public void Display(MenuPowerUpOffer offer, bool purchasesEnabled)
     {
         quantity.text = $"x{offer.Amount}";
         price.text = offer.Price.ToString();
-        buyButton.interactable = purchasesEnabled && coins >= offer.Price;
+        // Stays tappable without enough coins so the tap can explain the shortage.
+        buyButton.interactable = purchasesEnabled;
         buttonLabel.text = purchasesEnabled ? "Buy" : "Unavailable";
     }
 
-    public void DisplayLife(int lifePrice, bool purchasesEnabled, int coins, int lives)
+    public void DisplayLife(int lifePrice, bool purchasesEnabled, int lives)
     {
         quantity.text = "+1";
         price.text = lifePrice.ToString();
         bool livesFull = lives >= MenuPlayerProgress.MaxLives;
-        buyButton.interactable = purchasesEnabled && !livesFull && coins >= lifePrice;
+        buyButton.interactable = purchasesEnabled && !livesFull;
         buttonLabel.text = !purchasesEnabled ? "Unavailable" : livesFull ? "Full" : "Buy";
     }
 
@@ -42,9 +45,7 @@ public sealed class MenuShopPage : MonoBehaviour
 {
     [SerializeField] private Image featuredSkinPreview;
     [SerializeField] private TMP_Text featuredSkinName;
-    [SerializeField] private TMP_Text featuredSkinPrice;
-    [SerializeField] private TMP_Text featuredButtonLabel;
-    [SerializeField] private Button featuredBuyButton;
+    [SerializeField] private FeaturedSkinButtonView featuredButton;
     [SerializeField, Min(0)] private int featuredSkinIndex;
     [SerializeField] private MenuPowerUpOfferView[] powerUpViews;
     [SerializeField] private GameObject insufficientCoinsState;
@@ -52,6 +53,14 @@ public sealed class MenuShopPage : MonoBehaviour
     [SerializeField] private Button previousSkinButton;
     [SerializeField] private Button nextSkinButton;
     [SerializeField] private MenuSkinTransition skinTransition;
+    [SerializeField] private CoinShortageFeedback coinShortage;
+    [Header("Purchase Reward")]
+    [SerializeField] private PurchaseRewardFlight rewardFlight;
+    [SerializeField] private Image heartBar;
+    [SerializeField] private Image skinTabIcon;
+    [SerializeField] private MenuNewSkinBadge newSkinBadge;
+    // Centre of the heart badge inside the heart bar art (0-1 of the sprite).
+    [SerializeField] private Vector2 heartLandingPoint = new Vector2(0.236f, 0.531f);
     private MenuCatalog catalog;
     private Action purchaseCompleted;
     private bool processing;
@@ -60,7 +69,7 @@ public sealed class MenuShopPage : MonoBehaviour
     {
         catalog = menuCatalog;
         purchaseCompleted = onPurchaseCompleted;
-        featuredBuyButton.onClick.AddListener(BuyFeaturedSkin);
+        featuredButton.Button.onClick.AddListener(OnFeaturedButton);
         for (int i = 0; i < catalog.PowerUps.Length; i++)
         {
             int offerIndex = i;
@@ -78,21 +87,17 @@ public sealed class MenuShopPage : MonoBehaviour
         featuredSkinPreview.sprite = skin.Portrait;
         featuredSkinPreview.color = skin.Tint;
         featuredSkinName.text = skin.DisplayName;
-        featuredSkinPrice.text = skin.Price.ToString();
-        bool owned = MenuPlayerProgress.IsSkinOwned(skin.Id);
-        featuredBuyButton.interactable = catalog.PurchasesEnabled && !owned && MenuPlayerProgress.Coins >= skin.Price;
-        featuredButtonLabel.text = ButtonText(owned);
+        featuredButton.Display(skin, catalog.PurchasesEnabled);
         for (int i = 0; i < catalog.PowerUps.Length; i++)
-            powerUpViews[i].Display(catalog.PowerUps[i],
-                catalog.PurchasesEnabled, MenuPlayerProgress.Coins);
+            powerUpViews[i].Display(catalog.PowerUps[i], catalog.PurchasesEnabled);
         powerUpViews[catalog.PowerUps.Length].DisplayLife(catalog.HeartPrice,
-            catalog.PurchasesEnabled, MenuPlayerProgress.Coins, MenuPlayerProgress.Lives);
+            catalog.PurchasesEnabled, MenuPlayerProgress.Lives);
         insufficientCoinsState.SetActive(catalog.PurchasesEnabled && !CanAffordAnything());
     }
 
     void OnDestroy()
     {
-        featuredBuyButton.onClick.RemoveListener(BuyFeaturedSkin);
+        featuredButton.Button.onClick.RemoveListener(OnFeaturedButton);
         powerUpViews[catalog.PowerUps.Length].BuyButton.onClick.RemoveListener(BuyLife);
         previousSkinButton.onClick.RemoveListener(SelectPreviousSkin);
         nextSkinButton.onClick.RemoveListener(SelectNextSkin);
@@ -116,9 +121,11 @@ public sealed class MenuShopPage : MonoBehaviour
         skinTransition.Play(direction, () => ApplySelectedSkin(index));
     }
 
-    private void BuyFeaturedSkin()
+    // The button is only tappable while the featured skin is not owned yet.
+    private void OnFeaturedButton()
     {
         if (processing || skinTransition.IsPlaying) return;
+        if (!HasCoins(catalog.Skins[featuredSkinIndex].Price, featuredButton.Button)) return;
         SoundManager.Ins.PlayButtonSound();
         StartCoroutine(ProcessSkinPurchase());
     }
@@ -126,6 +133,7 @@ public sealed class MenuShopPage : MonoBehaviour
     private void BuyPowerUp(int offerIndex)
     {
         if (processing) return;
+        if (!HasCoins(catalog.PowerUps[offerIndex].Price, powerUpViews[offerIndex].BuyButton)) return;
         SoundManager.Ins.PlayButtonSound();
         StartCoroutine(ProcessPowerUpPurchase(offerIndex));
     }
@@ -133,15 +141,20 @@ public sealed class MenuShopPage : MonoBehaviour
     private void BuyLife()
     {
         if (processing) return;
+        if (!HasCoins(catalog.HeartPrice, powerUpViews[catalog.PowerUps.Length].BuyButton)) return;
         SoundManager.Ins.PlayButtonSound();
         StartCoroutine(ProcessLifePurchase());
     }
 
     private IEnumerator ProcessSkinPurchase()
     {
-        BeginProcessing(featuredButtonLabel, featuredBuyButton);
+        processing = true;
+        featuredButton.SetProcessing();
         yield return new WaitForSecondsRealtime(processingDuration);
-        MenuPlayerProgress.TryBuySkin(catalog.Skins[featuredSkinIndex]);
+        MenuSkinOffer skin = catalog.Skins[featuredSkinIndex];
+        // The new skin flies into the Inv tab; its red dot appears when the skin lands.
+        if (MenuPlayerProgress.TryBuySkin(skin))
+            rewardFlight.Play(skin.Portrait, "NEW!", skinTabIcon, new Vector2(0.5f, 0.5f), newSkinBadge.Refresh);
         EndProcessing();
     }
 
@@ -151,7 +164,9 @@ public sealed class MenuShopPage : MonoBehaviour
         processing = true;
         view.SetProcessing();
         yield return new WaitForSecondsRealtime(processingDuration);
-        MenuPlayerProgress.TryBuyPowerUp(catalog.PowerUps[offerIndex]);
+        MenuPowerUpOffer offer = catalog.PowerUps[offerIndex];
+        if (MenuPlayerProgress.TryBuyPowerUp(offer))
+            rewardFlight.PlayInPlace(view.IconSprite, $"x{offer.Amount}");
         EndProcessing();
     }
 
@@ -161,15 +176,10 @@ public sealed class MenuShopPage : MonoBehaviour
         processing = true;
         lifeView.SetProcessing();
         yield return new WaitForSecondsRealtime(processingDuration);
-        MenuPlayerProgress.TryBuyLife(catalog.HeartPrice);
-        EndProcessing();
-    }
-
-    private void BeginProcessing(TMP_Text label, Button button)
-    {
-        processing = true;
-        button.interactable = false;
-        label.text = "Processing...";
+        // The heart bar updates when the flying heart lands on it.
+        if (MenuPlayerProgress.TryBuyLife(catalog.HeartPrice))
+            rewardFlight.Play(lifeView.IconSprite, "+1", heartBar, heartLandingPoint, EndProcessing);
+        else EndProcessing();
     }
 
     private void EndProcessing()
@@ -185,6 +195,13 @@ public sealed class MenuShopPage : MonoBehaviour
         Refresh();
     }
 
+    private bool HasCoins(int price, Button buyButton)
+    {
+        if (MenuPlayerProgress.Coins >= price) return true;
+        coinShortage.Play((RectTransform)buyButton.transform);
+        return false;
+    }
+
     private bool CanAffordAnything()
     {
         for (int i = 0; i < catalog.PowerUps.Length; i++)
@@ -194,11 +211,5 @@ public sealed class MenuShopPage : MonoBehaviour
         if (MenuPlayerProgress.Lives < MenuPlayerProgress.MaxLives
             && MenuPlayerProgress.Coins >= catalog.HeartPrice) return true;
         return MenuPlayerProgress.Coins >= catalog.Skins[featuredSkinIndex].Price;
-    }
-
-    private string ButtonText(bool owned)
-    {
-        if (owned) return "Owned";
-        return catalog.PurchasesEnabled ? "Buy" : "Unavailable";
     }
 }

@@ -86,6 +86,5 @@ configured map-design assistant.
 
 ## Verification
 
-Chạy `Tools > A Mother's Ocean > Chạy kiểm thử trình chỉnh sửa bản đồ` để kiểm tra bản đồ có đường đi và bị chặn
-maps, directional movement, bounded search, dead ends, target completion, non-repeating routes,
-deterministic seeds, locked cells, configured tile counts, ratios, and supported dimensions.
+Bộ kiểm thử tự động của trình chỉnh sửa bản đồ đã được gỡ khỏi project để giảm độ phức tạp.
+Kiểm tra bản đồ bằng phần phân tích (Analysis) ngay trong cửa sổ AI Map Designer.

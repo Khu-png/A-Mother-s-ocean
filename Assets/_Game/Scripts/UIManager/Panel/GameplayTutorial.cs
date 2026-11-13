@@ -114,8 +114,7 @@ public sealed class GameplayTutorial : MonoBehaviour
     private void RefreshFocus()
     {
         TutorialFocusData focus = levelManager.GetTutorialFocus(FocusKind());
-        Vector2 anchor = new Vector2(focus.ScreenPosition.x / Screen.width,
-            focus.ScreenPosition.y / Screen.height);
+        Vector2 anchor = PortraitScreen.ToFrameNormalized(focus.ScreenPosition);
         PlaceAtAnchor(focusIcon.rectTransform, anchor, Vector2.zero);
         PlaceAtAnchor(focusGlow.rectTransform, anchor, Vector2.zero);
         PlaceAtAnchor(handIcon.rectTransform, anchor, handOffset);

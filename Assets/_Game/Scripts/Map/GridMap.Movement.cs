@@ -11,11 +11,17 @@ public partial class GridMap
 
     private void ReadMoveInput()
     {
+        // Moves are accepted while the mother or pipes are still animating:
+        // MoveTo starts from her current position, so quick inputs chain without waiting.
         bool canMove = !LoadingManager.Ins.IsLoading
-            && GameManager.IsState(GameState.Gameplay)
-            && player != null && !player.IsBusy && !AreTilesRotating();
+            && GameManager.IsState(GameState.Gameplay) && player != null;
         Vector2Int direction = inputReader.ReadDirection(canMove);
-        if (direction != Vector2Int.zero) TryMove(direction);
+        if (direction != Vector2Int.zero)
+        {
+            feedback.ResetIdle();
+            TryMove(direction);
+        }
+        else if (canMove && feedback.TickIdle(Time.deltaTime)) ShowMoveHint();
     }
 
     private bool AreTilesRotating()
@@ -38,11 +44,12 @@ public partial class GridMap
         }
 
         bool isBacktracking = IsBacktrackingToPreviousCell(nextCell);
-        bool rotatesTiles = rotateButtons.ContainsKey(
-            isBacktracking ? playerCell : nextCell);
+        Vector2Int buttonCell = isBacktracking ? playerCell : nextCell;
+        bool rotatesTiles = rotateButtons.ContainsKey(buttonCell);
         if (!UpdateRoute(nextCell, isBacktracking))
         {
             player.PlayBlocked(direction);
+            feedback.PlayBlocked();
             return;
         }
 
@@ -50,11 +57,16 @@ public partial class GridMap
         player.MoveTo(playerCell, CellToLocalPosition(playerCell));
         LevelManager.Ins.NotifyPlayerStepCompleted();
         MarkCurrentCell();
-        SoundManager.Ins.PlaySound(GameConstants.MOVE_SOUND);
+        if (isBacktracking) feedback.PlayBacktrack();
+        else feedback.PlayStep();
         LevelManager.Ins.NotifyPlayerMoved();
         if (!isBacktracking && rotateButtons.ContainsKey(playerCell))
             ActivateRotateButton();
-        if (rotatesTiles) SoundManager.Ins.PlaySound(GameConstants.ROTATE_SOUND);
+        if (rotatesTiles)
+        {
+            SoundManager.Ins.PlaySound(GameConstants.ROTATE_SOUND);
+            PlayRotateSwirl(buttonCell, isBacktracking);
+        }
         RefreshFinish();
     }
 
@@ -62,6 +74,8 @@ public partial class GridMap
         MoveBlockReason blockReason)
     {
         player.PlayBlocked(direction);
+        feedback.PlayBlocked();
+        HighlightBlocker(direction, blockReason);
         if (blockReason == MoveBlockReason.LockedFinish)
             LevelManager.Ins.NotifyMissingTargetsBlocked();
     }
@@ -103,7 +117,7 @@ public partial class GridMap
 
     private void ActivateRotateButton()
     {
-        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleState();
+        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleState(RippleDelay(path.Tile.Cell));
         rotateButtons[playerCell].Pulse();
     }
 
@@ -115,7 +129,7 @@ public partial class GridMap
     private void MarkCurrentCell()
     {
         pathTrail.Mark(playerCell, CellToLocalPosition(playerCell));
-        if (targets.ContainsKey(playerCell)) targets[playerCell].Collect();
+        if (targets.ContainsKey(playerCell)) targets[playerCell].Collect(targetArrivedHandler);
         NotifyTargetProgress();
     }
 
@@ -132,13 +146,15 @@ public partial class GridMap
 
     private void RevertOneWayTiles()
     {
-        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleBack();
+        foreach (OneWayPath path in oneWayPaths.Values) path.ToggleBack(RippleDelay(path.Tile.Cell));
     }
 
     private void RefreshFinish()
     {
         if (finishPoint == null) return;
+        bool wasOpen = finishPoint.IsOpen;
         finishPoint.SetOpen(AreAllTargetsCollected());
+        if (!wasOpen && finishPoint.IsOpen) PlayFinishOpened();
         if (finishPoint.IsOpen && playerCell == finishCell)
             LevelManager.Ins.OnWin();
     }

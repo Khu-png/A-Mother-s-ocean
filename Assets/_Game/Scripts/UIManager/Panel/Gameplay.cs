@@ -12,6 +12,7 @@ public class Gameplay : UICanvas
     [SerializeField] private GameplayTutorial tutorialController;
     [SerializeField] private GameObject[] winHiddenElements;
     [SerializeField] private GameplayLifeWarning lifeWarning;
+    [SerializeField] private GameplayTimeWarning timeWarning;
     [Header("Target Counter")]
     [SerializeField] private RectTransform targetCounterTransform;
     [SerializeField] private TextMeshProUGUI targetCounterText;
@@ -22,6 +23,7 @@ public class Gameplay : UICanvas
     private Vector3 targetCounterBaseScale;
     private Color targetCounterBaseColor;
     private float targetCounterFlashTimer;
+    private int displayedCollected;
 
     void LateUpdate()
     {
@@ -45,6 +47,7 @@ public class Gameplay : UICanvas
         if (levelManager != null) levelManager.MissingTargetsBlocked -= FlashTargetCounter;
         if (levelManager != null) levelManager.TimeChanged -= RefreshTimer;
         ResetTargetCounter();
+        timeWarning.Hide();
     }
 
     public override void Open()
@@ -58,6 +61,7 @@ public class Gameplay : UICanvas
     {
         foreach (GameObject element in winHiddenElements) element.SetActive(false);
         tutorialController.Hide();
+        timeWarning.Hide();
     }
 
     private void RefreshTutorial()
@@ -65,6 +69,7 @@ public class Gameplay : UICanvas
         if (levelText != null)
             levelText.text = $"Level {levelManager.CurrentLevelNumber:00}";
         tutorialController.Refresh();
+        displayedCollected = levelManager.CollectedTargetCount;
         RefreshTargetCounter(levelManager.CollectedTargetCount, levelManager.TotalTargetCount);
         RefreshTimer(levelManager.RemainingTime);
     }
@@ -79,6 +84,9 @@ public class Gameplay : UICanvas
     private void RefreshTargetCounter(int collected, int total)
     {
         targetCounterText.text = $"{collected}/{total}";
+        // Bump the counter each time another baby is rescued.
+        if (collected > displayedCollected) FlashTargetCounter();
+        displayedCollected = collected;
     }
 
     private void FlashTargetCounter()
@@ -111,6 +119,7 @@ public class Gameplay : UICanvas
     {
         int totalSeconds = Mathf.CeilToInt(seconds);
         timerText.text = $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
+        timeWarning.Refresh(seconds);
     }
 
     public void OnClickPause()

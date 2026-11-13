@@ -62,7 +62,7 @@ public class OneWayPath : MonoBehaviour
         return moveDirection == Vector2Int.right || moveDirection == Vector2Int.down;
     }
 
-    public void ToggleState()
+    public void ToggleState(float rippleDelay)
     {
         if (kind == OneWayPathKind.Straight)
         {
@@ -73,10 +73,10 @@ public class OneWayPath : MonoBehaviour
             ToggleCornerState();
         }
 
-        ApplyVisual(true);
+        ApplyVisual(true, rippleDelay);
     }
 
-    public void ToggleBack()
+    public void ToggleBack(float rippleDelay)
     {
         if (kind == OneWayPathKind.Straight)
         {
@@ -87,7 +87,7 @@ public class OneWayPath : MonoBehaviour
             ToggleCornerBack();
         }
 
-        ApplyVisual(true);
+        ApplyVisual(true, rippleDelay);
     }
 
     public void ResetState()
@@ -96,10 +96,10 @@ public class OneWayPath : MonoBehaviour
         ApplyVisual();
     }
 
-    private void ApplyVisual(bool animate = false)
+    private void ApplyVisual(bool animate = false, float rippleDelay = 0f)
     {
         visualRotation = RotationForState();
-        tile.SetVisualRotation(RotationDegrees(visualRotation), animate);
+        tile.SetVisualRotation(RotationDegrees(visualRotation), animate, rippleDelay);
         tile.SetColor(pathColor);
         tile.SetLabel(string.Empty, Color.white);
     }

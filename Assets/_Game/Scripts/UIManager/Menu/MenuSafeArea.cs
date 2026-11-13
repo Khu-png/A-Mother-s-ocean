@@ -21,18 +21,15 @@ public sealed class MenuSafeArea : MonoBehaviour
 
     private void Apply()
     {
-        Rect area = Screen.safeArea;
-        float width = Screen.width;
-        float height = Screen.height;
-        safeAreaRoot.anchorMin = new Vector2(
-            (area.xMin + padding.left) / width,
-            (area.yMin + padding.bottom) / height);
-        safeAreaRoot.anchorMax = new Vector2(
-            (area.xMax - padding.right) / width,
-            (area.yMax - padding.top) / height);
+        // The menu lives inside the portrait frame, so anchors are relative to that frame.
+        Rect area = PortraitScreen.SafeArea;
+        safeAreaRoot.anchorMin = PortraitScreen.ToFrameNormalized(
+            new Vector2(area.xMin + padding.left, area.yMin + padding.bottom));
+        safeAreaRoot.anchorMax = PortraitScreen.ToFrameNormalized(
+            new Vector2(area.xMax - padding.right, area.yMax - padding.top));
         safeAreaRoot.anchoredPosition = Vector2.zero;
         safeAreaRoot.sizeDelta = Vector2.zero;
-        appliedArea = area;
+        appliedArea = Screen.safeArea;
         appliedResolution = new Vector2Int(Screen.width, Screen.height);
     }
 }

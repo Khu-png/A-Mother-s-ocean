@@ -46,7 +46,10 @@ public class PathTrail
     public void Remove(Vector2Int cell)
     {
         if (!MARKS.ContainsKey(cell)) return;
-        ReturnMark(MARKS[cell]);
+        PathMarkFeedback mark = MARKS[cell];
+        // The mark is reusable at once; it hides itself when its retract finishes.
+        mark.Retract();
+        AVAILABLE_MARKS.Push(mark);
         MARKS.Remove(cell);
     }
 

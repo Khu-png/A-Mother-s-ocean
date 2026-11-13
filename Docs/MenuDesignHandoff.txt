@@ -1,3 +1,7 @@
+GHI CHU (2026-11): Cac scene xem mau trong Assets/_Game/Scenes/MenuDesign, MenuShellDesign.prefab
+va cac component mau (SkinSlot, PowerUpOffer, BabySharkVisual) da duoc go khoi project vi khong con dung.
+Menu chay that nam trong Prefab/UI/MainmenuRuntime.prefab va Prefab/UI/MenuDesign/Pages.
+
 A MOTHER'S OCEAN - BẢN THẢO BÀN GIAO MENU CHO DEV
 
 1. PHẠM VI BẢN DỰNG

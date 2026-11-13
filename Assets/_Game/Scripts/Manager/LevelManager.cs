@@ -15,6 +15,7 @@ public class LevelManager : Singleton<LevelManager>
     private float freezeDuration;
     private int displayedSecond;
     public int CurrentLevelNumber => currentLevelIndex + 1;
+    public GridMap CurrentLevel => currentLevel;
     public bool HasPlayerMoved { get; private set; }
     public int CollectedTargetCount { get; private set; }
     public int TotalTargetCount { get; private set; }
@@ -204,6 +205,7 @@ public class LevelManager : Singleton<LevelManager>
         OnDespawn();
         OnLoadLevel(currentLevelIndex);
         OnInit();
+        currentLevel.PlayIntro();
     }
 
     public void OnNextLevel()

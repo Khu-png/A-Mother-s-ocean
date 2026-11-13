@@ -8,6 +8,7 @@ public sealed class GameplayPowerUps : MonoBehaviour
 {
     private const float FREEZE_DURATION = 30f;
     private const float HAMMER_DIM_ALPHA = 0.82f;
+    private const string EMPTY_COUNT_LABEL = "+";
     [SerializeField] private Button freezeButton;
     [SerializeField] private Button hammerButton;
     [SerializeField] private TMP_Text freezeCountText;
@@ -23,6 +24,7 @@ public sealed class GameplayPowerUps : MonoBehaviour
     [SerializeField] private HammerImpactGraphic hammerImpactGraphic;
     [SerializeField] private CanvasGroup hammerSelectionDim;
     [SerializeField] private HammerSelectionOverlayGraphic hammerSelectionOverlay;
+    [SerializeField] private PowerUpNotice notice;
     private readonly List<Vector2> hammerTargetPositions = new();
     private PowerUpIconMotion.HomeState freezeHomeState;
     private PowerUpIconMotion.HomeState hammerHomeState;
@@ -80,6 +82,8 @@ public sealed class GameplayPowerUps : MonoBehaviour
     public void OnClickFreeze()
     {
         SoundManager.Ins.PlayButtonSound();
+        if (!CanUse(MenuPowerUpId.Freeze)) ShowNotice(freezeButton, "No freezes left!");
+        else if (LevelManager.Ins.IsTimeFrozen) ShowNotice(freezeButton, "Time is already frozen");
         if (!CanUse(MenuPowerUpId.Freeze) || !LevelManager.Ins.CanActivateFreeze()) return;
         SoundManager.Ins.PlaySound(GameConstants.FREEZE_SOUND);
         DisableButtons();
@@ -89,6 +93,8 @@ public sealed class GameplayPowerUps : MonoBehaviour
     public void OnClickHammer()
     {
         SoundManager.Ins.PlayButtonSound();
+        if (!CanUse(MenuPowerUpId.Hammer)) ShowNotice(hammerButton, "No hammers left!");
+        else if (!LevelManager.Ins.CurrentLevel.HasBlocks) ShowNotice(hammerButton, "No blocks to smash");
         if (!CanUse(MenuPowerUpId.Hammer) || !LevelManager.Ins.BeginHammerSelection()) return;
         hammerSelecting = true;
         ShowHammerTargets();
@@ -185,15 +191,26 @@ public sealed class GameplayPowerUps : MonoBehaviour
         RefreshCounts();
         bool free = GameManager.IsState(GameState.Gameplay)
             && freezeIntroRoutine == null && hammerRoutine == null && !hammerSelecting;
-        freezeButton.interactable = free && !LevelManager.Ins.IsTimeFrozen
-            && CanUse(MenuPowerUpId.Freeze);
-        hammerButton.interactable = free && CanUse(MenuPowerUpId.Hammer);
+        // Buttons stay tappable when empty so the tap can explain why nothing happens.
+        freezeButton.interactable = free;
+        hammerButton.interactable = free;
     }
 
     private void RefreshCounts()
     {
-        freezeCountText.text = MenuPlayerProgress.PowerUpCount(MenuPowerUpId.Freeze).ToString();
-        hammerCountText.text = MenuPlayerProgress.PowerUpCount(MenuPowerUpId.Hammer).ToString();
+        freezeCountText.text = CountLabel(MenuPowerUpId.Freeze);
+        hammerCountText.text = CountLabel(MenuPowerUpId.Hammer);
+    }
+
+    private static string CountLabel(MenuPowerUpId id)
+    {
+        int count = MenuPlayerProgress.PowerUpCount(id);
+        return count > 0 ? count.ToString() : EMPTY_COUNT_LABEL;
+    }
+
+    private void ShowNotice(Button button, string message)
+    {
+        notice.Show((RectTransform)button.transform, message);
     }
 
     private static bool CanUse(MenuPowerUpId id)

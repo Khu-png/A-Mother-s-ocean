@@ -6,7 +6,7 @@ using UnityEngine.Video;
 
 public class LoadingManager : Singleton<LoadingManager>
 {
-    [SerializeField] private GameObject loadingCanvas;
+    [SerializeField] private LoadingScreenFade screenFade;
     [SerializeField] private Slider progressSlider;
     [SerializeField] private TMP_Text progressText;
     [SerializeField, Min(0.01f)] private float progressSpeed = 0.8f;
@@ -23,7 +23,6 @@ public class LoadingManager : Singleton<LoadingManager>
     void Awake()
     {
         RegisterSingleton(this);
-        if (loadingCanvas != null) loadingCanvas.SetActive(true);
         SetProgress(0f);
     }
 
@@ -51,14 +50,8 @@ public class LoadingManager : Singleton<LoadingManager>
     private bool BeginLoading()
     {
         if (IsLoading) return false;
-        if (loadingCanvas == null || progressSlider == null)
-        {
-            GameDiagnostics.LogError("LoadingManager requires a loading canvas and progress slider.", this);
-            return false;
-        }
         IsLoading = true;
         if (SoundManager.Ins != null) SoundManager.Ins.SetMusicSuspended(true);
-        loadingCanvas.SetActive(true);
         progressSlider.interactable = false;
         SetProgress(0f);
         return true;
@@ -66,6 +59,7 @@ public class LoadingManager : Singleton<LoadingManager>
 
     private IEnumerator LoadLevel(int levelIndex)
     {
+        yield return screenFade.FadeIn();
         yield return null;
         yield return null;
         yield return MoveProgress(0.2f);
@@ -76,7 +70,10 @@ public class LoadingManager : Singleton<LoadingManager>
         // Allow Start/LateUpdate and canvas layout to finish behind the cover.
         yield return null;
         yield return null;
-        yield return FinishLoading(GameConstants.GAMEPLAY_MUSIC);
+        yield return CompleteProgress();
+        // The board grows in while the cover fades away.
+        LevelManager.Ins.CurrentLevel.PlayIntro();
+        yield return RevealScene(GameConstants.GAMEPLAY_MUSIC);
     }
 
     private bool PrepareGameplay(int levelIndex, bool openUI)
@@ -104,6 +101,7 @@ public class LoadingManager : Singleton<LoadingManager>
     private IEnumerator LoadMenu()
     {
         // Let the loading cover render before instantiating the menu.
+        yield return screenFade.FadeIn();
         yield return null;
         yield return null;
         GameManager.ChangeState(GameState.MainMenu);
@@ -120,19 +118,27 @@ public class LoadingManager : Singleton<LoadingManager>
         }
         yield return MoveProgress(0.45f);
         yield return PrepareVideo(menu);
-        yield return FinishLoading(GameConstants.MENU_MUSIC);
+        yield return CompleteProgress();
+        yield return RevealScene(GameConstants.MENU_MUSIC);
     }
 
-    private IEnumerator FinishLoading(string musicId)
+    private IEnumerator CompleteProgress()
     {
         yield return MoveProgress(1f);
         yield return new WaitForSecondsRealtime(0.15f);
-        loadingCanvas.SetActive(false);
+    }
+
+    private IEnumerator RevealScene(string musicId)
+    {
+        // Start music with the reveal so audio and picture arrive together.
+        if (SoundManager.Ins != null)
+        {
+            SoundManager.Ins.SetMusicSuspended(false);
+            SoundManager.Ins.PlayMusic(musicId);
+        }
+        yield return screenFade.FadeOut();
         IsLoading = false;
         loadingRoutine = null;
-        if (SoundManager.Ins == null) yield break;
-        SoundManager.Ins.SetMusicSuspended(false);
-        SoundManager.Ins.PlayMusic(musicId);
     }
 
     private IEnumerator PrepareVideo(Mainmenu menu)

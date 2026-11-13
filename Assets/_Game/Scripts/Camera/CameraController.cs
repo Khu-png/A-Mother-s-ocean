@@ -70,7 +70,7 @@ public class CameraController : MonoBehaviour
     {
         if (targetCamera == null) return default;
         SafeArenaScreenLayout screenLayout = SafeArenaCalculator.Calculate(
-            Screen.safeArea, safeArena, columns, rows);
+            PortraitScreen.SafeArea, safeArena, columns, rows);
         Vector3 worldCenter = ScreenToBoard(screenLayout.BoardCenter, boardZ);
         float samplePixels = Mathf.Max(1f, screenLayout.CellSize);
         Vector3 worldRight = ScreenToBoard(
@@ -137,7 +137,7 @@ public class CameraController : MonoBehaviour
     void OnDrawGizmos()
     {
         if (Application.isPlaying || targetCamera == null || !safeArena.ShowEditorPreview) return;
-        SafeArenaScreenLayout layout = SafeArenaCalculator.Calculate(Screen.safeArea, safeArena, 1, 1);
+        SafeArenaScreenLayout layout = SafeArenaCalculator.Calculate(PortraitScreen.SafeArea, safeArena, 1, 1);
         DrawScreenRect(layout.Arena, safeArena.PreviewColor);
         Color usableColor = safeArena.PreviewColor;
         usableColor.a *= 0.55f;

@@ -12,6 +12,11 @@ public class Win : UICanvas
     [SerializeField] private TMP_Text claimText;
     [SerializeField] private TMP_Text walletText;
     [SerializeField] private ParticleImage[] confettiEffects;
+    [Header("Coin Sound")]
+    [SerializeField, Min(0.01f)] private float coinTickInterval = 0.07f;
+    [SerializeField, Range(0f, 1f)] private float coinTickVolume = 0.7f;
+    [SerializeField, Range(0f, 1f)] private float coinPitchRise = 0.35f;
+    [SerializeField, Range(1f, 2f)] private float coinFinalPitch = 1.2f;
     private static readonly int INTRO_STATE = Animator.StringToHash("Intro");
     private static readonly int CLAIM_STATE = Animator.StringToHash("Claim");
     private bool readyToClaim;
@@ -68,13 +73,24 @@ public class Win : UICanvas
     private IEnumerator ShowClaim(int startingCoins, int finalCoins)
     {
         int reward = finalCoins - startingCoins;
+        int lastTickedCoins = startingCoins;
+        float nextTickTime = 0f;
         sequenceAnimator.Play(CLAIM_STATE, 0, 0f);
         sequenceAnimator.Update(0f);
         do
         {
             float progress = sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float coinProgress = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress / 0.7f));
-            walletText.text = Mathf.RoundToInt(Mathf.Lerp(startingCoins, finalCoins, coinProgress)).ToString();
+            int shownCoins = Mathf.RoundToInt(Mathf.Lerp(startingCoins, finalCoins, coinProgress));
+            walletText.text = shownCoins.ToString();
+            // Tick while the wallet counts up, rate-limited and rising in pitch.
+            if (shownCoins != lastTickedCoins && Time.unscaledTime >= nextTickTime)
+            {
+                lastTickedCoins = shownCoins;
+                nextTickTime = Time.unscaledTime + coinTickInterval;
+                float pitch = 1f + coinPitchRise * coinProgress;
+                SoundManager.Ins.PlaySound(GameConstants.COIN_SOUND, pitch, coinTickVolume);
+            }
             int remainingReward = Mathf.RoundToInt(Mathf.Lerp(reward, 0, coinProgress));
             rewardText.text = $"+{remainingReward}";
             yield return null;
@@ -82,6 +98,7 @@ public class Win : UICanvas
         while (sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
         walletText.text = finalCoins.ToString();
         rewardText.text = "+0";
+        if (reward > 0) SoundManager.Ins.PlaySound(GameConstants.COIN_SOUND, coinFinalPitch, 1f);
         sequence = null;
         LevelManager.Ins.ContinueAfterWin();
     }

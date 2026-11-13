@@ -5,6 +5,7 @@ public class StartPoint : MonoBehaviour
     [SerializeField] private Vector2Int cell;
     [SerializeField] private SpriteRenderer spriteRenderer;
     private Color winFadeColor;
+    private Vector3 entranceBaseScale;
 
     public Vector2Int Cell => cell;
 
@@ -25,6 +26,16 @@ public class StartPoint : MonoBehaviour
     public void SetLocalPosition(Vector3 localPosition)
     {
         transform.localPosition = localPosition;
+    }
+
+    public void BeginEntrance()
+    {
+        entranceBaseScale = transform.localScale;
+    }
+
+    public void ApplyEntranceScale(float factor)
+    {
+        transform.localScale = entranceBaseScale * factor;
     }
 
     public void BeginWinFade()

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2508500868480985367}
   - component: {fileID: 1902827563738353222}
   - component: {fileID: 3459162345560041237}
+  - component: {fileID: 7310000000000000001}
   m_Layer: 5
   m_Name: Shade
   m_TagString: Untagged
@@ -162,9 +163,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2231353906740505794}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_EditorClassIdentifier: Assembly-CSharp::PressableButton
   m_Navigation:
     m_Mode: 3
     m_WrapAround: 0
@@ -768,3 +769,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7310000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 948275316755100446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e054df129d3a4b0cb4bd91fe90aac6f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PopupDimFade
+  dim: {fileID: 3459162345560041237}
+  duration: 0.22

@@ -3,8 +3,8 @@ using UnityEngine;
 
 public static class LevelProgressTools
 {
-    private const string RESET_LEVEL_MENU = "Tools/A Mother's Ocean/PlayerPrefs/Reset Saved Level to 1";
-    private const string COIN_CHEAT_MENU = "Tools/A Mother's Ocean/Cheats/Set Coins to 9000";
+    private const string RESET_LEVEL_MENU = "Tools/A Mother's Ocean/Cheats/Reset To Level 1";
+    private const string COIN_CHEAT_MENU = "Tools/A Mother's Ocean/Cheats/Set Coins To 9000";
     private const int CHEAT_COINS = 9000;
 
     [MenuItem(COIN_CHEAT_MENU)]

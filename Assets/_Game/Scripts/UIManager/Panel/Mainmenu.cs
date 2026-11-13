@@ -21,6 +21,7 @@ public sealed class Mainmenu : UICanvas
     [SerializeField] private TMP_Text coinAmountText;
     [SerializeField] private TMP_Text energyAmountText;
     [SerializeField] private Button playButton;
+    [SerializeField] private MenuNewSkinBadge newSkinBadge;
 
     [Header("Optional Video Background")]
     [SerializeField] private BackgroundMode backgroundMode;
@@ -87,7 +88,12 @@ public sealed class Mainmenu : UICanvas
     public void OnClickGift() => SelectTab(MenuTabId.Gift);
     public void OnClickShop() => SelectTab(MenuTabId.Shop);
     public void OnClickHome() => SelectTab(MenuTabId.Home);
-    public void OnClickSkin() => SelectTab(MenuTabId.Skin);
+    public void OnClickSkin()
+    {
+        MenuPlayerProgress.MarkSkinsSeen();
+        newSkinBadge.Refresh();
+        SelectTab(MenuTabId.Skin);
+    }
     public void OnClickTank() => SelectTab(MenuTabId.Tank);
 
     private void Initialize()
@@ -109,6 +115,7 @@ public sealed class Mainmenu : UICanvas
         giftPage.Refresh();
         shopPage.Refresh();
         skinPage.Refresh();
+        newSkinBadge.Refresh();
     }
 
     private void SelectTab(MenuTabId tab)

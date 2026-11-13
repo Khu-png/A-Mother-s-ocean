@@ -330,6 +330,8 @@ GameObject:
         fileID: 2434251062794636514
     - component:
         fileID: 3221680707500254421
+    - component:
+        fileID: 5310000000000000002
   m_Layer: 5
   m_Name: "SelectedSharkPreview"
   m_TagString: "Untagged"
@@ -416,8 +418,7 @@ MonoBehaviour:
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
-  m_Material:
-    fileID: 0
+  m_Material: {fileID: 2100000, guid: 7e9a1c3e5a7c4e9a1c3e5a7c9e1a3c58, type: 2}
   m_Color:
     r: 1
     g: 1
@@ -597,7 +598,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -1046,7 +1047,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -1728,7 +1729,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -2179,7 +2180,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -2996,7 +2997,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -3813,7 +3814,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -4630,7 +4631,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -5447,7 +5448,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -6264,7 +6265,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script:
     fileID: 11500000
-    guid: "4e29b1a8efbd4b44bb3f3716e73f07ff"
+    guid: "3b5d7f9a1c2e4a6b8d0f2a4c6e8b0d29"
     type: 3
   m_Name: ""
   m_EditorClassIdentifier: ""
@@ -6928,3 +6929,17 @@ MonoBehaviour:
     y: 0
     z: 0
     w: 0
+--- !u!114 &5310000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4057850160220871107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55da7deccf6e48cc9838786efbbe10c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UISpriteLocalMesh
+  image: {fileID: 3221680707500254421}
+  phase: 0
