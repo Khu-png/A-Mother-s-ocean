@@ -72,7 +72,7 @@ public class PathTrail
         SpriteRenderer renderer = view.AddComponent<SpriteRenderer>();
         renderer.sprite = GridVisual.RoundedSquareSprite();
         renderer.color = COLOR;
-        renderer.sortingOrder = 1;
+        renderer.sortingOrder = RenderOrder.PATH_TRAIL;
         PathMarkFeedback feedback = view.AddComponent<PathMarkFeedback>();
         feedback.Setup(renderer, COLOR, Vector3.one * (CELL_SIZE * TILE_INTERIOR_FRACTION));
         view.SetActive(false);

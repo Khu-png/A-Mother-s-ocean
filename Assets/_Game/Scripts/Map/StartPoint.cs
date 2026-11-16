@@ -15,7 +15,7 @@ public class StartPoint : MonoBehaviour
         transform.localPosition = localPosition;
 
         spriteRenderer.color = color;
-        spriteRenderer.sortingOrder = 0;
+        spriteRenderer.sortingOrder = RenderOrder.START_POINT;
     }
 
     public void ConfigureRenderer(SpriteRenderer setupRenderer)

@@ -65,6 +65,14 @@ public sealed class MenuCatalog : ScriptableObject
     public int HeartPrice => heartPrice;
     public MenuGiftReward[] GiftRewards => giftRewards;
     public string DefaultSkinId => skins[0].Id;
+    public MenuPowerUpOffer GetPowerUp(MenuPowerUpId id)
+    {
+        for (int i = 0; i < powerUps.Length; i++)
+        {
+            if (powerUps[i].Id == id) return powerUps[i];
+        }
+        throw new UnityException($"Power-up '{id}' is absent from the catalog.");
+    }
     public MenuSkinOffer GetSkin(string skinId)
     {
         for (int i = 0; i < skins.Length; i++)

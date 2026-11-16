@@ -64,7 +64,7 @@ public class TargetPoint : MonoBehaviour
         // Reuse the bob offset so each baby swims slightly out of step with the others.
         SpriteIdleWave.Bind(spriteRenderer, idleBlock, timeOffset * 2f);
         baseColor = color;
-        spriteRenderer.sortingOrder = 3;
+        spriteRenderer.sortingOrder = RenderOrder.TARGET_POINT;
         baseScale = cachedTransform.localScale;
         cachedTransform.localScale = baseScale;
         ResetTarget();

@@ -46,6 +46,7 @@ public class GameManager : Singleton<GameManager>
     {
         if (SoundManager.Ins == null) return;
         if (state == GameState.Gameplay) SoundManager.Ins.PlayMusic(GameConstants.GAMEPLAY_MUSIC);
+        else if (state == GameState.Win || state == GameState.Lose) SoundManager.Ins.StopMusic();
     }
 
     public static bool IsState(GameState state) => gameState == state;
@@ -106,7 +107,6 @@ public class GameManager : Singleton<GameManager>
     private void ShowWinResult()
     {
         UIManager.Ins.GetUI<Gameplay>().HideWinHud();
-        SoundManager.Ins.PlaySound(GameConstants.WIN_SOUND);
         UIManager.Ins.OpenUI<Win>();
     }
 }

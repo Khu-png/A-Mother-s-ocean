@@ -3,7 +3,6 @@ using UnityEngine;
 // Prewarmed ring buffer of bubbles; reusing the oldest bubble keeps bursts allocation-free.
 public sealed class BubbleBurst
 {
-    private const int SORTING_ORDER = 6;
     private readonly BubbleParticle[] BUBBLES;
     private readonly float CELL_SIZE;
     private int nextIndex;
@@ -61,7 +60,7 @@ public sealed class BubbleBurst
         view.transform.SetParent(root, false);
         SpriteRenderer renderer = view.AddComponent<SpriteRenderer>();
         renderer.sprite = GridVisual.CircleSprite();
-        renderer.sortingOrder = SORTING_ORDER;
+        renderer.sortingOrder = RenderOrder.EFFECT_BUBBLES;
         BubbleParticle bubble = view.AddComponent<BubbleParticle>();
         bubble.Setup(renderer);
         view.SetActive(false);

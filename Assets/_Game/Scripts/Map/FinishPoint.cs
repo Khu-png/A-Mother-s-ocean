@@ -31,7 +31,7 @@ public class FinishPoint : MonoBehaviour
         baseScale = transform.localScale;
 
         spriteRenderer.sprite = closedSprite;
-        spriteRenderer.sortingOrder = 2;
+        spriteRenderer.sortingOrder = RenderOrder.FINISH_POINT;
         SetOpen(false);
     }
 

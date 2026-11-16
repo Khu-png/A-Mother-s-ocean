@@ -82,9 +82,9 @@ public sealed class GameplayPowerUps : MonoBehaviour
     public void OnClickFreeze()
     {
         SoundManager.Ins.PlayButtonSound();
-        if (!CanUse(MenuPowerUpId.Freeze)) ShowNotice(freezeButton, "No freezes left!");
-        else if (LevelManager.Ins.IsTimeFrozen) ShowNotice(freezeButton, "Time is already frozen");
-        if (!CanUse(MenuPowerUpId.Freeze) || !LevelManager.Ins.CanActivateFreeze()) return;
+        if (OfferIfEmpty(MenuPowerUpId.Freeze, freezeButton, "No freezes left!")) return;
+        if (LevelManager.Ins.IsTimeFrozen) ShowNotice(freezeButton, "Time is already frozen");
+        if (!LevelManager.Ins.CanActivateFreeze()) return;
         SoundManager.Ins.PlaySound(GameConstants.FREEZE_SOUND);
         DisableButtons();
         freezeIntroRoutine = StartCoroutine(PlayFreezeIntro());
@@ -93,9 +93,9 @@ public sealed class GameplayPowerUps : MonoBehaviour
     public void OnClickHammer()
     {
         SoundManager.Ins.PlayButtonSound();
-        if (!CanUse(MenuPowerUpId.Hammer)) ShowNotice(hammerButton, "No hammers left!");
-        else if (!LevelManager.Ins.CurrentLevel.HasBlocks) ShowNotice(hammerButton, "No blocks to smash");
-        if (!CanUse(MenuPowerUpId.Hammer) || !LevelManager.Ins.BeginHammerSelection()) return;
+        if (OfferIfEmpty(MenuPowerUpId.Hammer, hammerButton, "No hammers left!")) return;
+        if (!LevelManager.Ins.CurrentLevel.HasBlocks) ShowNotice(hammerButton, "No blocks to smash");
+        if (!LevelManager.Ins.BeginHammerSelection()) return;
         hammerSelecting = true;
         ShowHammerTargets();
         DisableButtons();
@@ -211,6 +211,15 @@ public sealed class GameplayPowerUps : MonoBehaviour
     private void ShowNotice(Button button, string message)
     {
         notice.Show((RectTransform)button.transform, message);
+    }
+
+    // An empty power-up offers the shop's pack; the notice stays when the shop is closed.
+    private bool OfferIfEmpty(MenuPowerUpId id, Button button, string emptyMessage)
+    {
+        if (CanUse(id)) return false;
+        Gameplay gameplay = UIManager.Ins.GetUI<Gameplay>();
+        if (!gameplay.TryOfferPowerUp(id, RefreshButtons)) ShowNotice(button, emptyMessage);
+        return true;
     }
 
     private static bool CanUse(MenuPowerUpId id)

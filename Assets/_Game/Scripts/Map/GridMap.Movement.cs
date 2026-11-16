@@ -11,6 +11,11 @@ public partial class GridMap
 
     private void ReadMoveInput()
     {
+        if (tutorialInputLocked)
+        {
+            ReadTutorialTap();
+            return;
+        }
         // Moves are accepted while the mother or pipes are still animating:
         // MoveTo starts from her current position, so quick inputs chain without waiting.
         bool canMove = !LoadingManager.Ins.IsLoading

@@ -98,7 +98,7 @@ public static class GridVisual
         line.endColor = color;
         line.startWidth = lineWidth;
         line.endWidth = lineWidth;
-        line.sortingOrder = 0;
+        line.sortingOrder = RenderOrder.GRID_LINES;
         line.SetPosition(0, start);
         line.SetPosition(1, end);
     }

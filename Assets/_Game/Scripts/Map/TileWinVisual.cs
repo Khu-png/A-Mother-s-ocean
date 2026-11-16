@@ -25,6 +25,8 @@ public sealed class TileWinVisual : MonoBehaviour
 
     public void ConfigureBase(float cellSize, Vector3 tileScale)
     {
+        shadow.sortingOrder = RenderOrder.TILE_SHADOW;
+        depth.sortingOrder = RenderOrder.TILE_DEPTH;
         Vector2 spriteSize = baseTileSprite.bounds.size;
         baseTileScale = new Vector3(cellSize / (tileScale.x * spriteSize.x),
             cellSize / (tileScale.y * spriteSize.y), 1f);

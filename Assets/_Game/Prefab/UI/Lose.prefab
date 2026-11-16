@@ -557,6 +557,7 @@ MonoBehaviour:
   replayButton: {fileID: 7824738928311424434}
   titleText: {fileID: 2595576428833824458}
   replayLabel: {fileID: 8592907119488066596}
+  catalog: {fileID: 11400000, guid: 6eed56f9069419d41bea57929b29d96c, type: 2}
 --- !u!1 &7672765802745554226
 GameObject:
   m_ObjectHideFlags: 0

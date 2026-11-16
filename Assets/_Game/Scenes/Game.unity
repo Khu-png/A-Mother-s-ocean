@@ -1974,7 +1974,6 @@ MonoBehaviour:
   bubbleSprite: {fileID: 21300000, guid: 5242cfb638644c8e8803c032e86a6136, type: 3}
   count: 14
   planeZ: 0
-  sortingOrder: -50
   sizeRange: {x: 0.015, y: 0.04}
   speedRange: {x: 0.035, y: 0.08}
   wobble: 0.012

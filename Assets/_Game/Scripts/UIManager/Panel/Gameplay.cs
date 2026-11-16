@@ -7,6 +7,7 @@ public class Gameplay : UICanvas
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private SpriteRenderer oceanBackground;
+    [SerializeField] private LevelBackgroundSet backgrounds;
     [FormerlySerializedAs("tutorial")]
     [SerializeField] private GameObject tutorialRoot;
     [SerializeField] private GameplayTutorial tutorialController;
@@ -20,6 +21,8 @@ public class Gameplay : UICanvas
     [SerializeField, Min(0.01f)] private float targetCounterFlashDuration = 0.28f;
     [SerializeField] private float targetCounterFlashScale = 0.16f;
     private LevelManager levelManager;
+    private Sprite loadedBackground;
+    private string loadedBackgroundPath;
     private Vector3 targetCounterBaseScale;
     private Color targetCounterBaseColor;
     private float targetCounterFlashTimer;
@@ -54,7 +57,22 @@ public class Gameplay : UICanvas
     {
         base.Open();
         foreach (GameObject element in winHiddenElements) element.SetActive(true);
+        ApplyLevelBackground();
         RefreshTutorial();
+    }
+
+    // Only the current background stays in memory; Open runs behind the loading cover.
+    private void ApplyLevelBackground()
+    {
+        oceanBackground.sortingOrder = RenderOrder.BACKGROUND;
+        string path = backgrounds.PathForLevel(levelManager.CurrentLevelNumber);
+        if (path == loadedBackgroundPath) return;
+        Sprite next = Resources.Load<Sprite>(path);
+        if (next == null) throw new UnityException($"Background '{path}' is missing from Resources.");
+        oceanBackground.sprite = next;
+        if (loadedBackground != null) Resources.UnloadAsset(loadedBackground.texture);
+        loadedBackground = next;
+        loadedBackgroundPath = path;
     }
 
     public void HideWinHud()
@@ -149,6 +167,14 @@ public class Gameplay : UICanvas
         GameManager.ChangeState(GameState.Pause);
         tutorialController.Hide();
         lifeWarning.ShowRestart();
+    }
+
+    public bool TryOfferPowerUp(MenuPowerUpId id, System.Action onPurchased)
+    {
+        if (!lifeWarning.TryShowPowerUpPurchase(id, onPurchased)) return false;
+        GameManager.ChangeState(GameState.Pause);
+        tutorialController.Hide();
+        return true;
     }
 
     public void ShowMainMenuWarning()

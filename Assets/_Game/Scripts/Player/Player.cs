@@ -58,6 +58,8 @@ public class Player : MonoBehaviour
     void Awake()
     {
         cachedTransform = transform;
+        shadowRenderer.sortingOrder = RenderOrder.PLAYER_SHADOW;
+        spriteRenderer.sortingOrder = RenderOrder.PLAYER;
         baseShadowColor = shadowRenderer.color;
         ApplyEquippedSkin();
         baseSpriteColor = spriteRenderer.color;

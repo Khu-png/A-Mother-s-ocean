@@ -13,11 +13,13 @@ MonoBehaviour:
   m_Name: Level_2
   m_EditorClassIdentifier: 
   mapRows:
-  - SX.-.
-  - .XOX.
-  - .XTX.
-  - TX.XT
+  - SX...
   - .X.X.
-  - OX.X.
-  - E.CXF
-  timeLimitSeconds: 150
+  - .XTX.
+  - .X.XT
+  - TX.X.
+  - .X.X.
+  - ...XF
+  difficulty: 0
+  grantsGiftChest: 0
+  timeLimitSeconds: 60

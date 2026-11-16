@@ -13,20 +13,28 @@ public class Win : UICanvas
     [SerializeField] private TMP_Text walletText;
     [SerializeField] private ParticleImage[] confettiEffects;
     [Header("Coin Sound")]
-    [SerializeField, Min(0.01f)] private float coinTickInterval = 0.07f;
-    [SerializeField, Range(0f, 1f)] private float coinTickVolume = 0.7f;
-    [SerializeField, Range(0f, 1f)] private float coinPitchRise = 0.35f;
-    [SerializeField, Range(1f, 2f)] private float coinFinalPitch = 1.2f;
+    // One tick per coin; every coinsPerTier ticks the pitch steps up the scale.
+    [SerializeField, Min(1)] private int coinsPerTier = 10;
+    [SerializeField, Min(0.1f)] private float maxCountSeconds = 2f;
+    [SerializeField, Min(0.005f)] private float minTickInterval = 0.02f;
+    [SerializeField, Min(0.005f)] private float maxTickInterval = 0.06f;
+    [SerializeField, Range(0f, 1f)] private float coinTickVolume = 0.6f;
+    [Header("Firework Sync")]
+    // Attack time of each bang in Win.mp3; the confetti bursts fire on these beats.
+    [SerializeField] private float[] fireworkTimes = { 0.19f, 0.44f, 0.69f, 0.94f, 1.45f, 1.9f };
     private static readonly int INTRO_STATE = Animator.StringToHash("Intro");
     private static readonly int CLAIM_STATE = Animator.StringToHash("Claim");
     private bool readyToClaim;
     private bool claimed;
     private Coroutine sequence;
+    private Coroutine fireworks;
 
     void OnDisable()
     {
         if (sequence != null) StopCoroutine(sequence);
+        if (fireworks != null) StopCoroutine(fireworks);
         sequence = null;
+        fireworks = null;
         readyToClaim = false;
     }
 
@@ -44,6 +52,24 @@ public class Win : UICanvas
         walletText.text = MenuPlayerProgress.Coins.ToString();
         sequenceAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
         sequence = StartCoroutine(ShowReward());
+        fireworks = StartCoroutine(PlayFireworks());
+    }
+
+    // The sound starts with the screen, so each confetti burst is timed to a bang in it.
+    private IEnumerator PlayFireworks()
+    {
+        SoundManager.Ins.PlaySound(GameConstants.WIN_SOUND);
+        float elapsed = 0f;
+        for (int bang = 0; bang < fireworkTimes.Length; bang++)
+        {
+            while (elapsed < fireworkTimes[bang])
+            {
+                yield return null;
+                elapsed += Time.unscaledDeltaTime;
+            }
+            confettiEffects[bang % confettiEffects.Length].Play();
+        }
+        fireworks = null;
     }
 
     private IEnumerator ShowReward()
@@ -52,7 +78,6 @@ public class Win : UICanvas
         sequenceAnimator.Update(0f);
         do { yield return null; }
         while (sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
-        foreach (ParticleImage confettiEffect in confettiEffects) confettiEffect.Play();
         readyToClaim = true;
         claimButton.interactable = true;
         sequence = null;
@@ -73,34 +98,29 @@ public class Win : UICanvas
     private IEnumerator ShowClaim(int startingCoins, int finalCoins)
     {
         int reward = finalCoins - startingCoins;
-        int lastTickedCoins = startingCoins;
-        float nextTickTime = 0f;
+        float interval = Mathf.Clamp(maxCountSeconds / Mathf.Max(1, reward), minTickInterval, maxTickInterval);
+        int counted = 0;
+        float elapsed = 0f;
         sequenceAnimator.Play(CLAIM_STATE, 0, 0f);
         sequenceAnimator.Update(0f);
-        do
+        while (counted < reward || sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f)
         {
-            float progress = sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-            float coinProgress = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress / 0.7f));
-            int shownCoins = Mathf.RoundToInt(Mathf.Lerp(startingCoins, finalCoins, coinProgress));
-            walletText.text = shownCoins.ToString();
-            // Tick while the wallet counts up, rate-limited and rising in pitch.
-            if (shownCoins != lastTickedCoins && Time.unscaledTime >= nextTickTime)
-            {
-                lastTickedCoins = shownCoins;
-                nextTickTime = Time.unscaledTime + coinTickInterval;
-                float pitch = 1f + coinPitchRise * coinProgress;
-                SoundManager.Ins.PlaySound(GameConstants.COIN_SOUND, pitch, coinTickVolume);
-            }
-            int remainingReward = Mathf.RoundToInt(Mathf.Lerp(reward, 0, coinProgress));
-            rewardText.text = $"+{remainingReward}";
+            elapsed += Time.unscaledDeltaTime;
+            int due = Mathf.Min(reward, Mathf.FloorToInt(elapsed / interval));
+            // Every coin that enters the wallet gets its own tick, in step with the number.
+            for (; counted < due; counted++) PlayCoinTick(counted);
+            walletText.text = (startingCoins + counted).ToString();
+            rewardText.text = $"+{reward - counted}";
             yield return null;
         }
-        while (sequenceAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
-        walletText.text = finalCoins.ToString();
-        rewardText.text = "+0";
-        if (reward > 0) SoundManager.Ins.PlaySound(GameConstants.COIN_SOUND, coinFinalPitch, 1f);
         sequence = null;
         LevelManager.Ins.ContinueAfterWin();
+    }
+
+    private void PlayCoinTick(int coinIndex)
+    {
+        SoundManager.Ins.PlaySound(GameConstants.COIN_SOUND,
+            CoinBeatSound.Pitch(coinIndex / coinsPerTier), coinTickVolume);
     }
 
     public void OnClickReplay()

@@ -19,6 +19,19 @@ public class MapTile : MonoBehaviour
     public Vector2Int Cell => cell;
     public bool IsRotating => rotationRoutine != null;
     public Vector3 WorldPosition => cachedTransform.position;
+    public Sprite DisplaySprite => spriteRenderer.sprite;
+    public Color DisplayColor => spriteRenderer.color;
+    public float WorldRotation => spriteRenderer.transform.eulerAngles.z;
+
+    public Vector2 WorldSize
+    {
+        get
+        {
+            Vector3 spriteSize = spriteRenderer.sprite.bounds.size;
+            Vector3 scale = spriteRenderer.transform.lossyScale;
+            return new Vector2(spriteSize.x * Mathf.Abs(scale.x), spriteSize.y * Mathf.Abs(scale.y));
+        }
+    }
 
     public void BeginWinDetailFade()
     {
@@ -56,7 +69,7 @@ public class MapTile : MonoBehaviour
         cachedTransform.localEulerAngles = Vector3.zero;
         winVisual.ConfigureBase(cellSize, cachedTransform.localScale);
 
-        spriteRenderer.sortingOrder = -1;
+        spriteRenderer.sortingOrder = RenderOrder.TILE_FACE;
         spriteRenderer.color = color;
 
         labelTransform = label.transform;

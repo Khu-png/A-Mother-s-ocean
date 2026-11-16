@@ -9,7 +9,6 @@ public sealed class AmbientBubbles : MonoBehaviour
     [SerializeField] private Sprite bubbleSprite;
     [SerializeField, Range(1, 40)] private int count = 14;
     [SerializeField] private float planeZ = 0f;
-    [SerializeField] private int sortingOrder = -50;
     [SerializeField] private Vector2 sizeRange = new Vector2(0.015f, 0.04f);
     [SerializeField] private Vector2 speedRange = new Vector2(0.035f, 0.08f);
     [SerializeField, Min(0f)] private float wobble = 0.012f;
@@ -65,7 +64,7 @@ public sealed class AmbientBubbles : MonoBehaviour
         bubbles[index].SetParent(transform, false);
         renderers[index] = view.AddComponent<SpriteRenderer>();
         renderers[index].sprite = bubbleSprite;
-        renderers[index].sortingOrder = sortingOrder;
+        renderers[index].sortingOrder = RenderOrder.AMBIENT_BUBBLES;
     }
 
     private void Respawn(int index, float startHeight)
