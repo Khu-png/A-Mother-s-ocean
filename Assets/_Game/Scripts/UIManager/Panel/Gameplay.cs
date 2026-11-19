@@ -17,6 +17,7 @@ public class Gameplay : UICanvas
     [Header("Target Counter")]
     [SerializeField] private RectTransform targetCounterTransform;
     [SerializeField] private TextMeshProUGUI targetCounterText;
+    [SerializeField] private RectTransform targetCounterIcon;
     [SerializeField] private Color targetCounterFlashColor = new Color(1f, 0.78f, 0.2f, 1f);
     [SerializeField, Min(0.01f)] private float targetCounterFlashDuration = 0.28f;
     [SerializeField] private float targetCounterFlashScale = 0.16f;
@@ -32,6 +33,8 @@ public class Gameplay : UICanvas
     {
         if (oceanBackground != null && LevelManager.Ins != null)
             LevelManager.Ins.FitGameplayBackground(oceanBackground);
+        levelManager.CurrentLevel.TargetCounterScreenPosition =
+            RectTransformUtility.WorldToScreenPoint(null, targetCounterIcon.position);
         AnimateTargetCounter();
     }
 
@@ -39,6 +42,7 @@ public class Gameplay : UICanvas
     {
         levelManager = LevelManager.Ins;
         levelManager.TargetProgressChanged += RefreshTargetCounter;
+        levelManager.CurrentLevel.TargetDelivered += HandleTargetDelivered;
         levelManager.MissingTargetsBlocked += FlashTargetCounter;
         levelManager.TimeChanged += RefreshTimer;
         InitializeTargetCounter();
@@ -47,6 +51,7 @@ public class Gameplay : UICanvas
     void OnDisable()
     {
         if (levelManager != null) levelManager.TargetProgressChanged -= RefreshTargetCounter;
+        if (levelManager != null) levelManager.CurrentLevel.TargetDelivered -= HandleTargetDelivered;
         if (levelManager != null) levelManager.MissingTargetsBlocked -= FlashTargetCounter;
         if (levelManager != null) levelManager.TimeChanged -= RefreshTimer;
         ResetTargetCounter();
@@ -99,12 +104,19 @@ public class Gameplay : UICanvas
         ResetTargetCounter();
     }
 
+    // A rescued baby only counts once it reaches the panel (HandleTargetDelivered);
+    // undoing a rescue lowers the number straight away.
     private void RefreshTargetCounter(int collected, int total)
     {
-        targetCounterText.text = $"{collected}/{total}";
-        // Bump the counter each time another baby is rescued.
-        if (collected > displayedCollected) FlashTargetCounter();
-        displayedCollected = collected;
+        if (collected < displayedCollected) displayedCollected = collected;
+        targetCounterText.text = $"{displayedCollected}/{total}";
+    }
+
+    private void HandleTargetDelivered()
+    {
+        displayedCollected = Mathf.Min(displayedCollected + 1, levelManager.CollectedTargetCount);
+        targetCounterText.text = $"{displayedCollected}/{levelManager.TotalTargetCount}";
+        FlashTargetCounter();
     }
 
     private void FlashTargetCounter()

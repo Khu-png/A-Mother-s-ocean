@@ -46,6 +46,13 @@ public sealed class MapAiAnalysisResult
     public int SearchExpansions { get; set; }
     public int DecisionPoints { get; set; }
     public int NearWinDeadEndCount { get; set; }
+    // Dead ends over the whole search tree (rotation included), the longest one, and how
+    // few rotators the best solution can get away with stepping on.
+    // SolutionCount keeps counting after Paths is full, so ratios stay honest on open maps.
+    public int SolutionCount { get; set; }
+    public int DeadEndLeaves { get; set; }
+    public int DeepestDeadEnd { get; set; }
+    public int RotatorsOnSolution { get; set; }
     public int SuggestedSeconds { get; set; }
     public Vector2Int Start { get; set; }
     public Vector2Int Finish { get; set; }

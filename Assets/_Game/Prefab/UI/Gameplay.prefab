@@ -4745,6 +4745,7 @@ MonoBehaviour:
   timeWarning: {fileID: 980001005}
   targetCounterTransform: {fileID: 920000001}
   targetCounterText: {fileID: 920000023}
+  targetCounterIcon: {fileID: 920000011}
   targetCounterFlashColor: {r: 1, g: 0.78, b: 0.2, a: 1}
   targetCounterFlashDuration: 0.28
   targetCounterFlashScale: 0.16

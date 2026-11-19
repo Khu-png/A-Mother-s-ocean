@@ -35,8 +35,8 @@ public static class MapAiPathSearch
         result.SearchExpansions++;
         if (current == result.Finish && collectedTargets.Count == targetCount)
         {
-            if (result.Paths.Count < budget.MaximumPaths)
-                result.Paths.Add(new List<Vector2Int>(path));
+            result.SolutionCount++;
+            if (result.Paths.Count < budget.MaximumPaths) RecordSolution(map, result, path);
             else result.SearchLimited = true;
             return true;
         }
@@ -62,10 +62,25 @@ public static class MapAiPathSearch
             visited[next.x, next.y] = false;
             if (!shouldContinue) return false;
         }
-        if (!hasAvailableMove && collectedTargets.Count > 0
-            && collectedTargets.Count == targetCount - 1)
+        if (hasAvailableMove) return true;
+        result.DeadEndLeaves++;
+        result.DeepestDeadEnd = Mathf.Max(result.DeepestDeadEnd, path.Count - 1);
+        if (collectedTargets.Count > 0 && collectedTargets.Count == targetCount - 1)
             RecordNearWinDeadEnd(result, path);
         return true;
+    }
+
+    private static void RecordSolution(MapAiMapData map, MapAiAnalysisResult result,
+        List<Vector2Int> path)
+    {
+        int rotators = 0;
+        foreach (Vector2Int cell in path)
+        {
+            if (map.GetCell(cell) == 'O') rotators++;
+        }
+        result.RotatorsOnSolution = result.Paths.Count == 0
+            ? rotators : Mathf.Min(result.RotatorsOnSolution, rotators);
+        result.Paths.Add(new List<Vector2Int>(path));
     }
 
     private static void RecordNearWinDeadEnd(MapAiAnalysisResult result,

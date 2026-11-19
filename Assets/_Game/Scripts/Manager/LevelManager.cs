@@ -8,6 +8,7 @@ public class LevelManager : Singleton<LevelManager>
     [SerializeField] private LevelData[] levels;
     [SerializeField] private GridMap levelMap;
     [SerializeField] private CameraController cameraController;
+    [SerializeField] private LevelDifficultyConfig difficultyConfig;
     private int currentLevelIndex;
     private GridMap currentLevel;
     private float remainingTime;
@@ -170,12 +171,12 @@ public class LevelManager : Singleton<LevelManager>
         GameManager.Ins.OnFinish();
     }
 
-    public int PendingWinCoins => levels[currentLevelIndex].CompletionCoinReward;
+    public int PendingWinCoins => difficultyConfig.GetCoinReward(CurrentLevelNumber);
 
     public void ClaimWinReward()
     {
         LevelData completedLevel = levels[currentLevelIndex];
-        MenuPlayerProgress.GrantCompletionCoins(completedLevel.CompletionCoinReward);
+        MenuPlayerProgress.GrantCompletionCoins(PendingWinCoins);
         if (completedLevel.GrantsGiftChest) MenuPlayerProgress.GrantChestForLevel(CurrentLevelNumber);
         int nextIndex = currentLevelIndex + 1;
         if (HasLevelData(nextIndex)) PlayerPrefs.SetInt(CurrentLevelKey, nextIndex + 1);

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public partial class GridMap
 {
-    private const int BUBBLE_CAPACITY = 32;
+    private const int BUBBLE_CAPACITY = 48;
     private static readonly Vector2Int[] MOVE_DIRECTIONS =
     {
         Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
@@ -14,6 +14,9 @@ public partial class GridMap
     private readonly ScalePulse motherPulse = new ScalePulse();
     private BubbleBurst bubbles;
     private System.Action<TargetPoint> targetArrivedHandler;
+    public event System.Action TargetDelivered;
+    // Screen position of the baby-counter icon; the HUD keeps it current every frame.
+    public Vector2 TargetCounterScreenPosition { get; set; }
     private float hitStopRestoreTimeScale = 1f;
     private float tileBubbleTimer;
     private bool isHitStopping;
@@ -61,13 +64,28 @@ public partial class GridMap
         player.SetRootScale(motherPulse.Factor);
     }
 
-    // The baby has dived into the mother: bubbles burst and the mother swells to catch it.
-    private void HandleTargetArrived(TargetPoint target)
+    // The mother frees the baby: bubbles burst and it swims off to the target panel.
+    private void CollectTarget(TargetPoint target)
     {
         bubbles.Play(CellToLocalPosition(target.Cell), feedback.RescueBubbleCount,
             feedback.RescueBubbleSpread, feedback.BubbleSize, feedback.BubbleColor);
-        motherPulse.Play(feedback.PulseDuration, feedback.MotherCatchPulse);
+        target.Collect(targetArrivedHandler,
+            cameraController.ScreenToWorld(TargetCounterScreenPosition, runtimeRoot.position.z),
+            EmitTargetTrail);
+    }
+
+    // A small bubble left behind the swimming baby.
+    private void EmitTargetTrail(Vector3 worldPosition)
+    {
+        bubbles.Play(runtimeRoot.InverseTransformPoint(worldPosition), 1,
+            feedback.RescueBubbleSpread * 0.35f, feedback.BubbleSize * 0.7f, feedback.BubbleColor);
+    }
+
+    // The baby reached the panel: the counter counts it and bumps.
+    private void HandleTargetArrived(TargetPoint target)
+    {
         feedback.Vibrate();
+        TargetDelivered?.Invoke();
     }
 
     private void PlayFinishOpened()

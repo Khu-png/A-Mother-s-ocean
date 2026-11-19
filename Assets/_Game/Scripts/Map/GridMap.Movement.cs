@@ -134,7 +134,7 @@ public partial class GridMap
     private void MarkCurrentCell()
     {
         pathTrail.Mark(playerCell, CellToLocalPosition(playerCell));
-        if (targets.ContainsKey(playerCell)) targets[playerCell].Collect(targetArrivedHandler);
+        if (targets.ContainsKey(playerCell)) CollectTarget(targets[playerCell]);
         NotifyTargetProgress();
     }
 

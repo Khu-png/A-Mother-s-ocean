@@ -17,6 +17,7 @@ public enum MapAiEditorCommand
 [Serializable]
 public sealed class MapAiControlPanel
 {
+    private const int SAMPLE_COUNT = 5;
     private static readonly string[] BRUSH_NAMES =
     {
         "Trống", "Bắt đầu", "Đích", "Cá con", "Đá", "Xoay",
@@ -31,20 +32,18 @@ public sealed class MapAiControlPanel
     [SerializeField] private Vector2 scroll;
     [SerializeField] private int selectedBrush;
     [SerializeField] private bool lockMode;
-    [SerializeField] private bool reproducibility;
     [SerializeField] private bool contentSettings = true;
     [SerializeField] private bool showLevelSave;
     [SerializeField] private LevelManager levelManager;
     [SerializeField] private int levelNumber = 1;
     [SerializeField] private int timeLimitSeconds = 120;
-    [SerializeField, Range(2, 10)] private int sampleCount = 5;
 
     public char? BrushCode => selectedBrush < 0 ? (char?)null : BRUSH_CODES[selectedBrush];
     public bool LockMode => lockMode;
     public LevelManager LevelManager => levelManager;
     public int LevelNumber => levelNumber;
     public int TimeLimitSeconds { get => timeLimitSeconds; set => timeLimitSeconds = value; }
-    public int SampleCount => sampleCount;
+    public int SampleCount => SAMPLE_COUNT;
 
     public MapAiEditorCommand Draw(Rect area, MapAiGenerationSettings settings,
         bool hasPreview, bool canApplyPreview, int previewIndex,
@@ -66,23 +65,15 @@ public sealed class MapAiControlPanel
             settings.Difficulty = difficulty;
             settings.ApplyPreset();
         }
-        MapAiPuzzleFocus focus = (MapAiPuzzleFocus)EditorGUILayout.IntPopup(
-            "Trọng tâm câu đố", (int)settings.PuzzleFocus,
-            new[] { "Thứ tự cứu cá con", "Thời điểm xoay", "Xoay toàn cục" },
-            new[] { 0, 1, 2 });
-        if (focus != settings.PuzzleFocus)
-        {
-            settings.PuzzleFocus = focus;
-            settings.ApplyPreset();
-        }
         DrawContentSettings(settings);
 
         if (GUILayout.Button("Đổi kích thước lưới")) command = MapAiEditorCommand.Resize;
-        sampleCount = EditorGUILayout.IntSlider("Số bản đồ khác nhau", sampleCount, 2, 10);
-        reproducibility = EditorGUILayout.Foldout(reproducibility, "Tái tạo kết quả", true);
-        if (reproducibility) settings.Seed = EditorGUILayout.IntField("Hạt giống", settings.Seed);
         if (GUILayout.Button("Tạo bản đồ mẫu", GUILayout.Height(28f)))
+        {
+            // A fresh seed on every press, so each press gives different maps.
+            settings.Seed = Environment.TickCount;
             command = MapAiEditorCommand.Generate;
+        }
 
         if (hasPreview)
         {
@@ -117,17 +108,24 @@ public sealed class MapAiControlPanel
         int maximumTargets = Mathf.Max(0, settings.Columns * settings.Rows - 2);
         settings.TargetCount = EditorGUILayout.IntSlider(
             "Số cá con", settings.TargetCount, 0, maximumTargets);
-        settings.RockRatio = EditorGUILayout.Slider(
-            "Tỷ lệ đá", settings.RockRatio, 0f, 0.75f);
-        settings.RotateRatio = EditorGUILayout.Slider(
-            "Tỷ lệ ô xoay", settings.RotateRatio, 0f, 0.5f);
-        settings.StraightOneWayRatio = EditorGUILayout.Slider(
-            "Tỷ lệ ống thẳng một chiều", settings.StraightOneWayRatio, 0f, 0.5f);
-        settings.CornerOneWayRatio = EditorGUILayout.Slider(
-            "Tỷ lệ ống góc một chiều", settings.CornerOneWayRatio, 0f, 0.5f);
-        settings.ExtraConnectionChance = EditorGUILayout.Slider(
-            "Tỷ lệ mở thêm lối", settings.ExtraConnectionChance, 0f, 0.5f);
-        if (GUILayout.Button("Áp dụng thiết lập độ khó")) settings.ApplyPreset();
+        settings.HasRocks = EditorGUILayout.ToggleLeft("Có ô đá", settings.HasRocks);
+        if (settings.HasRocks) settings.RockRatio = RatioField("Tỷ lệ đá", settings.RockRatio, 0.75f);
+        settings.HasOneWay = EditorGUILayout.ToggleLeft("Có ô một chiều", settings.HasOneWay);
+        if (settings.HasOneWay)
+        {
+            settings.StraightOneWayRatio = RatioField("Tỷ lệ ống thẳng", settings.StraightOneWayRatio, 0.5f);
+            settings.CornerOneWayRatio = RatioField("Tỷ lệ ống góc", settings.CornerOneWayRatio, 0.5f);
+        }
+        settings.HasRotate = EditorGUILayout.ToggleLeft("Có ô đổi chiều", settings.HasRotate);
+        if (settings.HasRotate) settings.RotateRatio = RatioField("Tỷ lệ ô đổi chiều", settings.RotateRatio, 0.5f);
+    }
+
+    private static float RatioField(string label, float value, float maximum)
+    {
+        EditorGUI.indentLevel++;
+        float result = EditorGUILayout.Slider(label, value, 0f, maximum);
+        EditorGUI.indentLevel--;
+        return result;
     }
 
     private static void DrawPreviewNavigation(int previewIndex, int previewCount,

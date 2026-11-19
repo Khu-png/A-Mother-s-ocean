@@ -4,7 +4,7 @@ using UnityEngine;
 
 public sealed class MapAiEditorWindow : EditorWindow
 {
-    private const float LEFT_WIDTH = 260f;
+    private const float LEFT_WIDTH = 320f;
     private const float RIGHT_WIDTH = 310f;
     private const float GAP = 4f;
     [SerializeField] private LevelData levelData;
@@ -58,7 +58,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         string[] displayedRows = hasPreview ? previewRows : document.ToRows();
         if (viewport.Draw(center, document, displayedRows, hasPreview,
             controls.BrushCode, controls.LockMode, overlay, this)) AnalyzeCurrent();
-        if (analysisPanel.Draw(right, displayedAnalysis)) RequestAiProposal();
+        if (analysisPanel.Draw(right, displayedAnalysis, displayedRows, generation)) RequestAiProposal();
     }
     private void DrawToolbar()
     {
@@ -86,7 +86,7 @@ public sealed class MapAiEditorWindow : EditorWindow
         else if (command == MapAiEditorCommand.DiscardPreview) DiscardPreview();
         else if (command == MapAiEditorCommand.CreateLevel) status = MapLevelRegistration.Create(
             controls.LevelManager, controls.LevelNumber, document.ToRows(),
-            (LevelDifficulty)generation.Difficulty, controls.TimeLimitSeconds, out levelData);
+            controls.TimeLimitSeconds, out levelData);
         else if (command == MapAiEditorCommand.PreviousPreview) SelectAdjacentPreview(-1);
         else if (command == MapAiEditorCommand.NextPreview) SelectAdjacentPreview(1);
     }
@@ -165,7 +165,6 @@ public sealed class MapAiEditorWindow : EditorWindow
         }
         Undo.RecordObject(this, "Mở dữ liệu màn chơi");
         document.Replace(levelData.MapRows);
-        generation.Difficulty = (MapAiDifficulty)levelData.Difficulty;
         controls.TimeLimitSeconds = levelData.TimeLimitSeconds;
         generation.Columns = document.Width;
         generation.Rows = document.Height;
@@ -177,7 +176,6 @@ public sealed class MapAiEditorWindow : EditorWindow
     {
         Undo.RecordObject(levelData, "Lưu bố cục bản đồ");
         levelData.SetMapRows(document.ToRows());
-        levelData.SetDifficulty((LevelDifficulty)generation.Difficulty);
         levelData.SetTimeLimit(controls.TimeLimitSeconds);
         EditorUtility.SetDirty(levelData);
         AssetDatabase.SaveAssets();
@@ -189,14 +187,13 @@ public sealed class MapAiEditorWindow : EditorWindow
         string path = EditorUtility.SaveFilePanelInProject("Lưu dữ liệu màn chơi",
             "Level_AI", "asset", "Chọn vị trí lưu dữ liệu màn chơi trong dự án.");
         if (path == string.Empty) return;
+        MapLevelRegistration.ValidateSlot(controls.LevelManager, controls.LevelNumber);
         LevelData asset = CreateInstance<LevelData>();
         asset.SetMapRows(document.ToRows());
-        asset.SetDifficulty((LevelDifficulty)generation.Difficulty);
         asset.SetTimeLimit(controls.TimeLimitSeconds);
         AssetDatabase.CreateAsset(asset, path);
-        AssetDatabase.SaveAssets();
         levelData = asset;
-        status = $"Đã tạo {path}";
+        status = MapLevelRegistration.Register(controls.LevelManager, controls.LevelNumber, asset);
     }
 
     private void RequestAiProposal()

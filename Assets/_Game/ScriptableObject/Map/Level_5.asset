@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: Level_5
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   mapRows:
-  - F|B...
-  - .E-.--
-  - O.ETOX
-  - .X.X.X
-  - S....|
-  - XXXXO.
+  - .XT.T.
+  - .S.X..
+  - T.C.TA
+  - C.X...
+  - .C..CF
   grantsGiftChest: 0
   timeLimitSeconds: 120

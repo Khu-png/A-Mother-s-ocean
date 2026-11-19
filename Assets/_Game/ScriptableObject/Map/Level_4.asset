@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: Level_4
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   mapRows:
-  - S....
-  - .T...
-  - .....
-  - ...T.
-  - ....F
-  difficulty: 0
+  - ..T.S.
+  - X.T.X.
+  - .T..T.
+  - .X.T.X
+  - .F.T..
   grantsGiftChest: 0
   timeLimitSeconds: 150

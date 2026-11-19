@@ -3,8 +3,8 @@ using UnityEngine;
 
 public static class MapAiGenerator
 {
-    public const int VERSION = 4;
-    private const int MAX_ATTEMPTS = 8;
+    public const int VERSION = 6;
+    private const int MAX_ATTEMPTS = 16;
 
     public static MapAiGenerationResult Generate(MapAiMapData current,
         bool[] locks, MapAiGenerationSettings settings)
@@ -31,6 +31,8 @@ public static class MapAiGenerator
                 settings, random, out lastIssue)) continue;
 
             string[] candidateRows = MapAiTopologyGenerator.ToRows(cells);
+            lastIssue = MapAiLayoutRules.HardIssue(candidateRows);
+            if (lastIssue != string.Empty) continue;
             MapAiAnalysisResult analysis = MapAiAnalyzer.Analyze(
                 new MapAiMapData(candidateRows), settings.SearchBudget, settings.Difficulty);
             if (!analysis.IsValid || !analysis.CanComplete)
@@ -40,7 +42,15 @@ public static class MapAiGenerator
                     : "Map sinh ra không có tuyến hoàn thành hợp lệ.";
                 continue;
             }
-            int score = ScoreCandidate(analysis, settings.Difficulty);
+            MapAiRotationMetrics rotation = MapAiRotationPuzzle.Measure(
+                candidateRows, settings.SearchBudget, settings.Difficulty, analysis);
+            if (settings.HasRotate && !rotation.RequiresRotation)
+            {
+                lastIssue = "Ô đổi chiều không ảnh hưởng tới lời giải.";
+                continue;
+            }
+            int score = ScoreCandidate(analysis, settings.Difficulty, candidateRows)
+                + MapAiRotationPuzzle.Bonus(rotation);
             if (foundCandidate && score <= bestScore) continue;
             foundCandidate = true;
             bestScore = score;
@@ -161,17 +171,14 @@ public static class MapAiGenerator
         return 'A';
     }
 
+    // Closer to the tier's difficulty band is better; ugly layouts cost points.
     private static int ScoreCandidate(MapAiAnalysisResult analysis,
-        MapAiDifficulty difficulty)
+        MapAiDifficulty difficulty, string[] rows)
     {
-        int complexity = analysis.DecisionPoints * 4
-            + Mathf.Min(analysis.NearWinDeadEndCount, 4) * 8
-            + Mathf.Min(analysis.CompletionPath.Count / 3, 6);
-        int ideal = difficulty == MapAiDifficulty.Easy ? 5
-            : difficulty == MapAiDifficulty.Hard ? 18 : 30;
-        int score = -Mathf.Abs(complexity - ideal);
-        if (difficulty != MapAiDifficulty.Easy)
-            score -= Mathf.Min(Mathf.Max(0, analysis.Paths.Count - 1), 10) * 2;
+        float difficultyScore = MapAiDifficultyProfile.Score(
+            MapAiDifficultyProfile.Measure(analysis)).Total;
+        int score = -Mathf.RoundToInt(MapAiDifficultyProfile.Distance(difficultyScore, difficulty))
+            - MapAiLayoutRules.Penalty(rows, analysis, difficulty);
         if (analysis.SearchLimited) score--;
         return score;
     }

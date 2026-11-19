@@ -17,7 +17,6 @@ public class MapBuilderWindow : EditorWindow
     private int selectedBrush;
     private int width = 6;
     private int height = 5;
-    private LevelDifficulty difficulty;
     private int timeLimitSeconds = 120;
     private bool createLevel;
     private int levelNumber = 1;
@@ -116,7 +115,6 @@ public class MapBuilderWindow : EditorWindow
         }
 
         createLevel = EditorGUILayout.Toggle("Create this as level", createLevel);
-        difficulty = (LevelDifficulty)EditorGUILayout.EnumPopup("Difficulty", difficulty);
         timeLimitSeconds = Mathf.Max(1, EditorGUILayout.IntField("Time (seconds)", timeLimitSeconds));
         using (new EditorGUI.DisabledScope(!createLevel)) levelNumber = EditorGUILayout.IntField("Which Level", levelNumber);
         using (new EditorGUI.DisabledScope(!createLevel || EditorApplication.isPlaying))
@@ -139,7 +137,6 @@ public class MapBuilderWindow : EditorWindow
     private void LoadFromLevelData()
     {
         grid.LoadRows(levelData.MapRows);
-        difficulty = levelData.Difficulty;
         timeLimitSeconds = levelData.TimeLimitSeconds;
         width = grid.Width;
         height = grid.Height;
@@ -149,7 +146,6 @@ public class MapBuilderWindow : EditorWindow
     {
         Undo.RecordObject(levelData, "Apply Map Layout");
         levelData.SetMapRows(grid.ToRows());
-        levelData.SetDifficulty(difficulty);
         levelData.SetTimeLimit(timeLimitSeconds);
         EditorUtility.SetDirty(levelData);
         AssetDatabase.SaveAssets();
@@ -160,7 +156,7 @@ public class MapBuilderWindow : EditorWindow
     {
         saveMessage = string.Empty;
         saveMessage = MapLevelRegistration.Create(levelManager, levelNumber,
-            grid.ToRows(), difficulty, timeLimitSeconds, out levelData);
+            grid.ToRows(), timeLimitSeconds, out levelData);
     }
 
     private string CellLabel(char code)

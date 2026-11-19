@@ -28,13 +28,16 @@ public sealed class MapAiAnalysisPanel
     [SerializeField] private int selectedBranch = -1;
     [SerializeField] private int selectedPath = -1;
     [SerializeField] private string aiRequest = string.Empty;
+    [SerializeField] private string feedbackReason = string.Empty;
+    [SerializeField] private string feedbackStatus = string.Empty;
 
     public MapAiOverlayMode OverlayMode => overlayMode;
     public int SelectedBranch => selectedBranch;
     public int SelectedPath => selectedPath;
     public string AiRequest => aiRequest;
 
-    public bool Draw(Rect area, MapAiAnalysisResult result)
+    public bool Draw(Rect area, MapAiAnalysisResult result, string[] rows,
+        MapAiGenerationSettings settings)
     {
         bool requestAi = false;
         GUILayout.BeginArea(area, EditorStyles.helpBox);
@@ -43,6 +46,7 @@ public sealed class MapAiAnalysisPanel
         DrawOverlays();
         DrawPaths(result);
         DrawBranches(result);
+        DrawFeedback(result, rows, settings);
         requestAi = DrawAiSection();
         EditorGUILayout.EndScrollView();
         GUILayout.EndArea();
@@ -59,6 +63,7 @@ public sealed class MapAiAnalysisPanel
         EditorGUILayout.LabelField("Số lời giải hoàn chỉnh", result.Paths.Count.ToString());
         EditorGUILayout.LabelField("Điểm lựa chọn", result.DecisionPoints.ToString());
         EditorGUILayout.LabelField("Số nhánh cụt", result.DeadEnds.Count.ToString());
+        DrawDifficultyScore(result);
         EditorGUILayout.LabelField("Mồi nhử gần F (ước lượng hình học)",
             result.MisleadingCount.ToString());
         EditorGUILayout.LabelField("Lối bế tắc sau khi lấy gần hết target",
@@ -73,6 +78,33 @@ public sealed class MapAiAnalysisPanel
                 MessageType.Warning);
         for (int i = 0; i < result.Issues.Count; i++)
             EditorGUILayout.HelpBox(result.Issues[i], MessageType.Error);
+    }
+
+    // The 0-100 difficulty score with the five parts it is made of.
+    private static void DrawDifficultyScore(MapAiAnalysisResult result)
+    {
+        if (!result.CanComplete) return;
+        MapAiDifficultyScore score = MapAiDifficultyProfile.Score(MapAiDifficultyProfile.Measure(result));
+        MapAiDifficulty tier = MapAiDifficultyProfile.Classify(score.Total);
+        EditorGUILayout.Space(4f);
+        EditorGUILayout.LabelField("Điểm độ khó", $"{Mathf.RoundToInt(score.Total)}  ({TierName(tier)})",
+            EditorStyles.boldLabel);
+        DrawScorePart("  Ngõ cụt mỗi lời giải", score.Traps, MapAiDifficultyProfile.TRAPS_MAX);
+        DrawScorePart("  Bẫy sâu", score.Depth, MapAiDifficultyProfile.DEPTH_MAX);
+        DrawScorePart("  Ít lời giải", score.Uniqueness, MapAiDifficultyProfile.UNIQUENESS_MAX);
+        DrawScorePart("  Ô đổi chiều bắt buộc", score.Rotation, MapAiDifficultyProfile.ROTATION_MAX);
+        DrawScorePart("  Độ dài tuyến", score.Length, MapAiDifficultyProfile.LENGTH_MAX);
+        EditorGUILayout.LabelField("  Dễ dưới 50, Khó 50 đến 74, Siêu khó từ 75", EditorStyles.miniLabel);
+    }
+
+    private static void DrawScorePart(string label, float points, float maximum)
+    {
+        EditorGUILayout.LabelField(label, $"{Mathf.RoundToInt(points)} / {Mathf.RoundToInt(maximum)}");
+    }
+
+    private static string TierName(MapAiDifficulty tier)
+    {
+        return tier == MapAiDifficulty.Easy ? "Dễ" : tier == MapAiDifficulty.Hard ? "Khó" : "Siêu khó";
     }
 
     private void DrawOverlays()
@@ -154,14 +186,40 @@ public sealed class MapAiAnalysisPanel
             MessageType.Info);
     }
 
-    private bool DrawAiSection()
+    // Rates the map on screen with a free-text reason and logs it for tuning the generator.
+    private void DrawFeedback(MapAiAnalysisResult result, string[] rows,
+        MapAiGenerationSettings settings)
     {
         EditorGUILayout.Space(8f);
-        EditorGUILayout.LabelField("Tích hợp AI", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Phản hồi cho AI", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Vì sao tốt hoặc xấu? (viết tự do)");
+        feedbackReason = EditorGUILayout.TextArea(feedbackReason, GUILayout.MinHeight(54f));
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Map tốt")) SaveFeedback(1, result, rows, settings);
+        if (GUILayout.Button("Map xấu")) SaveFeedback(-1, result, rows, settings);
+        EditorGUILayout.EndHorizontal();
+        if (feedbackStatus != string.Empty) EditorGUILayout.HelpBox(feedbackStatus, MessageType.None);
+    }
+
+    private void SaveFeedback(int rating, MapAiAnalysisResult result, string[] rows,
+        MapAiGenerationSettings settings)
+    {
+        MapAiFeedbackVote vote = new MapAiFeedbackVote { Rating = rating, Reason = feedbackReason.Trim() };
+        feedbackStatus = MapAiFeedbackLog.Save(vote, rows, settings, result);
+        feedbackReason = string.Empty;
+    }
+
+    // Shown only once an AI provider is registered; with none connected there is nothing to ask.
+    private bool DrawAiSection()
+    {
         IMapAiEditorProvider provider = MapAiProviderRegistry.Provider;
-        EditorGUILayout.LabelField("Nhà cung cấp", provider == null ? "Chưa cấu hình" : provider.DisplayName);
+        if (provider == null) return false;
+
+        EditorGUILayout.Space(8f);
+        EditorGUILayout.LabelField("Tích hợp AI", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Nhà cung cấp", provider.DisplayName);
         aiRequest = EditorGUILayout.TextArea(aiRequest, GUILayout.MinHeight(54f));
-        using (new EditorGUI.DisabledScope(provider == null || aiRequest.Trim().Length == 0))
+        using (new EditorGUI.DisabledScope(aiRequest.Trim().Length == 0))
         {
             return GUILayout.Button("Yêu cầu AI đề xuất");
         }

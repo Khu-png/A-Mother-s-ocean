@@ -23,8 +23,14 @@ public sealed class MapAiGenerationSettings
     public int Rows = 5;
     public int Seed = 12345;
     public MapAiDifficulty Difficulty = MapAiDifficulty.Easy;
-    public MapAiPuzzleFocus PuzzleFocus = MapAiPuzzleFocus.TargetOrder;
+    // No picker in the panel: maps with rotation tiles are built so rotating the pipes matters.
+    public MapAiPuzzleFocus PuzzleFocus =>
+        HasRotate ? MapAiPuzzleFocus.RotationTiming : MapAiPuzzleFocus.TargetOrder;
     [Min(0)] public int TargetCount = 2;
+    // A feature that is switched off is generated with ratio 0, whatever its slider says.
+    public bool HasRocks = true;
+    public bool HasOneWay = true;
+    public bool HasRotate = true;
     [Range(0f, 0.75f)] public float RockRatio = 0.25f;
     [Range(0f, 0.5f)] public float RotateRatio = 0.03f;
     [Range(0f, 0.5f)] public float StraightOneWayRatio = 0.05f;
@@ -48,12 +54,14 @@ public sealed class MapAiGenerationSettings
             Rows = Rows,
             Seed = seed,
             Difficulty = Difficulty,
-            PuzzleFocus = PuzzleFocus,
             TargetCount = TargetCount,
-            RockRatio = RockRatio,
-            RotateRatio = RotateRatio,
-            StraightOneWayRatio = StraightOneWayRatio,
-            CornerOneWayRatio = CornerOneWayRatio,
+            HasRocks = HasRocks,
+            HasOneWay = HasOneWay,
+            HasRotate = HasRotate,
+            RockRatio = HasRocks ? RockRatio : 0f,
+            RotateRatio = HasRotate ? RotateRatio : 0f,
+            StraightOneWayRatio = HasOneWay ? StraightOneWayRatio : 0f,
+            CornerOneWayRatio = HasOneWay ? CornerOneWayRatio : 0f,
             ExtraConnectionChance = ExtraConnectionChance,
             SearchBudget = new MapAiSearchBudget
             {
