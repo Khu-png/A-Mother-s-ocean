@@ -26,7 +26,7 @@ public sealed class GameplayFeedback
     [SerializeField, Min(1)] private int finishBubbleCount = 12;
     [SerializeField, Min(0f)] private float rescueBubbleSpread = 1.6f;
     [SerializeField, Min(0f)] private float winBubbleSpread = 2.4f;
-    [SerializeField, Min(0.01f)] private float bubbleSize = 0.14f;
+    [SerializeField, Min(0.01f)] private float bubbleSize = 0.19f;
 
     [Header("Rotate Swirl")]
     [SerializeField, Min(1)] private int swirlBubbleCount = 10;

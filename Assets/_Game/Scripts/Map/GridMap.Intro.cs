@@ -51,6 +51,7 @@ public partial class GridMap
         startPoint.ApplyEntranceScale(factor);
         finishPoint.ApplyEntranceScale(factor);
         foreach (TargetPoint target in targets.Values) target.ApplyEntranceScale(factor);
+        foreach (IceCover ice in iceCovers.Values) ice.ApplyEntranceScale(factor);
         player.SetRootScale(factor);
     }
 }

@@ -10,7 +10,7 @@ public static class MapAiPathSearch
         bool[,] visited = new bool[map.Width, map.Height];
         List<Vector2Int> path = new List<Vector2Int> { result.Start };
         HashSet<Vector2Int> collectedTargets = new HashSet<Vector2Int>();
-        List<Vector2Int> targets = map.Find('T');
+        List<Vector2Int> targets = map.FindTargets();
         visited[result.Start.x, result.Start.y] = true;
         Search(map, budget, result, result.Start, visited, path,
             collectedTargets, targets.Count, 0);
@@ -48,10 +48,11 @@ public static class MapAiPathSearch
             if (!map.Contains(next) || visited[next.x, next.y]
                 || !MapAiMovementGraph.CanMove(map, current, next, rotationPhase)) continue;
             if (next == result.Finish && collectedTargets.Count < targetCount) continue;
+            if (map.IsFrozenAt(next, collectedTargets.Count)) continue;
             hasAvailableMove = true;
             visited[next.x, next.y] = true;
             path.Add(next);
-            bool collectedTarget = map.GetCell(next) == 'T'
+            bool collectedTarget = MapCode.IsTarget(map.GetCell(next))
                 && collectedTargets.Add(next);
             int nextRotationPhase = map.GetCell(next) == 'O'
                 ? (rotationPhase + 1) % 4 : rotationPhase;
@@ -114,7 +115,7 @@ public static class MapAiPathSearch
         {
             Vector2Int current = route[i];
             visited[current.x, current.y] = true;
-            if (map.GetCell(current) == 'T') collected.Add(current);
+            if (MapCode.IsTarget(map.GetCell(current))) collected.Add(current);
             int alternatives = CountAvailableMoves(map, current, visited,
                 rotationPhase, collected.Count, targets.Count, finish);
             if (alternatives > 1) decisions++;
@@ -135,6 +136,7 @@ public static class MapAiPathSearch
             if (!map.Contains(next) || visited[next.x, next.y]
                 || !MapAiMovementGraph.CanMove(map, current, next, rotationPhase)) continue;
             if (next == finish && collectedTargets < targetCount) continue;
+            if (map.IsFrozenAt(next, collectedTargets)) continue;
             count++;
         }
         return count;

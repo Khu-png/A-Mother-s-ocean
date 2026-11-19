@@ -30,6 +30,10 @@ public class MapPrefabSet
     [Tooltip("Prefab cho Finish Point (FinishPoint.prefab)")]
     [SerializeField] private FinishPoint finishPointPrefab;
 
+    [Tooltip("Prefab cho lớp băng phủ cá mập con (IceCover.prefab)")]
+    [SerializeField] private IceCover iceCoverPrefab;
+
+    public IceCover IceCoverPrefab => iceCoverPrefab;
     public MapTile EmptyTilePrefab => emptyTilePrefab;
     public BlockTile BlockTilePrefab => blockTilePrefab;
     public OneWayPath OneWayStraightPrefab => oneWayStraightPrefab;
@@ -85,6 +89,11 @@ public class MapPrefabSet
     {
         string name = $"Target {cell.x} {cell.y}";
         return Rename(UnityEngine.Object.Instantiate(targetPointPrefab, root), name);
+    }
+
+    public IceCover CreateIce(Transform root, Vector2Int cell)
+    {
+        return Rename(UnityEngine.Object.Instantiate(iceCoverPrefab, root), $"Ice {cell.x} {cell.y}");
     }
 
     public FinishPoint CreateFinish(Transform root)

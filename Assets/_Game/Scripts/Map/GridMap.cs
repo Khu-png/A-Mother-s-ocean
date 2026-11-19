@@ -23,6 +23,7 @@ public partial class GridMap : MonoBehaviour
 
     [Header("Visual")]
     [SerializeField] private Sprite targetSprite;
+    [SerializeField] private EffectSprites effectSprites = new EffectSprites();
     [SerializeField] private MapPrefabSet prefabs = new MapPrefabSet();
 
     [Header("References")]
@@ -96,7 +97,7 @@ public partial class GridMap : MonoBehaviour
 
         if (MapCode.IsStart(code)) BuildStart(cell);
         else if (MapCode.IsFinish(code)) BuildFinish(cell);
-        else if (MapCode.IsTarget(code)) BuildTarget(cell);
+        else if (MapCode.IsTarget(code)) BuildTarget(cell, code);
     }
 
     private void BuildStart(Vector2Int cell)
@@ -113,11 +114,12 @@ public partial class GridMap : MonoBehaviour
         finishPoint.Setup(cell, CellToLocalPosition(cell), Color.white, Color.white);
     }
 
-    private void BuildTarget(Vector2Int cell)
+    private void BuildTarget(Vector2Int cell, char code)
     {
         TargetPoint target = prefabs.CreateTarget(runtimeRoot, cell);
         target.Setup(cell, CellToLocalPosition(cell), targetSprite, Color.white);
         targets.Add(cell, target);
+        if (MapCode.IsIce(code)) BuildIce(cell, MapCode.IceThreshold(code));
     }
 
     private void BuildPlayer()

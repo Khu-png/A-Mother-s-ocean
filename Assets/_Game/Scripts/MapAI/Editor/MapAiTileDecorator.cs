@@ -175,7 +175,7 @@ public static class MapAiTileDecorator
         for (int y = 0; y < cells.GetLength(1); y++)
         for (int x = 0; x < cells.GetLength(0); x++)
             if (cells[x, y] != 'X' && cells[x, y] != 'S'
-                && cells[x, y] != 'F' && cells[x, y] != 'T')
+                && cells[x, y] != 'F' && !MapCode.IsTarget(cells[x, y]))
                 result.Add(new Vector2Int(x, y));
         return result;
     }
@@ -215,13 +215,13 @@ public static class MapAiTileDecorator
         for (int x = 0; x < cells.GetLength(0); x++)
         {
             Vector2Int cell = new Vector2Int(x, y);
-            if (cells[x, y] == 'T' && MapAiTopologyGenerator.IsLocked(cell, locks, current)
+            if (MapCode.IsTarget(cells[x, y]) && MapAiTopologyGenerator.IsLocked(cell, locks, current)
                 && !path.Contains(cell)) return true;
         }
         return false;
     }
 
-    private static bool IsTarget(char code) { return code == 'T'; }
+    private static bool IsTarget(char code) { return MapCode.IsTarget(code); }
     private static bool IsRotate(char code) { return code == 'O'; }
     private static bool IsStraight(char code) { return code == '|' || code == '-'; }
     private static bool IsCorner(char code) { return code == 'A' || code == 'B' || code == 'C' || code == 'E'; }

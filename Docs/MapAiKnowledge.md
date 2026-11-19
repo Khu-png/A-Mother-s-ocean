@@ -204,3 +204,14 @@ trước khi đổi trọng số tự động.
 - Bộ sinh hiện chỉ bắt buộc **một** ô đổi chiều; level 3 cần 3 trong 5. Cần sinh nhiều ô
   đổi chiều đặt gần nhau ở giữa với ống ở nhiều chỗ.
 - Hạng mục chưa quyết: có đưa số cá con, kích thước lưới và thời gian vào điểm độ khó hay không.
+
+## Ice baby sharks (digits 1-9)
+
+- A digit `1`-`9` in a map row is a baby shark frozen in ice. It counts as a target like `T`.
+- The ice melts once at least that many *other* babies have been rescued. Until then the
+  cell cannot be entered (the solver treats it as a wall). Undoing the route past the
+  rescued babies freezes it again.
+- `MapAiMapData.IsFrozenAt` carries the rule; `MapAiPathSearch` applies it in the move
+  filter and in the decision-point count. The generator does not place ice yet - paint it
+  by hand with the "Cá con băng" brush (counter slider 1-9) and press analyze.
+- Level 1 style check: `S.T.1F` is solvable (one solution); `S1.T.F` is not.

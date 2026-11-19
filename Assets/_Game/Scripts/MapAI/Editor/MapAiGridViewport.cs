@@ -108,6 +108,7 @@ public sealed class MapAiGridViewport
         if (code == 'S') return new Color(0.1f, 0.62f, 0.34f);
         if (code == 'F') return new Color(0.18f, 0.42f, 0.78f);
         if (code == 'T') return new Color(0.82f, 0.55f, 0.08f);
+        if (MapCode.IsIce(code)) return new Color(0.2f, 0.62f, 0.82f);
         if (code == 'O') return new Color(0.78f, 0.3f, 0.08f);
         if (MapCode.IsOneWay(code)) return new Color(0.08f, 0.42f, 0.58f);
         return new Color(0.2f, 0.25f, 0.28f);

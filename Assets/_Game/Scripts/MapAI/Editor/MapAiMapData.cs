@@ -38,5 +38,25 @@ public sealed class MapAiMapData
         return cells;
     }
 
+    public List<Vector2Int> FindTargets()
+    {
+        List<Vector2Int> cells = new List<Vector2Int>();
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                if (MapCode.IsTarget(rows[y][x])) cells.Add(new Vector2Int(x, y));
+            }
+        }
+        return cells;
+    }
+
+    // A baby sealed in ice can only be entered once enough other babies are rescued.
+    public bool IsFrozenAt(Vector2Int cell, int rescuedOthers)
+    {
+        char code = rows[cell.y][cell.x];
+        return MapCode.IsIce(code) && rescuedOthers < MapCode.IceThreshold(code);
+    }
+
     public string[] ToRows() { return (string[])rows.Clone(); }
 }

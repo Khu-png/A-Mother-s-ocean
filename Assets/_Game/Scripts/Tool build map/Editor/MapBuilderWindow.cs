@@ -6,8 +6,11 @@ public class MapBuilderWindow : EditorWindow
     private readonly string[] brushNames =
     {
         "Empty .", "Start S", "Finish F", "Target T", "Block X", "Rotate O",
-        "Straight |", "Straight -", "Corner A LD", "Corner B LU", "Corner C UR", "Corner E RD"
+        "Straight |", "Straight -", "Corner A LD", "Corner B LU", "Corner C UR", "Corner E RD",
+        "Ice baby 1-9"
     };
+
+    private const int ICE_BRUSH = 12;
 
     private readonly char[] brushCodes = { '.', 'S', 'F', 'T', 'X', 'O', '|', '-', 'A', 'B', 'C', 'E' };
     private MapBuilderGridState grid = new MapBuilderGridState(6, 5);
@@ -15,6 +18,7 @@ public class MapBuilderWindow : EditorWindow
     [SerializeField] private LevelManager levelManager;
     private Vector2 scroll;
     private int selectedBrush;
+    private int iceCounter = 2;
     private int width = 6;
     private int height = 5;
     private int timeLimitSeconds = 120;
@@ -71,6 +75,8 @@ public class MapBuilderWindow : EditorWindow
         EditorGUILayout.Space(8f);
         EditorGUILayout.LabelField("Brush", EditorStyles.boldLabel);
         selectedBrush = GUILayout.SelectionGrid(selectedBrush, brushNames, 3);
+        if (selectedBrush == ICE_BRUSH)
+            iceCounter = EditorGUILayout.IntSlider("Ice counter", iceCounter, 1, 9);
     }
 
     private void DrawGrid()
@@ -99,7 +105,7 @@ public class MapBuilderWindow : EditorWindow
         GUI.backgroundColor = CellColor(code);
         if (GUILayout.Button(CellLabel(code), GUILayout.Width(46f), GUILayout.Height(34f)))
         {
-            grid.SetCell(x, y, brushCodes[selectedBrush]);
+            grid.SetCell(x, y, selectedBrush == ICE_BRUSH ? (char)('0' + iceCounter) : brushCodes[selectedBrush]);
         }
 
         GUI.backgroundColor = Color.white;
@@ -130,7 +136,7 @@ public class MapBuilderWindow : EditorWindow
         }
 
         if (GUILayout.Button("Copy mapRows")) EditorGUIUtility.systemCopyBuffer = grid.ToCSharpRows();
-        EditorGUILayout.HelpBox("A=left+down, B=left+up, C=up+right, E=right+down.", MessageType.Info);
+        EditorGUILayout.HelpBox("A=left+down, B=left+up, C=up+right, E=right+down. Digit 1-9 = baby frozen until that many other babies are rescued.", MessageType.Info);
         EditorGUILayout.TextArea(grid.ToCSharpRows(), GUILayout.MinHeight(90f));
     }
 
@@ -172,6 +178,7 @@ public class MapBuilderWindow : EditorWindow
         if (code == 'S') return new Color(0.35f, 1f, 0.65f);
         if (code == 'F') return new Color(0.45f, 0.65f, 1f);
         if (code == 'T') return new Color(1f, 0.72f, 0.15f);
+        if (MapCode.IsIce(code)) return new Color(0.45f, 0.85f, 1f);
         if (code == 'X') return new Color(0.12f, 0.12f, 0.12f);
         if (code == 'O') return new Color(1f, 0.48f, 0.12f);
         if (MapCode.IsOneWay(code)) return new Color(0.1f, 0.55f, 0.75f);

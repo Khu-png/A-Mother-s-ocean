@@ -14,7 +14,18 @@ public static class MapCode
 
     public static bool IsTarget(char code)
     {
-        return code == 'T';
+        return code == 'T' || IsIce(code);
+    }
+
+    // A digit is a baby shark frozen until that many other babies have been rescued.
+    public static bool IsIce(char code)
+    {
+        return code >= '1' && code <= '9';
+    }
+
+    public static int IceThreshold(char code)
+    {
+        return code - '0';
     }
 
     public static bool IsBlock(char code)

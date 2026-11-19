@@ -33,12 +33,14 @@ public partial class GridMap
         oneWayPaths.Clear();
         rotateButtons.Clear();
         targets.Clear();
+        iceCovers.Clear();
         currentRoute.Clear();
         player = null;
         startPoint = null;
         finishPoint = null;
         pathTrail = null;
         bubbles = null;
+        iceShards = null;
         gridVisualRoot = null;
         boardLayout = default;
         layoutRootScale = 1f;

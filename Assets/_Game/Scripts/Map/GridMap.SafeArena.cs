@@ -58,6 +58,8 @@ public partial class GridMap
             target.SetLocalPosition(CellToLocalPosition(target.Cell));
         }
 
+        foreach (IceCover ice in iceCovers.Values) ice.SetLocalPosition(CellToLocalPosition(ice.Cell));
+
         if (player != null) player.ApplyLayout(CellToLocalPosition(player.CurrentCell));
         if (pathTrail != null) pathTrail.Relayout(width, height, boardLayout.Spacing);
     }

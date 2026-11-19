@@ -215,6 +215,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 039c47e26f970ff418ee5997b7bb35af, type: 2}
   - {fileID: 11400000, guid: 6ceeacfbe15887843bf81b2c39390167, type: 2}
   - {fileID: 11400000, guid: 85601f6c5b9940345800e60c7b065cc5, type: 2}
+  - {fileID: 11400000, guid: 8e1ce8e1ce8e1ce8e1ce8e1ce8e1ce81, type: 2}
   levelMap: {fileID: 1037034053}
   cameraController: {fileID: 519420033}
   difficultyConfig: {fileID: 11400000, guid: 4e8a1c3f7b2d4a6c8e0f1a2b3c4d5e6f, type: 2}
@@ -893,6 +894,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 68fbc0b820c6797408d5555b1e16146a, type: 3}
   - id: Coin
     clip: {fileID: 8300000, guid: 5b2e8c41d7a94f6e9c3a1b8d0e4f7a26, type: 3}
+  - id: IceCrack
+    clip: {fileID: 8300000, guid: 1ce1ce1ce1ce1ce1ce1ce1ce1ce5a001, type: 3}
+  - id: IceBreak
+    clip: {fileID: 8300000, guid: 1ce1ce1ce1ce1ce1ce1ce1ce1ce5a002, type: 3}
+  - id: IceBlocked
+    clip: {fileID: 8300000, guid: 1ce1ce1ce1ce1ce1ce1ce1ce1ce5a003, type: 3}
 --- !u!82 &879553658
 AudioSource:
   m_ObjectHideFlags: 0

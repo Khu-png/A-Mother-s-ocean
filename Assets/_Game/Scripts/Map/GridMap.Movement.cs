@@ -6,7 +6,8 @@ public partial class GridMap
     {
         None,
         Obstacle,
-        LockedFinish
+        LockedFinish,
+        Frozen
     }
 
     private void ReadMoveInput()
@@ -108,6 +109,7 @@ public partial class GridMap
             return MoveBlockReason.Obstacle;
         if (toCell == finishCell && !finishPoint.IsOpen)
             return MoveBlockReason.LockedFinish;
+        if (IsFrozen(toCell)) return MoveBlockReason.Frozen;
         if (IsBacktrackingToPreviousCell(toCell)) return MoveBlockReason.None;
         return AllowsDirection(fromCell, direction)
             && AllowsDirection(toCell, -direction)
@@ -136,6 +138,7 @@ public partial class GridMap
         pathTrail.Mark(playerCell, CellToLocalPosition(playerCell));
         if (targets.ContainsKey(playerCell)) CollectTarget(targets[playerCell]);
         NotifyTargetProgress();
+        RefreshIce();
     }
 
     private void ResetTargets()
@@ -147,6 +150,7 @@ public partial class GridMap
     {
         if (targets.ContainsKey(cell)) targets[cell].ResetTarget();
         NotifyTargetProgress();
+        RefreshIce();
     }
 
     private void RevertOneWayTiles()

@@ -137,6 +137,7 @@ public partial class GridMap
         player.ApplyWinFade(overall);
         ApplyDetailFade(overall);
         foreach (TargetPoint target in targets.Values) target.ApplyFade(overall);
+        foreach (IceCover ice in iceCovers.Values) ice.ApplyFade(overall);
         float topRow = Mathf.Max(1, height - 1);
         foreach (MapTile tile in tiles.Values)
         {

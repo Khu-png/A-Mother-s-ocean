@@ -3,7 +3,7 @@ using UnityEngine;
 
 public partial class GridMap
 {
-    private const int BUBBLE_CAPACITY = 48;
+    private const int BUBBLE_CAPACITY = 80;
     private static readonly Vector2Int[] MOVE_DIRECTIONS =
     {
         Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
@@ -23,7 +23,9 @@ public partial class GridMap
 
     private void BuildFeedback()
     {
-        bubbles = new BubbleBurst(runtimeRoot, cellSize, BUBBLE_CAPACITY);
+        bubbles = new BubbleBurst(runtimeRoot, cellSize, BUBBLE_CAPACITY, effectSprites);
+        iceShards = new IceShardBurst(runtimeRoot, cellSize, ICE_SHARD_CAPACITY,
+            prefabs.IceCoverPrefab.ShardSprites);
         targetArrivedHandler = HandleTargetArrived;
         motherPulse.Stop();
         feedback.ResetCombo();
@@ -67,11 +69,19 @@ public partial class GridMap
     // The mother frees the baby: bubbles burst and it swims off to the target panel.
     private void CollectTarget(TargetPoint target)
     {
-        bubbles.Play(CellToLocalPosition(target.Cell), feedback.RescueBubbleCount,
-            feedback.RescueBubbleSpread, feedback.BubbleSize, feedback.BubbleColor);
+        PlayRescueEffect(CellToLocalPosition(target.Cell));
         target.Collect(targetArrivedHandler,
             cameraController.ScreenToWorld(TargetCounterScreenPosition, runtimeRoot.position.z),
             EmitTargetTrail);
+    }
+
+    // A soft ring, rising bubbles and a few twinkling glints.
+    private void PlayRescueEffect(Vector3 position)
+    {
+        bubbles.PlayRing(position, 1.5f, feedback.BubbleColor);
+        bubbles.Play(position, feedback.RescueBubbleCount, feedback.RescueBubbleSpread,
+            feedback.BubbleSize, feedback.BubbleColor);
+        bubbles.PlaySparkles(position, 6, feedback.RescueBubbleSpread * 0.9f, 0.26f);
     }
 
     // A small bubble left behind the swimming baby.
@@ -102,6 +112,7 @@ public partial class GridMap
         Vector2Int nextCell = playerCell + direction;
         if (reason == MoveBlockReason.LockedFinish)
             finishPoint.PlayPulse(feedback.PulseDuration, feedback.FinishDeniedPulse);
+        else if (reason == MoveBlockReason.Frozen) ShakeIce(nextCell);
         else if (blocks.ContainsKey(nextCell)) blocks[nextCell].PulseHighlight();
         else
         {

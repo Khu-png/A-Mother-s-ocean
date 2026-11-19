@@ -11,6 +11,9 @@ public static class GameConstants
     public const string FREEZE_SOUND = "Freeze";
     public const string HAMMER_SOUND = "Hammer";
     public const string COIN_SOUND = "Coin";
+    public const string ICE_CRACK_SOUND = "IceCrack";
+    public const string ICE_BREAK_SOUND = "IceBreak";
+    public const string ICE_BLOCKED_SOUND = "IceBlocked";
     public const string OPEN_ANIMATION = "Open";
     public const string CLOSE_ANIMATION = "Close";
 }

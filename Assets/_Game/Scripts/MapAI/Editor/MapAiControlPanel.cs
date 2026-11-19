@@ -18,11 +18,12 @@ public enum MapAiEditorCommand
 public sealed class MapAiControlPanel
 {
     private const int SAMPLE_COUNT = 5;
+    private const int ICE_BRUSH = 12;
     private static readonly string[] BRUSH_NAMES =
     {
         "Trống", "Bắt đầu", "Đích", "Cá con", "Đá", "Xoay",
         "Thẳng dọc", "Thẳng ngang", "Góc trái-dưới", "Góc trái-trên",
-        "Góc trên-phải", "Góc phải-dưới"
+        "Góc trên-phải", "Góc phải-dưới", "Cá con băng"
     };
     private static readonly char[] BRUSH_CODES =
     {
@@ -31,6 +32,7 @@ public sealed class MapAiControlPanel
 
     [SerializeField] private Vector2 scroll;
     [SerializeField] private int selectedBrush;
+    [SerializeField] private int iceCounter = 2;
     [SerializeField] private bool lockMode;
     [SerializeField] private bool contentSettings = true;
     [SerializeField] private bool showLevelSave;
@@ -38,7 +40,8 @@ public sealed class MapAiControlPanel
     [SerializeField] private int levelNumber = 1;
     [SerializeField] private int timeLimitSeconds = 120;
 
-    public char? BrushCode => selectedBrush < 0 ? (char?)null : BRUSH_CODES[selectedBrush];
+    public char? BrushCode => selectedBrush < 0 ? (char?)null
+        : selectedBrush == ICE_BRUSH ? (char)('0' + iceCounter) : BRUSH_CODES[selectedBrush];
     public bool LockMode => lockMode;
     public LevelManager LevelManager => levelManager;
     public int LevelNumber => levelNumber;
@@ -163,13 +166,24 @@ public sealed class MapAiControlPanel
     {
         EditorGUILayout.Space(10f);
         EditorGUILayout.LabelField("Chỉnh sửa thủ công", EditorStyles.boldLabel);
-        for (int i = 0; i < BRUSH_NAMES.Length; i += 2)
+        for (int i = 0; i < ICE_BRUSH; i += 2)
         {
             EditorGUILayout.BeginHorizontal();
             DrawBrushButton(i);
             DrawBrushButton(i + 1);
             EditorGUILayout.EndHorizontal();
         }
+        DrawIceBrush();
+    }
+
+    private void DrawIceBrush()
+    {
+        EditorGUILayout.BeginHorizontal();
+        DrawBrushButton(ICE_BRUSH);
+        EditorGUI.BeginDisabledGroup(selectedBrush != ICE_BRUSH);
+        iceCounter = EditorGUILayout.IntSlider(iceCounter, 1, 9);
+        EditorGUI.EndDisabledGroup();
+        EditorGUILayout.EndHorizontal();
     }
 
     private void DrawBrushButton(int brush)

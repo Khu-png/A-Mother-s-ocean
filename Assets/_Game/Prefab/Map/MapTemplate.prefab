@@ -57,6 +57,10 @@ MonoBehaviour:
   - .XOT-.
   - ..XO..
   targetSprite: {fileID: 2695155878254869062, guid: ea4c0f2048338484b9ea52465ab8d263, type: 3}
+  effectSprites:
+    bubble: {fileID: 21300000, guid: 1ce1ce1ce1ce1ce1ce1ce1ce1ce5c001, type: 3}
+    sparkle: {fileID: 21300000, guid: 1ce1ce1ce1ce1ce1ce1ce1ce1ce5c002, type: 3}
+    ring: {fileID: 21300000, guid: 1ce1ce1ce1ce1ce1ce1ce1ce1ce5c003, type: 3}
   prefabs:
     emptyTilePrefab: {fileID: 8112343277646653411, guid: 7d8f577aa46972b45b9e4d48a0eeb25a, type: 3}
     blockTilePrefab: {fileID: 2174455337430982041, guid: fd5fa719fb9c84644bd7eb2ca820d3d7, type: 3}
@@ -66,5 +70,6 @@ MonoBehaviour:
     startPointPrefab: {fileID: 4968038225018158331, guid: f10f3c605df2a5241ab794bfb84b4e17, type: 3}
     targetPointPrefab: {fileID: 4225186837732750951, guid: cac60534e0165fe42b74bbdf22750a4a, type: 3}
     finishPointPrefab: {fileID: 356433243040153167, guid: e38404381f4920b44b445298607257c3, type: 3}
+    iceCoverPrefab: {fileID: 7100000000000000004, guid: 1ce1ce1ce1ce1ce1ce1ce1ce1cef9ab0, type: 3}
   playerPrefab: {fileID: 1973450904327317224, guid: 2aad5cb193ee49e9ab52c72fbf340fa2, type: 3}
   cameraController: {fileID: 0}

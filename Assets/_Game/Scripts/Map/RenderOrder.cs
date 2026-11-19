@@ -15,6 +15,7 @@ public static class RenderOrder
     public const int PATH_TRAIL = 20;
     public const int FINISH_POINT = 30;
     public const int TARGET_POINT = 40;
+    public const int ICE_COVER = 45;
     public const int PLAYER_SHADOW = 50;
     public const int PLAYER = 60;
     public const int EFFECT_BUBBLES = 70;
